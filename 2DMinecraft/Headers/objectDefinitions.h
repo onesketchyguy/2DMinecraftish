@@ -1,5 +1,17 @@
 #pragma once
 
+namespace ANIMATION {
+	const int8_t SPRITE_SCALE = 12;
+	olc::vi2d spriteScale = { (int)SPRITE_SCALE, (int)SPRITE_SCALE };
+
+	enum LOOK_DIR {
+		down = 0,
+		right = 1,
+		up = 2,
+		left = 3
+	};
+}
+
 class AABBCollider
 {
 public:
@@ -162,19 +174,74 @@ public:
 
 class Object {
 private:
-	olc::Sprite* sprite;
-	olc::Decal* decal;
+	olc::Renderable* renderable = nullptr;
+	olc::vi2d cellIndex = { 0, 0 };
+
+	ANIMATION::LOOK_DIR lookDir = ANIMATION::down;
 
 	olc::PixelGameEngine* engine;
 
 	olc::vf2d position;
 
 	AABBCollider* collider;
+public:
+	olc::vf2d velocity = { 0.0, 0.0 };
 
 public:
-	void Draw() {
+	void Update(float fElapsedTime)
+	{
+		if (velocity.x > 0) {
+			// Should face right
+			lookDir = ANIMATION::right;
+		}
+		else if (velocity.x < 0) {
+			// Should face left
+			lookDir = ANIMATION::left;
+		}
+
+		if (velocity.y > 0) {
+			// Should face down
+			lookDir = ANIMATION::down;
+		}
+		else if (velocity.y < 0) {
+			// Should face up
+			lookDir = ANIMATION::up;
+		}
+
+		switch (lookDir)
+		{
+		case ANIMATION::down:
+			cellIndex = { 2, 0 };
+			break;
+		case ANIMATION::right:
+			cellIndex = { 0, 0 };
+			break;
+		case ANIMATION::up:
+			cellIndex = { 1, 0 };
+			break;
+		case ANIMATION::left:
+			cellIndex = { 0, 0 };
+			break;
+		default:
+			break;
+		}
+
+		this->position += velocity;
+		velocity *= 0.9f;
+	}
+
+	void Draw(olc::vf2d CameraPosition) {
 		engine->SetPixelMode(olc::Pixel::NORMAL);
-		engine->DrawDecal(position, decal);
+
+		olc::vi2d decalScale = {
+			lookDir == ANIMATION::left ? -ANIMATION::spriteScale.x : ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
+		olc::vi2d spriteCell = { ANIMATION::spriteScale.x * cellIndex.x, ANIMATION::spriteScale.y * cellIndex.y };
+
+		olc::vf2d offset = { lookDir == ANIMATION::left ? ANIMATION::spriteScale.x : 0.0f , 0.0f };
+
+		engine->DrawPartialDecal(this->position + offset - CameraPosition,
+			decalScale,
+			renderable->Decal(), spriteCell, ANIMATION::spriteScale);
 	}
 
 	bool CheckCollision(AABBCollider* collider)
@@ -194,16 +261,32 @@ public:
 
 public:
 	Object() = default;
-	Object(olc::Sprite* sprite, olc::vf2d position = { 0.0f, 0.0f })
+	Object(olc::Renderable* renderable, olc::PixelGameEngine* engine = nullptr, olc::vf2d position = { 0.0f, 0.0f })
 	{
 		// Generate the sprite/decal
-		this->sprite = this->sprite->Duplicate();
-		this->decal = new olc::Decal(this->sprite);
+		this->renderable = renderable;
 
 		// Set the position of this object
 		this->position = position;
 
+		// Set the engine for future rendering
+		this->engine = engine;
+
 		//Generate a new collider
-		this->collider = new AABBCollider(this->sprite);
+		this->collider = new AABBCollider(12, 12);
+	}
+};
+
+struct LightSource
+{
+public:
+	olc::vf2d position;
+	olc::Pixel color;
+	float intensity;
+
+	void Initialize(olc::vf2d position, olc::Pixel color, float intensity) {
+		this->position = position;
+		this->color = color;
+		this->intensity = intensity;
 	}
 };
