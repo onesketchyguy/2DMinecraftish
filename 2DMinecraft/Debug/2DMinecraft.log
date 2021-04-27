@@ -1,0 +1,4 @@
+﻿  Source.cpp
+D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(23,24): warning C4018: '<': signed/unsigned mismatch
+D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(130,24): warning C4018: '<': signed/unsigned mismatch
+  2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe
