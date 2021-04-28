@@ -1,5 +1,8 @@
 ﻿  Source.cpp
-D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(35,24): warning C4018: '<': signed/unsigned mismatch
-D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(142,24): warning C4018: '<': signed/unsigned mismatch
-D:\repos\2DMinecraftish\2DMinecraft\Source.cpp(117,21): warning C4244: '=': conversion from 'float' to 'uint8_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(63,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(64,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(34,24): warning C4018: '<': signed/unsigned mismatch
+D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(141,24): warning C4018: '<': signed/unsigned mismatch
+D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(145,21): warning C4244: '=': conversion from 'float' to 'uint8_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(162,1): warning C4244: '*=': conversion from 'float' to 'uint8_t', possible loss of data
   2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe

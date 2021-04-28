@@ -1,7 +1,6 @@
 #pragma once
 
 namespace ANIMATION {
-	const int8_t SPRITE_SCALE = 12;
 	olc::vi2d spriteScale = { (int)SPRITE_SCALE, (int)SPRITE_SCALE };
 
 	enum LOOK_DIR {
@@ -174,16 +173,14 @@ public:
 
 class Object {
 private:
+	AABBCollider* collider;
+
 	olc::Renderable* renderable = nullptr;
 	olc::vi2d cellIndex = { 0, 0 };
 
 	ANIMATION::LOOK_DIR lookDir = ANIMATION::down;
 
-	olc::PixelGameEngine* engine;
-
 	olc::vf2d position;
-
-	AABBCollider* collider;
 public:
 	olc::vf2d velocity = { 0.0, 0.0 };
 
@@ -230,20 +227,6 @@ public:
 		velocity *= 0.9f;
 	}
 
-	void Draw(olc::vf2d CameraPosition) {
-		engine->SetPixelMode(olc::Pixel::NORMAL);
-
-		olc::vi2d decalScale = {
-			lookDir == ANIMATION::left ? -ANIMATION::spriteScale.x : ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
-		olc::vi2d spriteCell = { ANIMATION::spriteScale.x * cellIndex.x, ANIMATION::spriteScale.y * cellIndex.y };
-
-		olc::vf2d offset = { lookDir == ANIMATION::left ? ANIMATION::spriteScale.x : 0.0f , 0.0f };
-
-		engine->DrawPartialDecal(this->position + offset - CameraPosition,
-			decalScale,
-			renderable->Decal(), spriteCell, ANIMATION::spriteScale);
-	}
-
 	bool CheckCollision(AABBCollider* collider)
 	{
 		return this->collider->CheckCollision(collider);
@@ -259,18 +242,30 @@ public:
 		return this->position;
 	}
 
+	ANIMATION::LOOK_DIR GetLookDir()
+	{
+		return lookDir;
+	}
+
+	olc::Renderable* GetRenderable()
+	{
+		return renderable;
+	}
+
+	olc::vi2d GetCellIndex()
+	{
+		return cellIndex;
+	}
+
 public:
 	Object() = default;
-	Object(olc::Renderable* renderable, olc::PixelGameEngine* engine = nullptr, olc::vf2d position = { 0.0f, 0.0f })
+	Object(olc::Renderable* renderable, olc::vf2d position = { 0.0f, 0.0f })
 	{
 		// Generate the sprite/decal
 		this->renderable = renderable;
 
 		// Set the position of this object
 		this->position = position;
-
-		// Set the engine for future rendering
-		this->engine = engine;
 
 		//Generate a new collider
 		this->collider = new AABBCollider(12, 12);

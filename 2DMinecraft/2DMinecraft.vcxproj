@@ -141,7 +141,9 @@
   <ItemGroup>
     <ClInclude Include="Headers\objectDefinitions.h" />
     <ClInclude Include="Headers\olcPixelGameEngine.h" />
+    <ClInclude Include="Headers\renderer.h" />
     <ClInclude Include="Headers\tileDefinitions.h" />
+    <ClInclude Include="Headers\worldData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
