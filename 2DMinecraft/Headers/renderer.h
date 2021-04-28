@@ -1,5 +1,7 @@
 #pragma once
 
+const uint8_t WORLD_TILES_WIDTH = 4;
+
 class Renderer
 {
 public:
@@ -78,7 +80,7 @@ public:
 	olc::Pixel* tileLightMap = nullptr;
 	LightSource* lightSources = nullptr;
 
-	uint8_t LIGHT_COUNT = 216;
+	uint8_t LIGHT_COUNT = 160;
 
 	WorldData* worldData;
 	olc::Renderable* tileSpriteData = nullptr;
@@ -119,8 +121,8 @@ public:
 		{
 			auto& tile = worldData->tiles[i];
 
-			int cellIndex_x = tile.ID;
-			int cellIndex_y = 0;
+			int cellIndex_x = tile.ID % WORLD_TILES_WIDTH;
+			int cellIndex_y = tile.ID / WORLD_TILES_WIDTH;
 
 			olc::vf2d pos = { float(tile.x),  float(tile.y) };
 			pos *= ANIMATION::spriteScale;
@@ -165,6 +167,12 @@ public:
 		}
 
 		engine->SetPixelMode(olc::Pixel::NORMAL);
+	}
+
+	void SnapCamera(olc::vf2d targetPosition)
+	{
+		targetCameraPosition = targetPosition - ANIMATION::spriteScale * 5;
+		cameraPosition = targetCameraPosition;
 	}
 
 	void UpdateCameraPosition(olc::vf2d targetPosition, float fElapsedTime)

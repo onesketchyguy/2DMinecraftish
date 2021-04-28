@@ -2,10 +2,8 @@ bool CRASH = false;
 
 #define OLC_PGE_APPLICATION
 #include "Headers/olcPixelGameEngine.h"
-#include "Headers/tileDefinitions.h"
 
 const int8_t SPRITE_SCALE = 12;
-const uint8_t TILE_COUNT = 216; // The constant for how many MAX tiles can be drawn at once
 #include "Headers/worldData.h"
 #include "Headers/objectDefinitions.h"
 #include "Headers/renderer.h"
@@ -21,7 +19,7 @@ public:
 public:
 	void MovePlayer(float fElapsedTime)
 	{
-		float speed = 10.0f;
+		float speed = 50.0f;
 
 		float x = 0;
 		float y = 0;
@@ -44,11 +42,12 @@ public:
 		olc::vf2d playerPos = player->GetPosition();
 		playerPos += {x, y};
 
-		if (renderer->worldData->GetTile(playerPos.x, playerPos.y).ID != 0)
+		int tileId = renderer->worldData->GetTile(playerPos.x, playerPos.y).ID;
+
+		if (tileId != 0)
 		{
-			// Collide. This is not the intended behaviour but works for now.
-			x = 0;
-			y = 0;
+			// FIXME: do things here
+			// There is a tile where the player is trying to go!
 		}
 
 		player->velocity = { x,y };
@@ -70,6 +69,9 @@ public:
 
 		// Player shit
 		player = new Object(renderer->playerSpriteData);
+		player->SetPosition(renderer->worldData->GetRandomGroundTile());
+
+		renderer->SnapCamera(player->GetPosition());
 
 		return true;
 	}
@@ -87,7 +89,44 @@ public:
 		renderer->UpdateSun(fElapsedTime);
 		renderer->UpdateLights();
 
+		DrawStringDecal({ 0,0 }, std::to_string(player->GetPosition().x) + ", " + std::to_string(player->GetPosition().y));
+
 		return GetKey(olc::ESCAPE).bReleased == false;
+	}
+};
+
+class Example : public olc::PixelGameEngine
+{
+public:
+	Example()
+	{
+		// Name your application
+		sAppName = "Example";
+	}
+
+	WorldData* worldData;
+
+public:
+	bool OnUserCreate() override
+	{
+		// Called once at the start, so create things here
+
+		worldData = new WorldData();
+
+		return true;
+	}
+
+	bool OnUserUpdate(float fElapsedTime) override
+	{
+		// Called once per frame, draws random coloured pixels
+		for (int x = 0; x < ScreenWidth(); x++)
+			for (int y = 0; y < ScreenHeight(); y++)
+			{
+				int dat = worldData->GetTileID(x, y);
+
+				Draw(x, y, olc::Pixel(21 * dat, 21 * dat, 21 * dat));
+			}
+		return true;
 	}
 };
 

@@ -21,9 +21,6 @@
     <ClInclude Include="Headers\objectDefinitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\tileDefinitions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
