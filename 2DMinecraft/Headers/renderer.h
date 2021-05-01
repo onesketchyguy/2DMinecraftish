@@ -1,14 +1,16 @@
 #pragma once
 
 const uint8_t WORLD_TILES_WIDTH = 4;
-const uint8_t WORLD_TILES_HEIGHT = 2;
+const uint8_t WORLD_TILES_HEIGHT = 3;
 
 class Renderer
 {
 public:
-	Renderer(olc::PixelGameEngine* engine)
+	Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 	{
 		this->engine = engine;
+
+		this->worldData = worldData;
 
 		// Render scale shit
 
@@ -35,8 +37,6 @@ public:
 
 			DEBUG = true;
 		}
-
-		worldData = new WorldData();
 
 		// Lighting shit
 		whiteSquareSprite = new olc::Sprite(SPRITE_SCALE, SPRITE_SCALE);
@@ -114,25 +114,29 @@ public:
 
 	void DrawWorld()
 	{
-		worldData->MoveTiles(engine->ScreenWidth(), engine->ScreenHeight(), cameraPosition);
-
 		engine->SetPixelMode(olc::Pixel::NORMAL);
+
+		worldData->MoveTiles(cameraPosition);
 
 		for (uint8_t i = 0; i < TILE_COUNT; i++)
 		{
 			auto& tile = worldData->tiles[i];
 
-			int cellIndex_x = tile.ID % WORLD_TILES_WIDTH;
-			int cellIndex_y = tile.ID / WORLD_TILES_WIDTH;
-
 			olc::vf2d pos = { float(tile.x),  float(tile.y) };
 			pos *= ANIMATION::spriteScale;
 
-			//if (pos.y >= engine->ScreenHeight() || pos.y < 0 ||
-			//	pos.x >= engine->ScreenWidth() || pos.x < 0) continue;
+			int cellIndex_x = tile.tileID % WORLD_TILES_WIDTH;
+			int cellIndex_y = tile.tileID / WORLD_TILES_WIDTH;
 
-			olc::vi2d spriteCell = { ANIMATION::spriteScale.x * cellIndex_x, ANIMATION::spriteScale.y * cellIndex_y };
-			DrawPartialDecal(pos, ANIMATION::spriteScale, tileSpriteData->Decal(), spriteCell);
+			olc::vi2d tileSpriteCell = { ANIMATION::spriteScale.x * cellIndex_x, ANIMATION::spriteScale.y * cellIndex_y };
+			DrawPartialDecal(pos, ANIMATION::spriteScale, tileSpriteData->Decal(), tileSpriteCell);
+
+			uint8_t foliage = tile.foliageID;
+			if (foliage == 0) continue; // 0 = no foliage
+			foliage -= 1; // Subtract 1 to put this layer back into sprite space
+
+			olc::vi2d foliageSpriteCell = { ANIMATION::spriteScale.x * foliage, ANIMATION::spriteScale.x * 2 };
+			DrawPartialDecal(pos, ANIMATION::spriteScale, tileSpriteData->Decal(), foliageSpriteCell);
 		}
 	}
 

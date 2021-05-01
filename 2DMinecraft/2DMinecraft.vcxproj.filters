@@ -30,6 +30,9 @@
     <ClInclude Include="Headers\olcPGEX_Network.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\networkCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">

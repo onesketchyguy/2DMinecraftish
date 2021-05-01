@@ -1,3 +1,23 @@
 ﻿  Source.cpp
-  The contents of <optional> are available only with C++17 or later.
-D:\repos\2DMinecraftish\2DMinecraft\Headers\olcPGEX_Network.h(79,10): fatal error C1083: Cannot open include file: 'asio.hpp': No such file or directory
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(118,12): warning C4244: 'initializing': conversion from 'uint64_t' to 'float', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(119,12): warning C4244: 'initializing': conversion from 'uint64_t' to 'float', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(124,20): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(127,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(246,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(252,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(263,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(276,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(282,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(293,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(306,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(312,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(323,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(335,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(336,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(347,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(348,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(34,24): warning C4018: '<': signed/unsigned mismatch
+D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(141,24): warning C4018: '<': signed/unsigned mismatch
+D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(152,21): warning C4244: '=': conversion from 'float' to 'uint8_t', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(169,1): warning C4244: '*=': conversion from 'float' to 'uint8_t', possible loss of data
+  2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe

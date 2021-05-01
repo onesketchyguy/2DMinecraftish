@@ -1,1 +1,2 @@
 D:\repos\2DMinecraft\Debug\2DMinecraft.exe
+D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe

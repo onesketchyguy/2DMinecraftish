@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\networkCommon.h" />
     <ClInclude Include="Headers\objectDefinitions.h" />
     <ClInclude Include="Headers\olcPGEX_Network.h" />
     <ClInclude Include="Headers\olcPixelGameEngine.h" />
