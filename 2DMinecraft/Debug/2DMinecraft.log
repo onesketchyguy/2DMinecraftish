@@ -1,14 +1,3 @@
 ﻿  Source.cpp
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(153,12): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(154,12): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(157,19): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(160,21): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(216,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(217,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(257,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(258,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(34,24): warning C4018: '<': signed/unsigned mismatch
-D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(141,24): warning C4018: '<': signed/unsigned mismatch
-D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(147,21): warning C4244: '=': conversion from 'float' to 'uint8_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(164,1): warning C4244: '*=': conversion from 'float' to 'uint8_t', possible loss of data
-  2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe
+  The contents of <optional> are available only with C++17 or later.
+D:\repos\2DMinecraftish\2DMinecraft\Headers\olcPGEX_Network.h(79,10): fatal error C1083: Cannot open include file: 'asio.hpp': No such file or directory

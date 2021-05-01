@@ -12,7 +12,7 @@ public:
 struct WorldData
 {
 private:
-	const float NOISE_SCALE = 12.0f;
+	const float NOISE_SCALE = 11.0f;
 
 	byte* worldData;
 	uint16_t mapLength = 0;
@@ -95,12 +95,17 @@ private:
 			}
 	}
 
-	float Evaluate(float value)
+	float Evaluate(float value, float falloffPoint = 1.75f)
 	{
 		float a = 3;
-		float b = 1.75f;
 
-		return pow(value, a) / (pow(value, a) + pow(b - b * value, a));
+		return pow(value, a) / (pow(value, a) + pow(falloffPoint - falloffPoint * value, a));
+	}
+
+	void ReseedNoise()
+	{
+		for (int i = 0; i < nOutputWidth * nOutputHeight; i++) fNoiseSeed2D[i] = (float)rand() / (float)RAND_MAX;
+		PerlinNoise2D(nOutputWidth, nOutputHeight, fNoiseSeed2D, nOctaveCount, fScalingBias, fPerlinNoise2D);
 	}
 
 	void InitNoise()
@@ -125,6 +130,7 @@ public:
 		worldData = new byte[mapLength];
 
 		InitNoise();
+
 		PerlinNoise2D(nOutputWidth, nOutputHeight, fNoiseSeed2D, nOctaveCount, fScalingBias, fPerlinNoise2D);
 
 		// Generate falloff map
@@ -145,8 +151,7 @@ public:
 			}
 		}
 
-		for (int i = 0; i < nOutputWidth * nOutputHeight; i++) fNoiseSeed2D[i] = (float)rand() / (float)RAND_MAX;
-		PerlinNoise2D(nOutputWidth, nOutputHeight, fNoiseSeed2D, nOctaveCount, fScalingBias, fPerlinNoise2D);
+		ReseedNoise();
 
 		for (uint16_t i = 0; i < mapLength; i++)
 		{
@@ -235,8 +240,8 @@ public:
 
 		for (uint8_t i = 0; i < TILE_COUNT; i++)
 		{
-			float distX = (tiles[i].x * SPRITE_SCALE) - x;
-			float distY = (tiles[i].y * SPRITE_SCALE) - y;
+			float distX = x - (tiles[i].x * (SPRITE_SCALE * 1.5f));
+			float distY = y - (tiles[i].y * (SPRITE_SCALE * 1.5f));
 
 			if ((distX > bestX - 0.1f && distX < bestX + 0.1f) && (distY > bestY - 0.1f && distY < bestY + 0.1f))
 			{
@@ -248,6 +253,35 @@ public:
 		}
 
 		return tiles[index];
+	}
+
+	Tile* GetTilePtr(float x, float y)
+	{
+		// This should find the best tile in range.
+		// This is slow and I hate it but fuck it it works.
+
+		uint8_t index = 0;
+
+		float range = SPRITE_SCALE * 2;
+
+		float bestX = range;
+		float bestY = range;
+
+		for (uint8_t i = 0; i < TILE_COUNT; i++)
+		{
+			float distX = x - (tiles[i].x * (SPRITE_SCALE * 1.5f));
+			float distY = y - (tiles[i].y * (SPRITE_SCALE * 1.5f));
+
+			if ((distX > bestX - 0.1f && distX < bestX + 0.1f) && (distY > bestY - 0.1f && distY < bestY + 0.1f))
+			{
+				bestX = tiles[i].x;
+				bestY = tiles[i].y;
+
+				index = i;
+			}
+		}
+
+		return &tiles[index];
 	}
 
 	void MoveTiles(int screenWidth, int screenHeight, olc::vf2d camPosition)

@@ -1,6 +1,7 @@
 #pragma once
 
 const uint8_t WORLD_TILES_WIDTH = 4;
+const uint8_t WORLD_TILES_HEIGHT = 2;
 
 class Renderer
 {
@@ -22,7 +23,7 @@ public:
 		if (playerSpriteData->Decal() == nullptr) {
 			std::cout << "Could not load player sprites!" << std::endl;
 
-			CRASH = true;
+			DEBUG = true;
 		}
 
 		// World shit
@@ -32,7 +33,7 @@ public:
 		if (tileSpriteData->Decal() == nullptr) {
 			std::cout << "Could not load tile sprites!" << std::endl;
 
-			CRASH = true;
+			DEBUG = true;
 		}
 
 		worldData = new WorldData();

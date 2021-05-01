@@ -178,11 +178,15 @@ private:
 	olc::Renderable* renderable = nullptr;
 	olc::vi2d cellIndex = { 0, 0 };
 
+	const byte WATER_INDEX = 3;
+
 	ANIMATION::LOOK_DIR lookDir = ANIMATION::down;
 
 	olc::vf2d position;
 public:
 	olc::vf2d velocity = { 0.0, 0.0 };
+
+	bool inWater = false;
 
 public:
 	void Update(float fElapsedTime)
@@ -205,19 +209,21 @@ public:
 			lookDir = ANIMATION::up;
 		}
 
+		int waterIndex = inWater ? WATER_INDEX : 0;
+
 		switch (lookDir)
 		{
 		case ANIMATION::down:
-			cellIndex = { 2, 0 };
+			cellIndex = { waterIndex + 2, 0 };
 			break;
 		case ANIMATION::right:
-			cellIndex = { 0, 0 };
+			cellIndex = { waterIndex + 0, 0 };
 			break;
 		case ANIMATION::up:
-			cellIndex = { 1, 0 };
+			cellIndex = { waterIndex + 1, 0 };
 			break;
 		case ANIMATION::left:
-			cellIndex = { 0, 0 };
+			cellIndex = { waterIndex + 0, 0 };
 			break;
 		default:
 			break;
