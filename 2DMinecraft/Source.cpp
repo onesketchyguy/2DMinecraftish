@@ -5,6 +5,9 @@ bool DEBUG = false;
 //#include "Headers/olcPGEX_Network.h"
 //#include "Headers/networkCommon.h"
 
+#include "Headers/uiObjects.h"
+#include "Headers/debugger.h"
+
 const int8_t SPRITE_SCALE = 12;
 #include "Headers/worldData.h"
 #include "Headers/objectDefinitions.h"
@@ -21,12 +24,13 @@ public:
 
 	Object* localPlayer;
 	int tileId;
-	int foliageID;
 
 	olc::Sprite* miniMapSprite;
 	olc::Decal* miniMapDecal;
 
 	uint8_t frameCount;
+
+	std::vector<Item> items;
 
 	bool drawMiniMap = false;
 	byte miniMapDrawLocation = 1;
@@ -76,10 +80,12 @@ public:
 			// FIXME: do things here
 			// There is a tile where the player is trying to go!
 		}
-		//else {
-		//	x = 0;
-		//	y = 0;
-		//}
+		else
+		{
+			// FIXME: Check for a boat
+			x = 0;
+			y = 0;
+		}
 
 		localPlayer->velocity = { x,y };
 		localPlayer->Update(fElapsedTime);
@@ -198,7 +204,7 @@ public:
 		//	return true;
 		//}
 
-		return true;
+		return !DEBUG;
 	}
 
 	bool OnUserUpdate(float fElapsedTime) override
@@ -217,53 +223,97 @@ public:
 		MovePlayer(fElapsedTime);
 		LoopPlayer();
 
-		// Set the action direction
-		olc::vf2d lookDirection = { 0,0 };
-		switch (localPlayer->GetLookDir())
-		{
-		case ANIMATION::right:
-			lookDirection.x += SPRITE_SCALE;
-			break;
-		case ANIMATION::left:
-			lookDirection.x -= SPRITE_SCALE;
-			break;
-		case ANIMATION::down:
-			lookDirection.y += SPRITE_SCALE;
-			break;
-		case ANIMATION::up:
-			lookDirection.y -= SPRITE_SCALE;
-			break;
-		default:
-			break;
-		}
-
-		lookDirection += localPlayer->GetPosition();
-
 		renderer->UpdateCameraPosition(localPlayer->GetPosition(), fElapsedTime);
 
 		// Draw routine
 		renderer->DrawWorld();
 		renderer->DrawObject(localPlayer);
+
+		for (auto& item : items)
+		{
+			renderer->DrawItem(item);
+		}
+
 		renderer->UpdateSun(fElapsedTime);
 		renderer->UpdateLights();
 
-		// Debug, move this later
-		foliageID = worldData->GetFoliageID(lookDirection.x, lookDirection.y);
-
 		if (GetKey(olc::SPACE).bPressed)
 		{
-			// Do some shit :D
+			// Set the action direction
+			bool hit = false;
 
-			// Do the action
-			if (foliageID == 2) // Hit tree
+			for (size_t i = 0; i < SPRITE_SCALE * 0.75f; i++)
 			{
-				worldData->SetFoliageID(lookDirection.x, lookDirection.y, 0);
+				if (hit) break;
+
+				olc::vf2d hitPosition = localPlayer->GetPosition();
+
+				switch (localPlayer->GetLookDir())
+				{
+				case ANIMATION::right:
+					hitPosition.x += 1;
+					break;
+				case ANIMATION::left:
+					hitPosition.x -= 1;
+					break;
+				case ANIMATION::down:
+					hitPosition.y += 1;
+					break;
+				case ANIMATION::up:
+					hitPosition.y -= 1;
+					break;
+				default:
+					break;
+				}
+
+				hitPosition.y += i;
+
+				int steps = 0;
+				while (steps < SPRITE_SCALE * 0.75f)
+				{
+					switch (localPlayer->GetLookDir())
+					{
+					case ANIMATION::right:
+						hitPosition.x += 1;
+						break;
+					case ANIMATION::left:
+						hitPosition.x -= 1;
+						break;
+					case ANIMATION::down:
+						hitPosition.y += 1;
+						break;
+					case ANIMATION::up:
+						hitPosition.y -= 1;
+						break;
+					default:
+						break;
+					}
+
+					int worldFoliageIndex = worldData->GetFoliageIndex(hitPosition.x, hitPosition.y);
+					int foliageID = worldData->foliageData[worldFoliageIndex];
+
+					// Do the action
+					if (foliageID == 2) // Hit tree
+					{
+						worldData->foliageData[worldFoliageIndex] = 0;
+
+						Item log = Item();
+						log.ID = 0;
+						log.position = hitPosition;
+						items.push_back(log);
+
+						hit = true;
+						break;
+					}
+
+					steps++;
+				}
 			}
 
-			if (DEBUG)
-			{
-				std::cout << "Player tried to hit: " << foliageID << " while standing at:" << lookDirection.x << "," << lookDirection.y << std::endl;
-			}
+			//if (DEBUG)
+			//{
+			//	print("Player tried to hit: " + std::to_string(foliageID));
+			//}
 		}
 
 		if (GetKey(olc::Key::M).bReleased)
@@ -336,11 +386,8 @@ public:
 		if (DEBUG)
 		{
 			DrawStringDecal({ 0,0 }, "pos:" + std::to_string(localPlayer->GetPosition().x) + ", " + std::to_string(localPlayer->GetPosition().y) + "\n" +
-				"tileID:" + std::to_string(tileId) + "\n" +
-				"foliageID:" + std::to_string(foliageID),
+				"tileID:" + std::to_string(tileId) + "\n",
 				olc::YELLOW, { 0.5f, 0.5f });
-
-			renderer->DrawDecal(lookDirection, { 1,1 }, renderer->whiteSquareDecal);
 		}
 
 		return GetKey(olc::ESCAPE).bReleased == false;
@@ -441,7 +488,7 @@ int main()
 	if (demo.Construct(264, 216, 3, 3))
 		demo.Start();
 
-	if (DEBUG) {
+	if (DEBUG && debug_prints > 0) {
 		ShowWindow(GetConsoleWindow(), SW_SHOW);
 
 		while (1) {}

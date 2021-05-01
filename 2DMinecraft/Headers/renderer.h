@@ -3,6 +3,9 @@
 const uint8_t WORLD_TILES_WIDTH = 4;
 const uint8_t WORLD_TILES_HEIGHT = 3;
 
+const uint8_t WORLD_ITEMS_WIDTH = 3;
+const uint8_t WORLD_ITEMS_HEIGHT = 1;
+
 class Renderer
 {
 public:
@@ -23,18 +26,26 @@ public:
 		playerSpriteData->Load("Data/player.png");
 
 		if (playerSpriteData->Decal() == nullptr) {
-			std::cout << "Could not load player sprites!" << std::endl;
-
+			print("Could not load player sprites!");
 			DEBUG = true;
 		}
+
+		// Item shit
+		itemSpriteData = new olc::Renderable();
+		itemSpriteData->Load("Data/items.png");
+
+		// For what ever reason this one specifically is throwing errors
+		//if (tileSpriteData->Decal() == nullptr) {
+		//	print("Could not load item sprites!");
+		//	DEBUG = true;
+		//}
 
 		// World shit
 		tileSpriteData = new olc::Renderable();
 		tileSpriteData->Load("Data/WorldTiles.png");
 
 		if (tileSpriteData->Decal() == nullptr) {
-			std::cout << "Could not load tile sprites!" << std::endl;
-
+			print("Could not load tile sprites!");
 			DEBUG = true;
 		}
 
@@ -85,6 +96,7 @@ public:
 
 	WorldData* worldData;
 	olc::Renderable* tileSpriteData = nullptr;
+	olc::Renderable* itemSpriteData = nullptr;
 	olc::Renderable* playerSpriteData = nullptr;
 
 	void DrawDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal, olc::Pixel color = { 255,255,255,255 })
@@ -110,6 +122,15 @@ public:
 
 		DrawPartialDecal(obj->GetPosition() + offset, decalScale,
 			obj->GetRenderable()->Decal(), spriteCell);
+	}
+
+	void DrawItem(Item obj) {
+		engine->SetPixelMode(olc::Pixel::NORMAL);
+
+		olc::vi2d spriteCell{ obj.ID % WORLD_ITEMS_WIDTH, obj.ID / WORLD_ITEMS_WIDTH };
+
+		DrawPartialDecal(obj.position, { SPRITE_SCALE * 0.75f,SPRITE_SCALE * 0.75f },
+			itemSpriteData->Decal(), spriteCell);
 	}
 
 	void DrawWorld()

@@ -33,6 +33,15 @@
     <ClInclude Include="Headers\networkCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\debugger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\fileManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\uiObjects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">

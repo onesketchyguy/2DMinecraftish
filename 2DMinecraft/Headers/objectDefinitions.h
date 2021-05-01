@@ -291,3 +291,10 @@ public:
 		this->intensity = intensity;
 	}
 };
+
+class Item
+{
+public:
+	olc::vf2d position;
+	uint8_t ID;
+};

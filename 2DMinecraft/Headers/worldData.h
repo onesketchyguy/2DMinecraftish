@@ -235,6 +235,34 @@ public:
 		return GetFoliageID(int(xPos), int(yPos));
 	}
 
+	int GetFoliageIndex(float fx, float fy)
+	{
+		int x = int(ceil(fx / SPRITE_SCALE));
+		int y = int(floor(fy / SPRITE_SCALE));
+
+		if (x < 0) {
+			x *= -1;
+			x %= MAP_WIDTH;
+			x = MAP_WIDTH - x;
+		}
+
+		if (y < 0) {
+			y *= -1;
+			y %= MAP_WIDTH;
+			y = MAP_HEIGHT - y;
+		}
+
+		if (x > MAP_WIDTH) {
+			x %= MAP_WIDTH;
+		}
+
+		if (y > MAP_HEIGHT) {
+			y %= MAP_HEIGHT;
+		}
+
+		return y * MAP_WIDTH + x;
+	}
+
 	void SetTileID(float x, float y, uint8_t value)
 	{
 		int xPos = int(ceil(x / SPRITE_SCALE));
@@ -290,9 +318,8 @@ public:
 			yPos %= MAP_HEIGHT;
 		}
 
-		int index = y * MAP_WIDTH + x;
+		int index = yPos * MAP_WIDTH + xPos;
 		foliageData[index] = value;
-		std::cout << "Changing foliage index from: " << xPos << "," << yPos << std::endl;
 	}
 
 	Tile GetTile(float x, float y)
