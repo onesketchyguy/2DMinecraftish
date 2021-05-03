@@ -42,6 +42,12 @@
     <ClInclude Include="Headers\uiObjects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\sceneDefinition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\olcPGEX_TransformedView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">

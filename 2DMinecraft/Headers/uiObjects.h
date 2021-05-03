@@ -14,7 +14,7 @@ public:
 
 	bool interactable = false;
 
-	bool MouseOver() {
+	virtual bool MouseOver() {
 		int mouseX = gameEngine->GetMouseX();
 		int mouseY = gameEngine->GetMouseY();
 
@@ -62,10 +62,18 @@ public:
 	olc::Pixel fillColor = olc::NONE;
 
 	void Draw() override {
-		if (fillColor != olc::NONE) gameEngine->FillRectDecal(pos, scale, fillColor);
-		gameEngine->DrawStringDecal(pos + textOffset, text, color, textScale);
+		if (fillColor != olc::NONE) gameEngine->FillRectDecal(pos - textOffset, scale, fillColor);
+		gameEngine->DrawStringDecal(pos, text, color, textScale);
 
 		TryDrawChild();
+	}
+
+	bool MouseOver() override {
+		int mouseX = gameEngine->GetMouseX();
+		int mouseY = gameEngine->GetMouseY();
+
+		return mouseX > x - textOffset.x && mouseX < x + width - textOffset.x
+			&& mouseY > y - textOffset.y && mouseY < y + height - textOffset.y;
 	}
 
 	void SetString(const char* text) {
