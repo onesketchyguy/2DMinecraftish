@@ -31,7 +31,9 @@ public:
 		this->offX = spriteWidth;
 		this->offY = spriteHeight;
 
-		for (size_t i = 0; i < spriteWidth * spriteHeight; i++)
+		int spriteLength = spriteWidth * spriteHeight;
+
+		for (int i = 0; i < spriteLength; i++)
 		{
 			int ix = i % spriteWidth;
 			int iy = i / spriteWidth;
@@ -136,9 +138,11 @@ public:
 		this->offX = sprite->width;
 		this->offY = sprite->height;
 
+		int spriteLength = sprite->width * sprite->height;
+
 		olc::Pixel* spriteData = sprite->GetData();
 
-		for (size_t i = 0; i < sprite->width * sprite->height; i++)
+		for (int i = 0; i < spriteLength; i++)
 		{
 			int ix = i % sprite->width;
 			int iy = i / sprite->width;

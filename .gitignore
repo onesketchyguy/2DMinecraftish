@@ -31,3 +31,6 @@
 *.exe
 *.out
 *.app
+
+# debug stuff
+output_log.txt

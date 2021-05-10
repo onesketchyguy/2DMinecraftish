@@ -1,4 +1,17 @@
+// Forrest Lowe 2021
 #pragma once
+
+#define OLC_PGEX_NETWORK
+#include "olcPGEX_Network.h"
+#include "networkCommon.h"
+
+const int8_t SPRITE_SCALE = 12;
+
+#include "worldData.h"
+#include "objectDefinitions.h"
+#include "renderer.h"
+
+#include <unordered_map>
 
 /* example of use
 class MainMenu : public Scene
@@ -15,8 +28,14 @@ public:
 	}
 };*/
 
-#define OLC_PGEX_TRANSFORMEDVIEW
-#include "olcPGEX_TransformedView.h"
+enum class PLAY_MODE : uint8_t
+{
+	SINGLE_PLAYER,
+	CLIENT,
+	SERVER
+};
+
+PLAY_MODE playMode = PLAY_MODE::SINGLE_PLAYER;
 
 enum class SCENE : uint8_t
 {
@@ -24,11 +43,10 @@ enum class SCENE : uint8_t
 	SCENE_MAIN_MENU,
 	SCENE_MP_LOBBY,
 	SCENE_SINGLE_PLAYER,
-	SCENE_MULTI_PLAYER,
-	TEMP_HOST
+	SCENE_MULTI_PLAYER
 };
 
-SCENE currentScene = SCENE::SCENE_INTRO;
+SCENE currentScene = SCENE::SCENE_MAIN_MENU; // FIXME: start at intro
 
 struct TimeConstruct
 {
@@ -203,9 +221,11 @@ public:
 
 	bool Update() override
 	{
-		// Draw the menu
+		// Reseed the world generator
+		srand(static_cast<unsigned int>(std::time(0)));
 
-		engine->Clear(olc::Pixel(15, 180, 180, 255));
+		// Draw the menu
+		engine->Clear(olc::DARK_BLUE);
 		title->Draw();
 		singlePlayerButton->Draw();
 		multiPlayerButton->Draw();
@@ -219,6 +239,7 @@ public:
 			if (engine->GetMouse(0).bReleased)
 			{
 				currentScene = SCENE::SCENE_SINGLE_PLAYER;
+				playMode = PLAY_MODE::SINGLE_PLAYER;
 			}
 		}
 		else singlePlayerButton->fillColor = defaultColor;
@@ -301,7 +322,7 @@ public:
 	{
 		// Draw the menu
 
-		engine->Clear(olc::Pixel(15, 180, 180, 255));
+		engine->Clear(olc::DARK_BLUE);
 		hostButton->Draw();
 		joinButton->Draw();
 		backButton->Draw();
@@ -313,8 +334,8 @@ public:
 
 			if (engine->GetMouse(0).bReleased)
 			{
-				IS_SERVER = true;
 				currentScene = SCENE::SCENE_MULTI_PLAYER;
+				playMode = PLAY_MODE::SERVER;
 			}
 		}
 		else hostButton->fillColor = defaultColor;
@@ -326,8 +347,8 @@ public:
 
 			if (engine->GetMouse(0).bReleased)
 			{
-				IS_SERVER = false;
 				currentScene = SCENE::SCENE_MULTI_PLAYER;
+				playMode = PLAY_MODE::CLIENT;
 			}
 		}
 		else joinButton->fillColor = defaultColor;
@@ -450,6 +471,12 @@ public:
 
 		if (yLoop != localPlayer->GetPosition().y || xLoop != localPlayer->GetPosition().x)
 		{
+#ifdef NEW_RENDERER
+			localPlayer->SetPosition({ xLoop, yLoop });
+#endif // OLD_RENDERER
+
+#ifdef OLD_RENDERER
+
 			olc::vf2d targetCameraPosition = localPlayer->GetPosition() - ANIMATION::spriteScale * 5;
 			olc::vf2d cameraOffset = targetCameraPosition - renderer->cameraPosition;
 
@@ -457,6 +484,7 @@ public:
 
 			// This is gonna look like shit
 			renderer->SnapCamera(localPlayer->GetPosition() - cameraOffset);
+#endif // OLD_RENDERER
 		}
 	}
 
@@ -492,6 +520,7 @@ public:
 	bool OnLoad() override
 	{
 		worldData = new WorldData();
+		worldData->GenerateMap();
 
 		// Initialize the renderer
 		renderer = new Renderer(engine, worldData);
@@ -500,7 +529,9 @@ public:
 		localPlayer = new Object(renderer->playerSpriteData);
 		localPlayer->SetPosition(renderer->worldData->GetRandomGroundTile());
 
+#ifdef OLD_RENDERER
 		renderer->SnapCamera(localPlayer->GetPosition());
+#endif // OLD_RENDERER
 
 		miniMapSprite = new olc::Sprite(MAP_WIDTH, MAP_HEIGHT);
 		miniMapDecal = new olc::Decal(miniMapSprite);
@@ -531,7 +562,9 @@ public:
 		// Movement code
 		MovePlayer(time->elapsedTime);
 		LoopPlayer();
+		return true;
 
+#ifdef OLD_RENDERER
 		renderer->UpdateCameraPosition(localPlayer->GetPosition(), time->elapsedTime);
 
 		// Draw routine
@@ -545,7 +578,7 @@ public:
 
 		renderer->UpdateSun(time->elapsedTime);
 		renderer->UpdateLights();
-
+#endif
 		if (GetKey(olc::SPACE).bPressed)
 		{
 			// Set the action direction
@@ -613,11 +646,6 @@ public:
 			}
 		}
 
-		if (GetKey(olc::Key::F3).bReleased)
-		{
-			DEBUG = !DEBUG;
-		}
-
 		// Draw ye bloody minimap
 		if (drawMiniMap == true)
 		{
@@ -679,68 +707,36 @@ public:
 
 		if (GetKey(olc::ESCAPE).bReleased) {
 			//FIXME: Toggle pause
-			APPLICATION_RUNNING = !APPLICATION_RUNNING; // remove this
+
+			currentScene = SCENE::SCENE_MAIN_MENU;
 		}
 
 		return APPLICATION_RUNNING;
 	}
 };
 
-class MultiPlayerClient : public Scene
+class MultiPlayer : public Scene
 {
 	GameServer* server = nullptr;
 	Client* client = nullptr;
 
+	WorldData* worldData;
+
 private:
-	olc::TileTransformedView tv;
-
-	std::string sWorldMap =
-		"################################"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..........####...####.........#"
-		"#..........#.........#.........#"
-		"#..........#.........#.........#"
-		"#..........#.........#.........#"
-		"#..........##############......#"
-		"#..............................#"
-		"#..................#.#.#.#.....#"
-		"#..............................#"
-		"#..................#.#.#.#.....#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"#..............................#"
-		"################################";
-
-	olc::vi2d vWorldSize = { 32, 32 };
+	olc::vi2d vWorldSize = { MAP_WIDTH, MAP_HEIGHT };
 
 private:
 	std::unordered_map<uint32_t, PlayerDescription> mapObjects;
 	uint32_t playerID = 0;
 	PlayerDescription descPlayer;
 
+	Renderer* renderer = nullptr;
+
 	bool waitingForConnection = true;
 
-	bool TryConnect(const char* ip = "127.0.0.1", uint16_t port = 60000)
+	bool TryConnect(const char* ip = "127.0.0.1", uint16_t port = SERVER_PORT)
 	{
 		if (client != nullptr) return false;
-
 		client = new Client();
 
 		return client->Connect(ip, port);
@@ -749,22 +745,41 @@ private:
 public:
 	bool OnLoad() override
 	{
-		if (IS_SERVER)
+		if (playMode == PLAY_MODE::SERVER)
 		{
-			server = new GameServer(60000);
+			server = new GameServer(SERVER_PORT);
 			server->Start();
 		}
 
-		tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 8, 8 });
+		worldData = new WorldData();
+		renderer = new Renderer(engine, worldData);
 
 		//mapObjects[0].uniqueID = 0;
 		//mapObjects[0].vPos = { 3.0f, 3.0f };
 
-		return TryConnect();
+		if (playMode != PLAY_MODE::SINGLE_PLAYER)
+			TryConnect(); // FIXME: wait for user input to connect to
+
+		return true;
 	}
 
 	bool Update() override
 	{
+		if (worldData->GetWorldGenerated() == false)
+		{
+			if (worldData->GetWorldProgress() < 0.99f)
+			{
+				engine->Clear(olc::DARK_BLUE);
+				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
+				return true;
+			}
+			else
+			{
+				worldData->GenerateMap();
+				return true;
+			}
+		}
+
 		// Check for incoming network messages
 		if (client->IsConnected())
 		{
@@ -776,7 +791,7 @@ public:
 				{
 				case(GameMsg::Client_Accepted):
 				{
-					std::cout << "Server accepted client - you're in!\n";
+					print("Server accepted client - you're in!");
 					olc::net::message<GameMsg> msg;
 					msg.header.id = GameMsg::Client_RegisterWithServer;
 					descPlayer.position = { 3.0f, 3.0f };
@@ -789,7 +804,7 @@ public:
 				{
 					// Server is assigning us OUR id
 					msg >> playerID;
-					std::cout << "Assigned Client ID = " << playerID << "\n";
+					print("Assigned Client ID = " + playerID);
 					break;
 				}
 
@@ -826,10 +841,10 @@ public:
 			}
 		}
 
-		if (IS_SERVER == false && waitingForConnection)
+		if (playMode == PLAY_MODE::CLIENT && waitingForConnection)
 		{
 			engine->Clear(olc::DARK_BLUE);
-			engine->DrawString({ 10,10 }, "Waiting to connect...", olc::WHITE);
+			engine->DrawStringDecal({ 10,10 }, "Waiting to connect...", olc::WHITE);
 			return true;
 		}
 
@@ -862,8 +877,10 @@ public:
 				for (vCell.x = vAreaTL.x; vCell.x <= vAreaBR.x; vCell.x++)
 				{
 					// Check if the cell is actually solid...
-				//	olc::vf2d vCellMiddle = vCell.floor();
-					if (sWorldMap[vCell.y * vWorldSize.x + vCell.x] == '#')
+					//	olc::vf2d vCellMiddle = vCell.floor();
+					int mapIndex = vCell.y * vWorldSize.x + vCell.x;
+
+					if (worldData->tileData[mapIndex] == 0)
 					{
 						// ...it is! So work out nearest point to future player position, around perimeter
 						// of cell rectangle. We can test the distance to this point to see if we have
@@ -897,42 +914,51 @@ public:
 		}
 
 		// Handle Pan & Zoom
-		if (engine->GetMouse(2).bPressed) tv.StartPan(engine->GetMousePos());
-		if (engine->GetMouse(2).bHeld) tv.UpdatePan(engine->GetMousePos());
-		if (engine->GetMouse(2).bReleased) tv.EndPan(engine->GetMousePos());
-		if (engine->GetMouseWheel() > 0) tv.ZoomAtScreenPos(1.5f, engine->GetMousePos());
-		if (engine->GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.75f, engine->GetMousePos());
+		olc::vf2d camTarget = mapObjects[playerID].position;
+		if (engine->GetMouse(2).bPressed) renderer->viewPort.StartPan(engine->GetMousePos());
+		if (engine->GetMouse(2).bHeld) renderer->viewPort.UpdatePan(engine->GetMousePos());
+		if (engine->GetMouse(2).bReleased) renderer->viewPort.EndPan(engine->GetMousePos());
+
+		if (engine->GetMouseWheel() > 0) renderer->viewPort.ZoomAtScreenPos(1.5f, engine->GetMousePos());
+		if (engine->GetMouseWheel() < 0) renderer->viewPort.ZoomAtScreenPos(0.75f, engine->GetMousePos());
+
+		// Clamp the zoom
+		if (renderer->viewPort.GetWorldScale().x <= 12)
+			renderer->viewPort.SetZoom(12, engine->GetMousePos());
+
+		if (renderer->viewPort.GetWorldScale().x >= 30)
+			renderer->viewPort.SetZoom(30, engine->GetMousePos());
 
 		// Clear World
 		engine->Clear(olc::BLACK);
 
 		// Draw World
-		olc::vi2d vTL = tv.GetTopLeftTile().max({ 0,0 });
-		olc::vi2d vBR = tv.GetBottomRightTile().min(vWorldSize);
-		olc::vi2d vTile;
-		for (vTile.y = vTL.y; vTile.y < vBR.y; vTile.y++)
-			for (vTile.x = vTL.x; vTile.x < vBR.x; vTile.x++)
+		olc::vi2d topLeft = renderer->viewPort.GetTopLeftTile().max({ 0,0 });
+		olc::vi2d bottomRight = renderer->viewPort.GetBottomRightTile().min(vWorldSize);
+		olc::vi2d tile;
+		for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
+		{
+			for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
 			{
-				if (sWorldMap[vTile.y * vWorldSize.x + vTile.x] == '#')
-				{
-					tv.DrawRect(vTile, { 1.0f, 1.0f });
-					tv.DrawRect(olc::vf2d(vTile) + olc::vf2d(0.1f, 0.1f), { 0.8f, 0.8f });
-				}
+				int mapIndex = tile.y * vWorldSize.x + tile.x;
+
+				renderer->DrawTile(mapIndex, tile.x, tile.y);
 			}
+		}
 
 		// Draw World Objects
 		for (auto& object : mapObjects)
 		{
 			// Draw Boundary
-			tv.DrawCircle(object.second.position, object.second.radius);
+			renderer->viewPort.DrawCircle(object.second.position, object.second.radius);
 
 			// Draw Velocity
 			if (object.second.velocity.mag2() > 0)
-				tv.DrawLine(object.second.position, object.second.position + object.second.velocity.norm() * object.second.radius, olc::MAGENTA);
+				renderer->viewPort.DrawLine(object.second.position, object.second.position + object.second.velocity.norm() * object.second.radius, olc::MAGENTA);
 
 			// Draw Name
 			olc::vi2d vNameSize = engine->GetTextSizeProp("ID: " + std::to_string(object.first));
-			tv.DrawStringPropDecal(object.second.position - olc::vf2d{ vNameSize.x * 0.5f * 0.25f * 0.125f, -object.second.radius * 1.25f }, "ID: " + std::to_string(object.first), olc::BLUE, { 0.25f, 0.25f });
+			renderer->viewPort.DrawStringPropDecal(object.second.position - olc::vf2d{ vNameSize.x * 0.5f * 0.25f * 0.125f, -object.second.radius * 1.25f }, "ID: " + std::to_string(object.first), olc::BLUE, { 0.25f, 0.25f });
 		}
 
 		// Send player description
@@ -941,7 +967,7 @@ public:
 		msg << mapObjects[playerID];
 		client->Send(msg);
 
-		if (IS_SERVER)
+		if (playMode == PLAY_MODE::SERVER)
 		{
 			server->Update(-1, true);
 

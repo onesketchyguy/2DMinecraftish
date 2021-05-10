@@ -4,21 +4,25 @@
 #include <string>
 #include <filesystem>
 
-namespace FILESYSTEM {
-	std::string GetInputFromUser() {
+namespace FILESYSTEM
+{
+	std::string GetInputFromUser()
+	{
 		std::string input;
 		std::cin >> input;
 
 		return input;
 	}
 
-	int GetFileSize(const char* fileName) {
+	int GetFileSize(const char* fileName)
+	{
 		std::ifstream fileStream(fileName, std::ifstream::ate | std::ifstream::binary);
 
-		return fileStream.tellg();
+		return static_cast<int>(fileStream.tellg());
 	}
 
-	std::string GetFileData(const char* fileName) {
+	std::string GetFileData(const char* fileName)
+	{
 		std::ifstream readFileStream(fileName);
 
 		if (!readFileStream) {
@@ -37,17 +41,20 @@ namespace FILESYSTEM {
 		return data;
 	}
 
-	std::string WriteFile(const char* fileName, std::string data, std::fstream::_Openmode openMode = std::fstream::app) {
+	std::string WriteFile(const char* fileName, std::string data, std::fstream::_Openmode openMode = std::fstream::app)
+	{
 		std::ofstream writeFileStream(fileName, openMode);
 		double size = 0.0;
 
-		if (writeFileStream.is_open()) {
+		if (writeFileStream.is_open())
+		{
 			writeFileStream << data.c_str();
 			size = GetFileSize(fileName) * 0.001;
 
 			writeFileStream.close();
 		}
-		else {
+		else
+		{
 			return "WARNING! Could not create file! FileStream failure! May need more access.";
 		}
 

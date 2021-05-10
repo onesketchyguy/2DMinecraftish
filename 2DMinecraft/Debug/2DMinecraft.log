@@ -1,33 +1,30 @@
 ﻿  Source.cpp
-D:\repos\2DMinecraftish\2DMinecraft\Headers\fileManager.h(18,26): warning C4244: 'return': conversion from 'std::streamoff' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(118,12): warning C4244: 'initializing': conversion from 'uint64_t' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(119,12): warning C4244: 'initializing': conversion from 'uint64_t' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(124,20): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(127,22): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(274,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(280,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(291,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(304,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(310,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(333,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(339,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(350,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(362,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(363,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(374,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(375,26): warning C4244: '=': conversion from 'float' to 'int16_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(34,24): warning C4018: '<': signed/unsigned mismatch
-D:\repos\2DMinecraftish\2DMinecraft\Headers\objectDefinitions.h(141,24): warning C4018: '<': signed/unsigned mismatch
-D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(173,21): warning C4244: '=': conversion from 'float' to 'uint8_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\renderer.h(190,1): warning C4244: '*=': conversion from 'float' to 'uint8_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(115,29): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Source.cpp(8,1): error C3064: 'uint8_t': must be a simple type or resolve to one
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(180,18): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(244,26): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(249,28): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(356,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(362,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(373,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(386,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\worldData.h(392,22): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(125,29): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(116,30): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(126,30): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-  2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe
+D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(937,46): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=int32_t
+          ]
+D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(937,38): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=int32_t
+          ]

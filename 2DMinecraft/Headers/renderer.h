@@ -1,10 +1,17 @@
 #pragma once
 
+#define OLC_PGEX_TRANSFORMEDVIEW
+#include "olcPGEX_TransformedView.h"
+
 const uint8_t WORLD_TILES_WIDTH = 4;
 const uint8_t WORLD_TILES_HEIGHT = 3;
 
 const uint8_t WORLD_ITEMS_WIDTH = 3;
 const uint8_t WORLD_ITEMS_HEIGHT = 1;
+
+#define NEW_RENDERER
+
+#ifdef NEW_RENDERER
 
 class Renderer
 {
@@ -12,11 +19,136 @@ public:
 	Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 	{
 		this->engine = engine;
-
 		this->worldData = worldData;
 
 		// Render scale shit
 
+		print("Generating sprites...");
+
+		viewPort = olc::TileTransformedView({ engine->ScreenWidth(), engine->ScreenHeight() },
+			{ SPRITE_SCALE, SPRITE_SCALE });
+
+		print("Created viewport.");
+
+		// Player shit
+		playerSpriteData = new olc::Renderable();
+		playerSpriteData->Load("Data/player.png");
+
+		if (playerSpriteData->Decal() == nullptr) {
+			print("Could not load player sprites!");
+			DEBUG = true;
+		}
+
+		print("Loaded player sprites!");
+
+		// Item shit
+		itemSpriteData = new olc::Renderable();
+		itemSpriteData->Load("Data/items.png");
+
+		// For what ever reason this one specifically is throwing errors
+		//if (tileSpriteData->Decal() == nullptr) {
+		//	print("Could not load item sprites!");
+		//	DEBUG = true;
+		//}
+
+		print("Loaded item sprites!");
+
+		// World shit
+		tileSpriteData = new olc::Renderable();
+		tileSpriteData->Load("Data/tiles.png");
+
+		if (tileSpriteData->Decal() == nullptr) {
+			print("Could not load tile sprites!");
+			DEBUG = true;
+		}
+
+		print("Loaded tile sprites!");
+	}
+
+public:
+	olc::PixelGameEngine* engine = nullptr;
+
+	olc::TileTransformedView viewPort;
+
+	WorldData* worldData = nullptr;
+	olc::Renderable* tileSpriteData = nullptr;
+	olc::Renderable* itemSpriteData = nullptr;
+	olc::Renderable* playerSpriteData = nullptr;
+
+	void DrawDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal, olc::Pixel color = { 255,255,255,255 })
+	{
+		viewPort.DrawDecal(pos, decal, scale, color);
+	}
+
+	void DrawPartialDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal, olc::vi2d cell = { 0,0 }, olc::Pixel color = { 255,255,255,255 })
+	{
+		viewPort.DrawPartialDecal(pos, scale, decal, cell, ANIMATION::spriteScale, color);
+	}
+
+	void DrawObject(Object* obj) {
+		engine->SetPixelMode(olc::Pixel::NORMAL);
+
+		olc::vi2d decalScale = {
+			obj->GetLookDir() == ANIMATION::left ? -ANIMATION::spriteScale.x : ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
+		olc::vi2d spriteCell = { ANIMATION::spriteScale.x * obj->GetCellIndex().x, ANIMATION::spriteScale.y * obj->GetCellIndex().y };
+
+		olc::vf2d offset = { obj->GetLookDir() == ANIMATION::left ? ANIMATION::spriteScale.x : 0.0f , 0.0f };
+
+		DrawPartialDecal(obj->GetPosition() + offset, decalScale,
+			obj->GetRenderable()->Decal(), spriteCell);
+	}
+
+	void DrawTile(int mapIndex, float x, float y) {
+		engine->SetPixelMode(olc::Pixel::NORMAL);
+
+		olc::vf2d pos = { x, y };
+
+		int foliage = worldData->foliageData[mapIndex];
+		int tile = worldData->tileData[mapIndex];
+
+		int cellIndex_x = tile % WORLD_TILES_WIDTH;
+		int cellIndex_y = tile / WORLD_TILES_WIDTH;
+		olc::vi2d tileSpriteCell = { ANIMATION::spriteScale.x * cellIndex_x, ANIMATION::spriteScale.y * cellIndex_y };
+
+		olc::vi2d decalScale = { ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
+
+		// Draw tile
+		DrawPartialDecal(pos, decalScale, tileSpriteData->Decal(), tileSpriteCell);
+
+		if (foliage > 0) // 0 = no foliage
+		{
+			foliage -= 1; // Subtract 1 to put this layer back into sprite space
+
+			olc::vi2d foliageSpriteCell = { ANIMATION::spriteScale.x * foliage, ANIMATION::spriteScale.x * 2 };
+
+			// Draw foliage
+			DrawPartialDecal(pos, decalScale, tileSpriteData->Decal(), tileSpriteCell);
+		}
+	}
+
+	void DrawItem(Item obj) {
+		engine->SetPixelMode(olc::Pixel::NORMAL);
+
+		olc::vi2d spriteCell{ obj.ID % WORLD_ITEMS_WIDTH, obj.ID / WORLD_ITEMS_WIDTH };
+
+		DrawPartialDecal(obj.position, { SPRITE_SCALE * 0.75f,SPRITE_SCALE * 0.75f },
+			itemSpriteData->Decal(), spriteCell);
+	}
+};
+
+#endif
+
+#ifdef OLD_RENDERER
+
+class Renderer
+{
+public:
+	Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
+	{
+		this->engine = engine;
+		this->worldData = worldData;
+
+		// Render scale shit
 		// lock the zoomscale to the resolution of 132x108
 		ZOOM_SCALE.x = engine->ScreenWidth() / 132.0f;
 		ZOOM_SCALE.y = engine->ScreenHeight() / 108.0f;
@@ -30,6 +162,8 @@ public:
 			DEBUG = true;
 		}
 
+		print("Loaded player sprites!");
+
 		// Item shit
 		itemSpriteData = new olc::Renderable();
 		itemSpriteData->Load("Data/items.png");
@@ -40,6 +174,8 @@ public:
 		//	DEBUG = true;
 		//}
 
+		print("Loaded item sprites!");
+
 		// World shit
 		tileSpriteData = new olc::Renderable();
 		tileSpriteData->Load("Data/WorldTiles.png");
@@ -48,6 +184,8 @@ public:
 			print("Could not load tile sprites!");
 			DEBUG = true;
 		}
+
+		print("Loaded tile sprites!");
 
 		// Lighting shit
 		whiteSquareSprite = new olc::Sprite(SPRITE_SCALE, SPRITE_SCALE);
@@ -74,9 +212,11 @@ public:
 
 public:
 	olc::PixelGameEngine* engine = nullptr;
+
+	olc::TileTransformedView viewPort;
+
 	olc::vf2d cameraPosition = { 0.0,0.0 };
 	olc::vf2d targetCameraPosition = { 0.0f, 0.0f };
-
 	const float cameraSpeed = 3.5f;
 	olc::vf2d ZOOM_SCALE = { 1.0f, 1.0f };
 
@@ -225,3 +365,5 @@ public:
 		//engine->DrawStringDecal({ 0.0,0.0 }, std::to_string(dayLight)); // Show amount of sunlight
 	}
 };
+
+#endif
