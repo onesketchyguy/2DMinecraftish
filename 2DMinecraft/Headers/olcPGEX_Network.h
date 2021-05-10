@@ -1,7 +1,7 @@
 /*
 	ASIO Based Networking olcPixelGameEngine Extension v1.0
 
-	Videos: 
+	Videos:
 	Part #1: https://youtu.be/2hNdkYInj4g
 	Part #2: https://youtu.be/UbjxGvrDrbw
 	Part #3: https://youtu.be/hHowZ3bWsio
@@ -55,7 +55,7 @@
 
 */
 
-#pragma once 
+#pragma once
 
 #include <memory>
 #include <thread>
@@ -119,8 +119,8 @@ namespace olc
 			}
 
 			// Convenience Operator overloads - These allow us to add and remove stuff from
-			// the body vector as if it were a stack, so First in, Last Out. These are a 
-			// template in itself, because we dont know what data type the user is pushing or 
+			// the body vector as if it were a stack, so First in, Last Out. These are a
+			// template in itself, because we dont know what data type the user is pushing or
 			// popping, so lets allow them all. NOTE: It assumes the data type is fundamentally
 			// Plain Old Data (POD). TLDR: Serialise & Deserialise into/from a vector
 
@@ -168,12 +168,11 @@ namespace olc
 
 				// Return the target message so it can be "chained"
 				return msg;
-			}			
+			}
 		};
 
-
 		// An "owned" message is identical to a regular message, but it is associated with
-		// a connection. On a server, the owner would be the client that sent the message, 
+		// a connection. On a server, the owner would be the client that sent the message,
 		// on a client the owner would be the server.
 
 		// Forward declare the connection
@@ -192,9 +191,8 @@ namespace olc
 				os << msg.msg;
 				return os;
 			}
-		};		
+		};
 
-		
 		// Queue
 		template<typename T>
 		class tsqueue
@@ -293,7 +291,7 @@ namespace olc
 			std::condition_variable cvBlocking;
 			std::mutex muxBlocking;
 		};
-		
+
 		// Connection
 		// Forward declare
 		template<typename T>
@@ -331,7 +329,7 @@ namespace olc
 				}
 				else
 				{
-					// Connection is Client -> Server, so we have nothing to define, 
+					// Connection is Client -> Server, so we have nothing to define,
 					m_nHandshakeIn = 0;
 					m_nHandshakeOut = 0;
 				}
@@ -391,7 +389,6 @@ namespace olc
 				}
 			}
 
-
 			void Disconnect()
 			{
 				if (IsConnected())
@@ -406,7 +403,6 @@ namespace olc
 			// Prime the connection to wait for incoming messages
 			void StartListening()
 			{
-				
 			}
 
 		public:
@@ -417,7 +413,7 @@ namespace olc
 				asio::post(m_asioContext,
 					[this, msg]()
 					{
-						// If the queue has a message in it, then we must 
+						// If the queue has a message in it, then we must
 						// assume that it is in the process of asynchronously being written.
 						// Either way add the message to the queue to be output. If no messages
 						// were available to be written, then start the process of writing the
@@ -431,13 +427,11 @@ namespace olc
 					});
 			}
 
-
-
 		private:
 			// ASYNC - Prime context to write a message header
 			void WriteHeader()
 			{
-				// If this function is called, we know the outgoing message queue must have 
+				// If this function is called, we know the outgoing message queue must have
 				// at least one message to send. So allocate a transmission buffer to hold
 				// the message, and issue the work - asio, send these bytes
 				asio::async_write(m_socket, asio::buffer(&m_qMessagesOut.front().header, sizeof(message_header<T>)),
@@ -456,7 +450,7 @@ namespace olc
 							}
 							else
 							{
-								// ...it didnt, so we are done with this message. Remove it from 
+								// ...it didnt, so we are done with this message. Remove it from
 								// the outgoing message queue
 								m_qMessagesOut.pop_front();
 
@@ -470,7 +464,7 @@ namespace olc
 						}
 						else
 						{
-							// ...asio failed to write the message, we could analyse why but 
+							// ...asio failed to write the message, we could analyse why but
 							// for now simply assume the connection has died by closing the
 							// socket. When a future attempt to write to this client fails due
 							// to the closed socket, it will be tidied up.
@@ -495,7 +489,7 @@ namespace olc
 							// and remove it from the queue
 							m_qMessagesOut.pop_front();
 
-							// If the queue still has messages in it, then issue the task to 
+							// If the queue still has messages in it, then issue the task to
 							// send the next messages' header.
 							if (!m_qMessagesOut.empty())
 							{
@@ -516,12 +510,12 @@ namespace olc
 			{
 				// If this function is called, we are expecting asio to wait until it receives
 				// enough bytes to form a header of a message. We know the headers are a fixed
-				// size, so allocate a transmission buffer large enough to store it. In fact, 
-				// we will construct the message in a "temporary" message object as it's 
+				// size, so allocate a transmission buffer large enough to store it. In fact,
+				// we will construct the message in a "temporary" message object as it's
 				// convenient to work with.
 				asio::async_read(m_socket, asio::buffer(&m_msgTemporaryIn.header, sizeof(message_header<T>)),
 					[this](std::error_code ec, std::size_t length)
-					{						
+					{
 						if (!ec)
 						{
 							// A complete message header has been read, check if this message
@@ -558,7 +552,7 @@ namespace olc
 				// in the temporary message object, so just wait for the bytes to arrive...
 				asio::async_read(m_socket, asio::buffer(m_msgTemporaryIn.body.data(), m_msgTemporaryIn.body.size()),
 					[this](std::error_code ec, std::size_t length)
-					{						
+					{
 						if (!ec)
 						{
 							// ...and they have! The message is now complete, so add
@@ -650,22 +644,22 @@ namespace olc
 
 			// Once a full message is received, add it to the incoming queue
 			void AddToIncomingMessageQueue()
-			{				
+			{
 				// Shove it in queue, converting it to an "owned message", by initialising
 				// with the a shared pointer from this connection object
-				if(m_nOwnerType == owner::server)
+				if (m_nOwnerType == owner::server)
 					m_qMessagesIn.push_back({ this->shared_from_this(), m_msgTemporaryIn });
 				else
 					m_qMessagesIn.push_back({ nullptr, m_msgTemporaryIn });
 
-				// We must now prime the asio context to receive the next message. It 
+				// We must now prime the asio context to receive the next message. It
 				// wil just sit and wait for bytes to arrive, and the message construction
 				// process repeats itself. Clever huh?
 				ReadHeader();
 			}
 
 		protected:
-			// Each connection has a unique socket to a remote 
+			// Each connection has a unique socket to a remote
 			asio::ip::tcp::socket m_socket;
 
 			// This context is shared with the whole asio instance
@@ -685,25 +679,23 @@ namespace olc
 			// The "owner" decides how some of the connection behaves
 			owner m_nOwnerType = owner::server;
 
-			// Handshake Validation			
+			// Handshake Validation
 			uint64_t m_nHandshakeOut = 0;
 			uint64_t m_nHandshakeIn = 0;
 			uint64_t m_nHandshakeCheck = 0;
-
 
 			bool m_bValidHandshake = false;
 			bool m_bConnectionEstablished = false;
 
 			uint32_t id = 0;
-
 		};
-		
+
 		// Client
 		template <typename T>
 		class client_interface
 		{
 		public:
-			client_interface() 
+			client_interface()
 			{}
 
 			virtual ~client_interface()
@@ -724,7 +716,7 @@ namespace olc
 
 					// Create connection
 					m_connection = std::make_unique<connection<T>>(connection<T>::owner::client, m_context, asio::ip::tcp::socket(m_context), m_qMessagesIn);
-					
+
 					// Tell the connection object to connect to server
 					m_connection->ConnectToServer(endpoints);
 
@@ -743,13 +735,13 @@ namespace olc
 			void Disconnect()
 			{
 				// If connection exists, and it's connected then...
-				if(IsConnected())
+				if (IsConnected())
 				{
 					// ...disconnect from server gracefully
 					m_connection->Disconnect();
 				}
 
-				// Either way, we're also done with the asio context...				
+				// Either way, we're also done with the asio context...
 				m_context.stop();
 				// ...and its thread
 				if (thrContext.joinable())
@@ -772,13 +764,12 @@ namespace olc
 			// Send message to server
 			void Send(const message<T>& msg)
 			{
-				if (IsConnected())
-					 m_connection->Send(msg);
+				if (IsConnected()) m_connection->Send(msg);
 			}
 
 			// Retrieve queue of messages from server
 			tsqueue<owned_message<T>>& Incoming()
-			{ 
+			{
 				return m_qMessagesIn;
 			}
 
@@ -789,12 +780,12 @@ namespace olc
 			std::thread thrContext;
 			// The client has a single instance of a "connection" object, which handles data transfer
 			std::unique_ptr<connection<T>> m_connection;
-			
+
 		private:
 			// This is the thread safe queue of incoming messages from server
 			tsqueue<owned_message<T>> m_qMessagesIn;
 		};
-		
+
 		// Server
 		template<typename T>
 		class server_interface
@@ -804,7 +795,6 @@ namespace olc
 			server_interface(uint16_t port)
 				: m_asioAcceptor(m_asioContext, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port))
 			{
-
 			}
 
 			virtual ~server_interface()
@@ -820,7 +810,7 @@ namespace olc
 				{
 					// Issue a task to the asio context - This is important
 					// as it will prime the context with "work", and stop it
-					// from exiting immediately. Since this is a server, we 
+					// from exiting immediately. Since this is a server, we
 					// want it primed ready to handle clients trying to
 					// connect.
 					WaitForClientConnection();
@@ -867,16 +857,14 @@ namespace olc
 							// Display some useful(?) information
 							std::cout << "[SERVER] New Connection: " << socket.remote_endpoint() << "\n";
 
-							// Create a new connection to handle this client 
-							std::shared_ptr<connection<T>> newconn = 
-								std::make_shared<connection<T>>(connection<T>::owner::server, 
+							// Create a new connection to handle this client
+							std::shared_ptr<connection<T>> newconn =
+								std::make_shared<connection<T>>(connection<T>::owner::server,
 									m_asioContext, std::move(socket), m_qMessagesIn);
-							
-							
 
 							// Give the user server a chance to deny connection
 							if (OnClientConnect(newconn))
-							{								
+							{
 								// Connection allowed, so add to container of new connections
 								m_deqConnections.push_back(std::move(newconn));
 
@@ -917,7 +905,7 @@ namespace olc
 				}
 				else
 				{
-					// If we cant communicate with client then we may as 
+					// If we cant communicate with client then we may as
 					// well remove the client - let the server know, it may
 					// be tracking it somehow
 					OnClientDisconnect(client);
@@ -930,7 +918,7 @@ namespace olc
 						std::remove(m_deqConnections.begin(), m_deqConnections.end(), client), m_deqConnections.end());
 				}
 			}
-			
+
 			// Send message to all clients
 			void MessageAllClients(const message<T>& msg, std::shared_ptr<connection<T>> pIgnoreClient = nullptr)
 			{
@@ -943,7 +931,7 @@ namespace olc
 					if (client && client->IsConnected())
 					{
 						// ..it is!
-						if(client != pIgnoreClient)
+						if (client != pIgnoreClient)
 							client->Send(msg);
 					}
 					else
@@ -998,22 +986,18 @@ namespace olc
 			// Called when a client appears to have disconnected
 			virtual void OnClientDisconnect(std::shared_ptr<connection<T>> client)
 			{
-
 			}
 
 			// Called when a message arrives
 			virtual void OnMessage(std::shared_ptr<connection<T>> client, message<T>& msg)
 			{
-
 			}
 
 		public:
 			// Called when a client is validated
 			virtual void OnClientValidated(std::shared_ptr<connection<T>> client)
 			{
-
 			}
-
 
 		protected:
 			// Thread Safe Queue for incoming message packets
@@ -1034,5 +1018,3 @@ namespace olc
 		};
 	}
 }
-
-

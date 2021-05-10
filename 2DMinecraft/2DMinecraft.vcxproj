@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="Headers\debugger.h" />
     <ClInclude Include="Headers\fileManager.h" />
+    <ClInclude Include="Headers\miniMap.h" />
     <ClInclude Include="Headers\networkCommon.h" />
     <ClInclude Include="Headers\objectDefinitions.h" />
     <ClInclude Include="Headers\olcPGEX_Network.h" />

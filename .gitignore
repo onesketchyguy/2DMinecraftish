@@ -32,5 +32,8 @@
 *.out
 *.app
 
+# VS stuff
+*.VC.db
+
 # debug stuff
 output_log.txt

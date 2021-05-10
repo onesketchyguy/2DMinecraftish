@@ -2,7 +2,7 @@
 
 bool DEBUG = false;
 bool APPLICATION_RUNNING = true;
-const SERVER_PORT = 60000;
+const int SERVER_PORT = 60000;
 
 #define OLC_PGE_APPLICATION
 #include "Headers/olcPixelGameEngine.h"
@@ -29,7 +29,7 @@ public:
 	IntroScene* introScene = nullptr;
 	MainMenu* mainMenu = nullptr;
 	MultiplayerLobby* multiplayerLobby = nullptr;
-	SinglePlayer* singlePlayer = nullptr;
+	MultiPlayer* singlePlayer = nullptr;
 	MultiPlayer* multiPlayer = nullptr;
 
 public:
@@ -104,7 +104,7 @@ public:
 		case SCENE::SCENE_SINGLE_PLAYER:
 			if (singlePlayer == nullptr)
 			{
-				singlePlayer = new SinglePlayer();
+				singlePlayer = new MultiPlayer();
 				singlePlayer->Initialize(time, this);
 			}
 			else
@@ -181,7 +181,7 @@ int main()
 	// Hide console
 	ShowWindow(GetConsoleWindow(), SW_HIDE);
 
-	print("\n\n_____Session started____");
+	print("_____Session started____");
 
 	// Show game
 	MiniMinecraft demo;

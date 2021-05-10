@@ -3,18 +3,19 @@
 #define OLC_PGEX_TRANSFORMEDVIEW
 #include "olcPGEX_TransformedView.h"
 
-const uint8_t WORLD_TILES_WIDTH = 4;
-const uint8_t WORLD_TILES_HEIGHT = 3;
-
-const uint8_t WORLD_ITEMS_WIDTH = 3;
-const uint8_t WORLD_ITEMS_HEIGHT = 1;
-
 #define NEW_RENDERER
 
 #ifdef NEW_RENDERER
 
 class Renderer
 {
+private:
+	olc::vf2d screenCenter;
+	olc::vf2d camTarget;
+
+	const float MIN_ZOOM = 6.0f;
+	const float MAX_ZOOM = 36.0f;
+
 public:
 	Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 	{
@@ -32,37 +33,15 @@ public:
 
 		// Player shit
 		playerSpriteData = new olc::Renderable();
-		playerSpriteData->Load("Data/player.png");
-
-		if (playerSpriteData->Decal() == nullptr) {
-			print("Could not load player sprites!");
-			DEBUG = true;
-		}
-
-		print("Loaded player sprites!");
+		LoadSprites(playerSpriteData, "Data/player.png");
 
 		// Item shit
 		itemSpriteData = new olc::Renderable();
-		itemSpriteData->Load("Data/items.png");
-
-		// For what ever reason this one specifically is throwing errors
-		//if (tileSpriteData->Decal() == nullptr) {
-		//	print("Could not load item sprites!");
-		//	DEBUG = true;
-		//}
-
-		print("Loaded item sprites!");
+		LoadSprites(itemSpriteData, "Data/items.png");
 
 		// World shit
 		tileSpriteData = new olc::Renderable();
-		tileSpriteData->Load("Data/tiles.png");
-
-		if (tileSpriteData->Decal() == nullptr) {
-			print("Could not load tile sprites!");
-			DEBUG = true;
-		}
-
-		print("Loaded tile sprites!");
+		LoadSprites(tileSpriteData, "Data/tiles.png");
 	}
 
 public:
@@ -75,6 +54,21 @@ public:
 	olc::Renderable* itemSpriteData = nullptr;
 	olc::Renderable* playerSpriteData = nullptr;
 
+	void LoadSprites(olc::Renderable* renderable, std::string dir)
+	{
+		renderable->Load(dir);
+		print("Loading sprites from: " + dir);
+
+		if (renderable->Decal() == nullptr)
+		{
+			print("Could not load sprites!");
+			DEBUG = true;
+			APPLICATION_RUNNING = true;
+		}
+
+		print("Loaded sprites.");
+	}
+
 	void DrawDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal, olc::Pixel color = { 255,255,255,255 })
 	{
 		viewPort.DrawDecal(pos, decal, scale, color);
@@ -82,20 +76,26 @@ public:
 
 	void DrawPartialDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal, olc::vi2d cell = { 0,0 }, olc::Pixel color = { 255,255,255,255 })
 	{
-		viewPort.DrawPartialDecal(pos, scale, decal, cell, ANIMATION::spriteScale, color);
+		viewPort.DrawPartialDecal(pos, scale, decal, cell, spriteScale, color);
 	}
 
 	void DrawObject(Object* obj) {
 		engine->SetPixelMode(olc::Pixel::NORMAL);
 
 		olc::vi2d decalScale = {
-			obj->GetLookDir() == ANIMATION::left ? -ANIMATION::spriteScale.x : ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
-		olc::vi2d spriteCell = { ANIMATION::spriteScale.x * obj->GetCellIndex().x, ANIMATION::spriteScale.y * obj->GetCellIndex().y };
+			obj->GetLookDir() == ANIMATION::left ? -spriteScale.x : spriteScale.x, spriteScale.y };
+		olc::vi2d spriteCell = { spriteScale.x * obj->GetCellIndex().x, spriteScale.y * obj->GetCellIndex().y };
 
-		olc::vf2d offset = { obj->GetLookDir() == ANIMATION::left ? ANIMATION::spriteScale.x : 0.0f , 0.0f };
+		olc::vf2d offset = { obj->GetLookDir() == ANIMATION::left ? spriteScale.x : 0.0f , 0.0f };
 
 		DrawPartialDecal(obj->GetPosition() + offset, decalScale,
 			obj->GetRenderable()->Decal(), spriteCell);
+	}
+
+	void DrawPlayer(olc::vf2d pos) {
+		engine->SetPixelMode(olc::Pixel::NORMAL);
+
+		DrawPartialDecal(pos, spriteScale, playerSpriteData->Decal(), { 0, 0 });
 	}
 
 	void DrawTile(int mapIndex, float x, float y) {
@@ -108,21 +108,21 @@ public:
 
 		int cellIndex_x = tile % WORLD_TILES_WIDTH;
 		int cellIndex_y = tile / WORLD_TILES_WIDTH;
-		olc::vi2d tileSpriteCell = { ANIMATION::spriteScale.x * cellIndex_x, ANIMATION::spriteScale.y * cellIndex_y };
-
-		olc::vi2d decalScale = { ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
+		olc::vi2d tileSpriteCell = {
+			spriteScale.x * cellIndex_x,
+			spriteScale.y * cellIndex_y };
 
 		// Draw tile
-		DrawPartialDecal(pos, decalScale, tileSpriteData->Decal(), tileSpriteCell);
+		DrawPartialDecal(pos, spriteScale, tileSpriteData->Decal(), tileSpriteCell);
 
 		if (foliage > 0) // 0 = no foliage
 		{
 			foliage -= 1; // Subtract 1 to put this layer back into sprite space
 
-			olc::vi2d foliageSpriteCell = { ANIMATION::spriteScale.x * foliage, ANIMATION::spriteScale.x * 2 };
+			olc::vi2d foliageSpriteCell = { spriteScale.x * foliage, spriteScale.x * 2 };
 
 			// Draw foliage
-			DrawPartialDecal(pos, decalScale, tileSpriteData->Decal(), tileSpriteCell);
+			DrawPartialDecal(pos, spriteScale, tileSpriteData->Decal(), tileSpriteCell);
 		}
 	}
 
@@ -133,6 +133,47 @@ public:
 
 		DrawPartialDecal(obj.position, { SPRITE_SCALE * 0.75f,SPRITE_SCALE * 0.75f },
 			itemSpriteData->Decal(), spriteCell);
+	}
+
+	void DrawWorld()
+	{
+		// Clear World
+		engine->Clear(olc::BLACK);
+
+		// Draw World
+		olc::vi2d topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
+		olc::vi2d bottomRight = viewPort.GetBottomRightTile().min({ MAP_WIDTH, MAP_HEIGHT });
+		olc::vi2d tile;
+		for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
+		{
+			for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
+			{
+				int mapIndex = tile.y * MAP_WIDTH + tile.x;
+
+				DrawTile(mapIndex, tile.x, tile.y);
+			}
+		}
+	}
+
+	void UpdateZoom()
+	{
+		if (engine->GetMouseWheel() > 0) viewPort.ZoomAtScreenPos(1.5f, engine->GetMousePos());
+		if (engine->GetMouseWheel() < 0) viewPort.ZoomAtScreenPos(0.75f, engine->GetMousePos());
+
+		// Clamp the zoom
+		if (viewPort.GetWorldScale().x <= MIN_ZOOM)
+			viewPort.SetZoom(MIN_ZOOM, camTarget);
+
+		if (viewPort.GetWorldScale().x >= MAX_ZOOM)
+			viewPort.SetZoom(MAX_ZOOM, camTarget);
+
+		screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenWidth() / 2.0f });
+	}
+
+	void SetCamera(olc::vf2d pos)
+	{
+		camTarget = pos - screenCenter;
+		viewPort.SetWorldOffset(camTarget);
 	}
 };
 

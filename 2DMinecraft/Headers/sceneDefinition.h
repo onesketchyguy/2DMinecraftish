@@ -6,8 +6,35 @@
 #include "networkCommon.h"
 
 const int8_t SPRITE_SCALE = 12;
+olc::vi2d spriteScale = { (int)SPRITE_SCALE, (int)SPRITE_SCALE };
+
+const uint8_t WORLD_TILES_WIDTH = 4;
+const uint8_t WORLD_TILES_HEIGHT = 3;
+
+const uint8_t WORLD_ITEMS_WIDTH = 3;
+const uint8_t WORLD_ITEMS_HEIGHT = 1;
+
+struct TimeConstruct
+{
+public:
+	// Amount of time since the last frame
+	float elapsedTime = 0.0f;
+
+	// Number of frames passed since the application has started. Note that this loops.
+	int32_t frameCount = 0;
+
+	void Update(float elapsedTime)
+	{
+		this->elapsedTime = elapsedTime;
+
+		frameCount++;
+		frameCount %= 4294967294; // Keep the frame count within the range of its values.
+	}
+};
 
 #include "worldData.h"
+#include "miniMap.h"
+
 #include "objectDefinitions.h"
 #include "renderer.h"
 
@@ -46,25 +73,7 @@ enum class SCENE : uint8_t
 	SCENE_MULTI_PLAYER
 };
 
-SCENE currentScene = SCENE::SCENE_MAIN_MENU; // FIXME: start at intro
-
-struct TimeConstruct
-{
-public:
-	// Amount of time since the last frame
-	float elapsedTime = 0.0f;
-
-	// Number of frames passed since the application has started. Note that this loops.
-	int32_t frameCount = 0;
-
-	void Update(float elapsedTime)
-	{
-		this->elapsedTime = elapsedTime;
-
-		frameCount++;
-		frameCount %= 4294967294; // Keep the frame count within the range of its values.
-	}
-};
+SCENE currentScene = SCENE::SCENE_INTRO;
 
 class Scene
 {
@@ -128,6 +137,13 @@ class IntroScene : public Scene
 	float logoTime = 3;
 
 public:
+	~IntroScene()
+	{
+		delete olc_logo;
+		delete flowe_logo;
+	}
+
+public:
 	bool OnLoad() override
 	{
 		logoPos.x = ScreenWidth() / 2;
@@ -173,6 +189,15 @@ private:
 
 	olc::Pixel defaultColor = olc::WHITE;
 	olc::Pixel highlightColor = olc::GREY;
+
+public:
+	~MainMenu()
+	{
+		delete title;
+		delete singlePlayerButton;
+		delete multiPlayerButton;
+		delete quitButton;
+	}
 
 public:
 	bool OnLoad() override
@@ -284,6 +309,14 @@ private:
 	olc::Pixel highlightColor = olc::GREY;
 
 public:
+	~MultiplayerLobby()
+	{
+		delete hostButton;
+		delete joinButton;
+		delete backButton;
+	}
+
+public:
 	bool OnLoad() override
 	{
 		int xPos = (ScreenWidth() / 2) - 75;
@@ -378,22 +411,17 @@ public:
 	Object* localPlayer;
 	int tileId;
 
-	olc::Sprite* miniMapSprite;
-	olc::Decal* miniMapDecal;
+	MiniMap* minimap;
 
 	std::vector<Item> items;
 
-	bool drawMiniMap = false;
-	byte miniMapDrawLocation = 1;
-	float miniMapDrawScale = 0.25f;
-	olc::Pixel* mapColors;
-
-private:
-	std::unordered_map<uint32_t, PlayerDescription> mapObjects;
-	uint32_t playerID = 0;
-	PlayerDescription descPlayer;
-
-	bool waitingForConnection = true;
+public:
+	~SinglePlayer()
+	{
+		delete renderer;
+		delete worldData;
+		delete localPlayer;
+	}
 
 public:
 	void MovePlayer(float fElapsedTime)
@@ -488,81 +516,113 @@ public:
 		}
 	}
 
-	void UpdateMiniMap()
+	void TryHit()
 	{
-		// Called once per frame, draws random coloured pixels
-		for (int x = 0; x < MAP_WIDTH; x++)
-			for (int y = 0; y < MAP_HEIGHT; y++)
+		// Set the action direction
+		olc::vf2d hitPosition = localPlayer->GetPosition();
+
+		switch (localPlayer->GetLookDir())
+		{
+		case ANIMATION::right:
+			hitPosition.x += SPRITE_SCALE;
+			break;
+		case ANIMATION::left:
+			hitPosition.x -= SPRITE_SCALE;
+			break;
+		case ANIMATION::down:
+			hitPosition.y += SPRITE_SCALE;
+			break;
+		case ANIMATION::up:
+			hitPosition.y -= SPRITE_SCALE;
+			break;
+		default:
+			break;
+		}
+
+		int foliageHit[5] =
+		{
+			worldData->GetFoliageIndex(hitPosition.x, hitPosition.y),
+			worldData->GetFoliageIndex(hitPosition.x - SPRITE_SCALE, hitPosition.y),
+			worldData->GetFoliageIndex(hitPosition.x + SPRITE_SCALE, hitPosition.y),
+			worldData->GetFoliageIndex(hitPosition.x, hitPosition.y - SPRITE_SCALE),
+			worldData->GetFoliageIndex(hitPosition.x, hitPosition.y + SPRITE_SCALE)
+		};
+
+		for (size_t i = 0; i < 5; i++)
+		{
+			int worldFoliageIndex = foliageHit[i];
+			int foliageID = worldData->foliageData[worldFoliageIndex];
+
+			// Do the action
+			if (foliageID == 2) // Hit tree
 			{
-				int dat = renderer->worldData->GetTileID(x, y);
+				worldData->foliageData[worldFoliageIndex] = 0;
 
-				if (y * SPRITE_SCALE > localPlayer->GetPosition().y - 25 &&
-					y * SPRITE_SCALE < localPlayer->GetPosition().y + 25 &&
-					x * SPRITE_SCALE > localPlayer->GetPosition().x - 25 &&
-					x * SPRITE_SCALE < localPlayer->GetPosition().x + 25)
-				{
-					miniMapSprite->SetPixel(x, y, olc::Pixel(255, 0, 0, 255));
-				}
-				else
-				{
-					miniMapSprite->SetPixel(x, y, mapColors[dat]);
-				}
+				Item log = Item();
+				log.ID = 0;
+				log.position = hitPosition;
+				items.push_back(log);
+
+				break;
 			}
-
-		miniMapDecal->Update();
-	}
-
-	void DestroyTree()
-	{
+		}
 	}
 
 public:
 	bool OnLoad() override
 	{
 		worldData = new WorldData();
-		worldData->GenerateMap();
 
 		// Initialize the renderer
 		renderer = new Renderer(engine, worldData);
 
-		// Player shit
-		localPlayer = new Object(renderer->playerSpriteData);
-		localPlayer->SetPosition(renderer->worldData->GetRandomGroundTile());
+		minimap = new MiniMap();
+		minimap->Initialize(renderer->tileSpriteData->Sprite(), worldData, engine, time);
 
 #ifdef OLD_RENDERER
 		renderer->SnapCamera(localPlayer->GetPosition());
 #endif // OLD_RENDERER
-
-		miniMapSprite = new olc::Sprite(MAP_WIDTH, MAP_HEIGHT);
-		miniMapDecal = new olc::Decal(miniMapSprite);
-
-		mapColors = new olc::Pixel[WORLD_TILES_WIDTH * WORLD_TILES_HEIGHT];
-
-		for (uint8_t i = 0; i < WORLD_TILES_WIDTH * WORLD_TILES_HEIGHT; i++)
-		{
-			int x = i % WORLD_TILES_WIDTH;
-			int y = i / WORLD_TILES_WIDTH;
-
-			x *= SPRITE_SCALE;
-			y *= SPRITE_SCALE;
-
-			mapColors[i] = renderer->tileSpriteData->Sprite()->GetPixel(x, y);
-		}
-
-		//if (Connect("127.0.0.1", 60000))
-		//{
-		//	return true;
-		//}
 
 		return !DEBUG;
 	}
 
 	bool Update() override
 	{
+		if (GetKey(olc::ESCAPE).bReleased)
+		{
+			//FIXME: Toggle pause
+
+			currentScene = SCENE::SCENE_MAIN_MENU;
+		}
+
+		engine->Clear(olc::BLACK);
+
+		if (worldData->GetWorldGenerated() == false)
+		{
+			if (worldData->GetWorldProgress() < 0.99f)
+			{
+				engine->Clear(olc::DARK_BLUE);
+				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
+				return true;
+			}
+			else
+			{
+				worldData->GenerateMap();
+
+				// Player shit
+				localPlayer = new Object(renderer->playerSpriteData);
+				localPlayer->SetPosition(renderer->worldData->GetRandomGroundTile());
+
+				return true;
+			}
+		}
+
 		// Movement code
 		MovePlayer(time->elapsedTime);
 		LoopPlayer();
-		return true;
+
+		renderer->SetCamera(localPlayer->GetPosition() / SPRITE_SCALE);
+		renderer->DrawWorld();
 
 #ifdef OLD_RENDERER
 		renderer->UpdateCameraPosition(localPlayer->GetPosition(), time->elapsedTime);
@@ -579,136 +639,19 @@ public:
 		renderer->UpdateSun(time->elapsedTime);
 		renderer->UpdateLights();
 #endif
+
 		if (GetKey(olc::SPACE).bPressed)
 		{
-			// Set the action direction
-			olc::vf2d hitPosition = localPlayer->GetPosition();
-
-			switch (localPlayer->GetLookDir())
-			{
-			case ANIMATION::right:
-				hitPosition.x += SPRITE_SCALE;
-				break;
-			case ANIMATION::left:
-				hitPosition.x -= SPRITE_SCALE;
-				break;
-			case ANIMATION::down:
-				hitPosition.y += SPRITE_SCALE;
-				break;
-			case ANIMATION::up:
-				hitPosition.y -= SPRITE_SCALE;
-				break;
-			default:
-				break;
-			}
-
-			int foliageHit[5] =
-			{
-				worldData->GetFoliageIndex(hitPosition.x, hitPosition.y),
-				worldData->GetFoliageIndex(hitPosition.x - SPRITE_SCALE, hitPosition.y),
-				worldData->GetFoliageIndex(hitPosition.x + SPRITE_SCALE, hitPosition.y),
-				worldData->GetFoliageIndex(hitPosition.x, hitPosition.y - SPRITE_SCALE),
-				worldData->GetFoliageIndex(hitPosition.x, hitPosition.y + SPRITE_SCALE)
-			};
-
-			for (size_t i = 0; i < 5; i++)
-			{
-				int worldFoliageIndex = foliageHit[i];
-				int foliageID = worldData->foliageData[worldFoliageIndex];
-
-				// Do the action
-				if (foliageID == 2) // Hit tree
-				{
-					worldData->foliageData[worldFoliageIndex] = 0;
-
-					Item log = Item();
-					log.ID = 0;
-					log.position = hitPosition;
-					items.push_back(log);
-
-					break;
-				}
-			}
-
-			//if (DEBUG)
-			//{
-			//	print("Player tried to hit: " + std::to_string(foliageID));
-			//}
+			TryHit();
 		}
 
-		if (GetKey(olc::Key::M).bReleased)
-		{
-			drawMiniMap = !drawMiniMap;
-
-			if (drawMiniMap == true)
-			{
-				UpdateMiniMap();
-			}
-		}
-
-		// Draw ye bloody minimap
-		if (drawMiniMap == true)
-		{
-			// L is for location
-			if (GetKey(olc::Key::L).bReleased)
-			{
-				miniMapDrawLocation++;
-				miniMapDrawLocation %= 4;
-			}
-
-			// I is for in
-			if (GetKey(olc::Key::I).bHeld)
-			{
-				miniMapDrawScale += 0.01f;
-				if (miniMapDrawScale > 1) miniMapDrawScale = 1;
-			}
-
-			// O is for out
-			if (GetKey(olc::Key::O).bHeld)
-			{
-				miniMapDrawScale -= 0.01f;
-				if (miniMapDrawScale < 0.05f) miniMapDrawScale = 0.05f;
-			}
-
-			// Only update the minimap every 'n'th frame
-			if (time->frameCount % 20 == 0)
-				UpdateMiniMap();
-
-			// Draw the minimap
-
-			olc::vf2d drawLocation;
-			switch (miniMapDrawLocation)
-			{
-			case 0:
-				drawLocation = { 0,0 };
-				break;
-			case 1:
-				drawLocation = { ScreenWidth() - miniMapSprite->width * miniMapDrawScale, 0 };
-				break;
-			case 2:
-				drawLocation = { ScreenWidth() - miniMapSprite->width * miniMapDrawScale, ScreenHeight() - miniMapSprite->height * miniMapDrawScale };
-				break;
-			case 3:
-				drawLocation = { 0, ScreenHeight() - miniMapSprite->height * miniMapDrawScale };
-				break;
-			default:
-				break;
-			}
-
-			engine->DrawDecal(drawLocation, miniMapDecal, { miniMapDrawScale, miniMapDrawScale });
-		}
+		minimap->UpdateMiniMap(localPlayer->GetPosition());
 
 		if (DEBUG)
 		{
 			engine->DrawStringDecal({ 0,0 }, "pos:" + std::to_string(localPlayer->GetPosition().x) + ", " + std::to_string(localPlayer->GetPosition().y) + "\n" +
 				"tileID:" + std::to_string(tileId) + "\n",
 				olc::YELLOW, { 0.5f, 0.5f });
-		}
-
-		if (GetKey(olc::ESCAPE).bReleased) {
-			//FIXME: Toggle pause
-
-			currentScene = SCENE::SCENE_MAIN_MENU;
 		}
 
 		return APPLICATION_RUNNING;
@@ -722,15 +665,65 @@ class MultiPlayer : public Scene
 
 	WorldData* worldData;
 
+	Renderer* renderer = nullptr;
+	MiniMap* minimap = nullptr;
+
 private:
 	olc::vi2d vWorldSize = { MAP_WIDTH, MAP_HEIGHT };
 
 private:
+	void MovePlayer()
+	{
+		float speed = 50.0f * time->elapsedTime;
+
+		olc::vf2d velocity = { 0.0f, 0.0f };
+
+		if (GetKey(olc::A).bHeld || GetKey(olc::LEFT).bHeld) {
+			velocity += { -1.0f, 0.0f };
+		}
+		if (GetKey(olc::D).bHeld || GetKey(olc::RIGHT).bHeld) {
+			velocity += { +1.0f, 0.0f };
+		}
+
+		if (GetKey(olc::W).bHeld || GetKey(olc::UP).bHeld) {
+			velocity += { 0.0f, -1.0f };
+		}
+		if (GetKey(olc::S).bHeld || GetKey(olc::DOWN).bHeld) {
+			velocity += { 0.0f, +1.0f };
+		}
+
+		velocity *= speed;
+
+		if (velocity.mag2() > 0) velocity = velocity.norm() * 4.0f;
+
+		// Basic world collision here
+		olc::vf2d playerPos = mapObjects[playerID].position;
+		playerPos += velocity;
+
+		int tileId = worldData->GetTileID(playerPos.x, playerPos.y);
+
+		// in water
+		//localPlayer->inWater = (tileId == 0 || tileId == 1);
+
+		if (tileId != 0)
+		{
+			// FIXME: do things here
+			// There is a tile where the player is trying to go!
+		}
+		else
+		{
+			// FIXME: Check for a boat
+			velocity = { 0, 0 };
+		}
+
+		mapObjects[playerID].velocity = velocity;
+		//localPlayer->Update(fElapsedTime);
+	}
+
+private: // Networking stuff
 	std::unordered_map<uint32_t, PlayerDescription> mapObjects;
 	uint32_t playerID = 0;
 	PlayerDescription descPlayer;
-
-	Renderer* renderer = nullptr;
 
 	bool waitingForConnection = true;
 
@@ -742,48 +735,11 @@ private:
 		return client->Connect(ip, port);
 	}
 
-public:
-	bool OnLoad() override
+	void HandleNetworkingMessages()
 	{
-		if (playMode == PLAY_MODE::SERVER)
-		{
-			server = new GameServer(SERVER_PORT);
-			server->Start();
-		}
-
-		worldData = new WorldData();
-		renderer = new Renderer(engine, worldData);
-
-		//mapObjects[0].uniqueID = 0;
-		//mapObjects[0].vPos = { 3.0f, 3.0f };
-
-		if (playMode != PLAY_MODE::SINGLE_PLAYER)
-			TryConnect(); // FIXME: wait for user input to connect to
-
-		return true;
-	}
-
-	bool Update() override
-	{
-		if (worldData->GetWorldGenerated() == false)
-		{
-			if (worldData->GetWorldProgress() < 0.99f)
-			{
-				engine->Clear(olc::DARK_BLUE);
-				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
-				return true;
-			}
-			else
-			{
-				worldData->GenerateMap();
-				return true;
-			}
-		}
-
-		// Check for incoming network messages
 		if (client->IsConnected())
 		{
-			while (!client->Incoming().empty())
+			while (client->Incoming().empty())
 			{
 				auto msg = client->Incoming().pop_front().msg;
 
@@ -794,7 +750,7 @@ public:
 					print("Server accepted client - you're in!");
 					olc::net::message<GameMsg> msg;
 					msg.header.id = GameMsg::Client_RegisterWithServer;
-					descPlayer.position = { 3.0f, 3.0f };
+					descPlayer.position = worldData->GetRandomGroundTile();
 					msg << descPlayer;
 					client->Send(msg);
 					break;
@@ -840,23 +796,107 @@ public:
 				}
 			}
 		}
+	}
 
-		if (playMode == PLAY_MODE::CLIENT && waitingForConnection)
+	void HandleClient()
+	{
+		olc::net::message<GameMsg> msg;
+		msg.header.id = GameMsg::Game_UpdatePlayer;
+		msg << mapObjects[playerID];
+		client->Send(msg);
+	}
+
+public:
+	bool OnLoad() override
+	{
+		if (playMode == PLAY_MODE::SERVER)
 		{
-			engine->Clear(olc::DARK_BLUE);
-			engine->DrawStringDecal({ 10,10 }, "Waiting to connect...", olc::WHITE);
-			return true;
+			server = new GameServer(SERVER_PORT);
+			server->Start();
 		}
 
-		// Control of Player Object
-		mapObjects[playerID].velocity = { 0.0f, 0.0f };
-		if (GetKey(olc::Key::W).bHeld) mapObjects[playerID].velocity += { 0.0f, -1.0f };
-		if (GetKey(olc::Key::S).bHeld) mapObjects[playerID].velocity += { 0.0f, +1.0f };
-		if (GetKey(olc::Key::A).bHeld) mapObjects[playerID].velocity += { -1.0f, 0.0f };
-		if (GetKey(olc::Key::D).bHeld) mapObjects[playerID].velocity += { +1.0f, 0.0f };
+		worldData = new WorldData();
+		renderer = new Renderer(engine, worldData);
 
-		if (mapObjects[playerID].velocity.mag2() > 0)
-			mapObjects[playerID].velocity = mapObjects[playerID].velocity.norm() * 4.0f;
+		minimap = new MiniMap();
+		minimap->Initialize(renderer->tileSpriteData->Sprite(), worldData, engine, time);
+
+		if (playMode == PLAY_MODE::CLIENT)
+			TryConnect(); // FIXME: wait for user input to connect to
+
+		return true;
+	}
+
+	bool Update() override
+	{
+		engine->Clear(olc::BLACK);
+
+		if (GetKey(olc::ESCAPE).bReleased)
+		{
+			//FIXME: Toggle pause
+
+			currentScene = SCENE::SCENE_MAIN_MENU;
+
+			if (playMode == PLAY_MODE::SERVER)
+			{
+				// FIXME: Move the host or kick all players
+			}
+
+			return false;
+		}
+
+		if (worldData->GetWorldGenerated() == false)
+		{
+			if (worldData->GetWorldProgress() < 0.99f)
+			{
+				engine->Clear(olc::DARK_BLUE);
+				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
+				return true;
+			}
+			else
+			{
+				worldData->GenerateMap();
+
+				if (playMode != PLAY_MODE::CLIENT)
+				{ // Auto accept this client
+					print("You're the host!");
+					descPlayer.position = worldData->GetRandomGroundTile();
+
+					if (descPlayer.position.x <= -0.9f && descPlayer.position.y <= -0.9f)
+					{
+						worldData->GenerateMap();
+						return true;
+					}
+
+					mapObjects.insert_or_assign(0, descPlayer);
+					waitingForConnection = false;
+				}
+
+				return true;
+			}
+		}
+
+		// Check for incoming network messages
+		if (playMode == PLAY_MODE::CLIENT)
+		{
+			HandleNetworkingMessages();
+
+			if (waitingForConnection)
+			{
+				engine->Clear(olc::DARK_BLUE);
+				engine->DrawStringDecal({ 10,10 }, "Waiting to connect...", olc::WHITE);
+				return true;
+			}
+		}
+
+		// Handle Pan & Zoom
+		renderer->UpdateZoom();
+		renderer->SetCamera(mapObjects[playerID].position / SPRITE_SCALE);
+
+		renderer->DrawWorld();
+
+		// Control of Player Object
+		MovePlayer();
 
 		// Update objects locally
 		for (auto& object : mapObjects)
@@ -913,42 +953,12 @@ public:
 			object.second.position = vPotentialPosition;
 		}
 
-		// Handle Pan & Zoom
-		olc::vf2d camTarget = mapObjects[playerID].position;
-		if (engine->GetMouse(2).bPressed) renderer->viewPort.StartPan(engine->GetMousePos());
-		if (engine->GetMouse(2).bHeld) renderer->viewPort.UpdatePan(engine->GetMousePos());
-		if (engine->GetMouse(2).bReleased) renderer->viewPort.EndPan(engine->GetMousePos());
-
-		if (engine->GetMouseWheel() > 0) renderer->viewPort.ZoomAtScreenPos(1.5f, engine->GetMousePos());
-		if (engine->GetMouseWheel() < 0) renderer->viewPort.ZoomAtScreenPos(0.75f, engine->GetMousePos());
-
-		// Clamp the zoom
-		if (renderer->viewPort.GetWorldScale().x <= 12)
-			renderer->viewPort.SetZoom(12, engine->GetMousePos());
-
-		if (renderer->viewPort.GetWorldScale().x >= 30)
-			renderer->viewPort.SetZoom(30, engine->GetMousePos());
-
-		// Clear World
-		engine->Clear(olc::BLACK);
-
-		// Draw World
-		olc::vi2d topLeft = renderer->viewPort.GetTopLeftTile().max({ 0,0 });
-		olc::vi2d bottomRight = renderer->viewPort.GetBottomRightTile().min(vWorldSize);
-		olc::vi2d tile;
-		for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
-		{
-			for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
-			{
-				int mapIndex = tile.y * vWorldSize.x + tile.x;
-
-				renderer->DrawTile(mapIndex, tile.x, tile.y);
-			}
-		}
-
 		// Draw World Objects
 		for (auto& object : mapObjects)
 		{
+			// Draw object
+			renderer->DrawPlayer(object.second.position);
+
 			// Draw Boundary
 			renderer->viewPort.DrawCircle(object.second.position, object.second.radius);
 
@@ -961,17 +971,14 @@ public:
 			renderer->viewPort.DrawStringPropDecal(object.second.position - olc::vf2d{ vNameSize.x * 0.5f * 0.25f * 0.125f, -object.second.radius * 1.25f }, "ID: " + std::to_string(object.first), olc::BLUE, { 0.25f, 0.25f });
 		}
 
-		// Send player description
-		olc::net::message<GameMsg> msg;
-		msg.header.id = GameMsg::Game_UpdatePlayer;
-		msg << mapObjects[playerID];
-		client->Send(msg);
+		minimap->UpdateMiniMap(mapObjects[playerID].position);
 
-		if (playMode == PLAY_MODE::SERVER)
+		if (playMode != PLAY_MODE::SINGLE_PLAYER)
 		{
-			server->Update(-1, true);
+			// Send player description
+			HandleClient();
 
-			if (DEBUG) ShowWindow(GetConsoleWindow(), SW_SHOW);
+			if (playMode == PLAY_MODE::SERVER) server->Update(-1, true);
 		}
 
 		return true;

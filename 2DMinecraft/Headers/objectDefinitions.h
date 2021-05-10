@@ -1,8 +1,6 @@
 #pragma once
 
 namespace ANIMATION {
-	olc::vi2d spriteScale = { (int)SPRITE_SCALE, (int)SPRITE_SCALE };
-
 	enum LOOK_DIR {
 		down = 0,
 		right = 1,

@@ -21,14 +21,12 @@ struct WorldData
 private:
 	const float NOISE_SCALE = 10.0f;
 	// 2D noise variables
-	int nOutputWidth;
-	int nOutputHeight;
 	int outputLength;
 	float* noiseSeed = nullptr;
 	float* perlinNoise = nullptr;
 
-	int nOctaveCount = 5;
-	float fScalingBias = 1.6f;
+	int nOctaveCount = 6;
+	float fScalingBias = 1.3f;
 
 	bool worldGenerated = false;
 	uint8_t generatingWorld = 255;
@@ -103,10 +101,7 @@ private:
 
 	void InitNoise()
 	{
-		nOutputWidth = MAP_WIDTH;
-		nOutputHeight = MAP_HEIGHT;
-
-		outputLength = nOutputWidth * nOutputHeight;
+		outputLength = MAP_WIDTH * MAP_HEIGHT;
 		perlinNoise = new float[outputLength];
 		ReseedNoise();
 	}
@@ -140,7 +135,7 @@ public:
 		print("Generating falloff map...");
 
 		// Seed the noise
-		PerlinNoise2D(nOutputWidth, nOutputHeight, nOctaveCount, fScalingBias, perlinNoise);
+		PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, perlinNoise);
 
 		generatingFalloff = 0;
 
@@ -154,11 +149,11 @@ public:
 				float _y = abs(y / (float)MAP_HEIGHT * 2 - 1);
 
 				// Generate the noise
-				int noiseIndex = y * nOutputWidth + x;
+				int noiseIndex = y * MAP_WIDTH + x;
 				float perlinValue = perlinNoise[noiseIndex];
 
 				float value = _x > _y ? _x : _y;
-				fallOffMap[0][y * MAP_WIDTH + x] = perlinValue;// Evaluate(perlinValue);
+				fallOffMap[0][y * MAP_WIDTH + x] = Evaluate(perlinValue);
 				fallOffMap[1][y * MAP_WIDTH + x] = Evaluate(value);
 
 				generatingFalloff = static_cast<int>(x + y / static_cast<float>(mapLength));
@@ -168,24 +163,23 @@ public:
 		print("Generated falloff map.");
 
 		ReseedNoise();
-		PerlinNoise2D(nOutputWidth, nOutputHeight, nOctaveCount, fScalingBias, perlinNoise);
+		PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, perlinNoise);
 
 		for (int i = 0; i < mapLength; i++)
 		{
-			float x = static_cast<float>(i % MAP_WIDTH);
-			float y = i / static_cast<float>(MAP_WIDTH);
+			float x = i % MAP_WIDTH;
+			float y = i / MAP_WIDTH;
+
 			if (x == 0 || y == 0 || x == MAP_WIDTH - 1 || y == MAP_HEIGHT - 1) tileData[i] = 0;
 			else
 			{
-				int mapIndex = y * MAP_WIDTH + x;
-
 				// As the world reaches the edge we should blend it into the water
-				float fallOff = fallOffMap[0][mapIndex] + fallOffMap[1][mapIndex];
+				float fallOff = fallOffMap[0][i] + fallOffMap[1][i];
 
 				// Generate the noise
-				float perlinValue = perlinNoise[mapIndex] - fallOff;
+				float perlinValue = perlinNoise[i] - fallOff;
 				if (perlinValue < 0) perlinValue = 0;
-				int pixel_bw = int(perlinValue * NOISE_SCALE);
+				int pixel_bw = static_cast<int>(perlinValue * NOISE_SCALE);
 
 				tileData[i] = pixel_bw;
 
@@ -241,12 +235,12 @@ public:
 
 	float GetWorldProgress()
 	{
-		return generatingWorld / 255.0;
+		return generatingWorld / 255.0f;
 	}
 
 	float GetFalloffProgress()
 	{
-		return generatingFalloff / 255.0;
+		return generatingFalloff / 255.0f;
 	}
 
 	int GetTileID(int x, int y)
@@ -406,6 +400,8 @@ public:
 
 	olc::vf2d GetRandomGroundTile()
 	{
+		int attempts = 0;
+
 		while (true)
 		{
 			int index = rand() % mapLength;
@@ -415,6 +411,12 @@ public:
 				float y = index / static_cast<float>(MAP_WIDTH);
 
 				return { x * SPRITE_SCALE, y * SPRITE_SCALE };
+			}
+			attempts++;
+
+			if (attempts > 100) {
+				print("Unable to get spawn point.");
+				return { -1.0f, 1.0f };
 			}
 		}
 	}
