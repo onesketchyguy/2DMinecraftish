@@ -26,4 +26,5 @@ D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(150,30): warning C
           [
               T=float
           ]
+D:\repos\2DMinecraftish\2DMinecraft\Headers\sceneDefinition.h(661,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
   2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe

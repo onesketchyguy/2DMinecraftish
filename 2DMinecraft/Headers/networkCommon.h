@@ -15,6 +15,15 @@ enum class GameMsg : uint32_t
 	Game_UpdatePlayer,
 };
 
+enum class Tools : uint32_t
+{
+	None,
+	Shovel,
+	Pickaxe,
+	Axe,
+	Hoe
+};
+
 struct PlayerDescription
 {
 	uint32_t uniqueID = 0;
@@ -22,6 +31,7 @@ struct PlayerDescription
 
 	uint32_t health = 100;
 	uint32_t ammo = 20;
+	Tools currentTool = Tools::None;
 	uint32_t kills = 0;
 	uint32_t deaths = 0;
 

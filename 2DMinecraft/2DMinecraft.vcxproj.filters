@@ -51,6 +51,9 @@
     <ClInclude Include="Headers\miniMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\gameScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
