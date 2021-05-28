@@ -1,20 +1,9 @@
 // Forrest Lowe 2021
-
 const uint8_t TILE_COUNT = 160; // The constant for how many MAX tiles can be drawn at once
 
 const uint8_t MAP_WIDTH = 255;
 const uint8_t MAP_HEIGHT = 255;
 uint16_t mapLength = 0;
-
-#ifdef OLD_RENDERER
-struct Tile
-{
-public:
-	uint8_t tileID;
-	uint8_t foliageID;
-	int16_t x, y;
-};
-#endif
 
 struct WorldData
 {
@@ -113,9 +102,6 @@ public:
 	}
 
 public:
-#ifdef OLD_RENDERER
-	Tile* tiles = nullptr;
-#endif
 	uint8_t* tileData = nullptr;
 	uint8_t* foliageData = nullptr;
 
@@ -209,15 +195,6 @@ public:
 				generatingWorld = static_cast<int>(i / static_cast<float>(mapLength)) * 255;
 			}
 		}
-
-#ifdef OLD_RENDERER
-		tiles = new Tile[TILE_COUNT];
-		for (uint8_t i = 0; i < TILE_COUNT; i++)
-		{
-			tiles[i].x = i / 10;
-			tiles[i].y = i % 10;
-		}
-#endif
 
 		delete[] perlinNoise;
 		delete[] noiseSeed;
@@ -420,51 +397,4 @@ public:
 			}
 		}
 	}
-
-#ifdef OLD_RENDERER
-	Tile GetTile(float x, float y)
-	{
-		int xPos = int(ceil(x / SPRITE_SCALE));
-		int yPos = int(floor(y / SPRITE_SCALE));
-
-		if (xPos < 0) {
-			xPos *= -1;
-			xPos %= MAP_WIDTH;
-			xPos = MAP_WIDTH - x;
-		}
-
-		if (yPos < 0) {
-			yPos *= -1;
-			yPos %= MAP_WIDTH;
-			yPos = MAP_HEIGHT - y;
-		}
-
-		if (xPos > MAP_WIDTH) {
-			xPos %= MAP_WIDTH;
-		}
-
-		if (yPos > MAP_HEIGHT) {
-			yPos %= MAP_HEIGHT;
-		}
-
-		int index = y * MAP_WIDTH + x;
-
-		return tiles[index];
-	}
-
-	void MoveTiles(olc::vf2d camPosition)
-	{
-		for (uint8_t i = 0; i < TILE_COUNT; i++)
-		{
-			tiles[i].x = static_cast<int16_t>((i / 10.0f) + ceil(camPosition.x / SPRITE_SCALE));
-			tiles[i].y = static_cast<int16_t>((i % 10) + ceil(camPosition.y / SPRITE_SCALE));
-
-			tiles[i].x -= 5;
-			tiles[i].y -= 1;
-
-			tiles[i].tileID = GetTileID(tiles[i].x, tiles[i].y);
-			tiles[i].foliageID = GetFoliageID(tiles[i].x, tiles[i].y);
-		}
-	}
-#endif
 };

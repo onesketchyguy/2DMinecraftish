@@ -25,15 +25,17 @@ namespace FILESYSTEM
 	{
 		std::ifstream readFileStream(fileName);
 
-		if (!readFileStream) {
+		if (!readFileStream)
+		{
 			return "";
 		}
 
 		std::string data;
 		std::string n;
 
-		while (readFileStream >> n) {
-			data = data + n;
+		while (readFileStream >> n)
+		{
+			data += n;
 		}
 
 		readFileStream.close();

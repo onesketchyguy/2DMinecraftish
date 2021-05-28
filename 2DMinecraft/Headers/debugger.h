@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DEBUGGER
+#define DEBUGGER
+
 #include "fileManager.h"
 
 uint64_t debug_prints;
@@ -14,3 +16,5 @@ void print(std::string text) {
 	FILESYSTEM::WriteFile("Data/output_log.txt", outPut);
 	debug_prints++;
 }
+
+#endif // !DEBUGGER

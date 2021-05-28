@@ -1,7 +1,10 @@
-#pragma once
+// Forrest Lowe 2021
+#ifndef GAME_SCENE
+#define GAME_SCENE
 
-class MultiPlayer : public Scene
+class GameScene : public Scene
 {
+private:
 	GameServer* server = nullptr;
 	Client* client = nullptr;
 
@@ -41,7 +44,7 @@ private:
 		if (velocity.mag2() > 0) velocity = velocity.norm() * 4.0f;
 
 		// Basic world collision here
-		olc::vf2d playerPos = mapObjects[playerID].position;
+		olc::vf2d playerPos = GetLocalPlayer().position;
 		playerPos += velocity;
 
 		int tileId = worldData->GetTileID(playerPos.x, playerPos.y);
@@ -60,14 +63,60 @@ private:
 			velocity = { 0, 0 };
 		}
 
-		mapObjects[playerID].velocity = velocity;
+		GetLocalPlayer().velocity = velocity;
 		//localPlayer->Update(fElapsedTime);
+	}
+
+	bool ValidateWorld()
+	{
+		if (worldData->GetWorldGenerated() == false)
+		{
+			if (worldData->GetWorldProgress() < 0.99f)
+			{
+				engine->Clear(olc::DARK_BLUE);
+				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
+				return false;
+			}
+			else
+			{
+				worldData->GenerateMap();
+
+				if (playMode != PLAY_MODE::CLIENT)
+				{ // Auto accept this client
+					print("You're the host!");
+					descPlayer.position = worldData->GetRandomGroundTile();
+
+					if (descPlayer.position.x <= -0.9f && descPlayer.position.y <= -0.9f)
+					{
+						worldData->GenerateMap();
+						return false;
+					}
+
+					mapObjects.insert_or_assign(0, descPlayer);
+					waitingForConnection = false;
+
+					localPlayer = new PlayerObject(&GetLocalPlayer());
+				}
+
+				return false;
+			}
+		}
+
+		// Done
+		return true;
 	}
 
 private: // Networking stuff
 	std::unordered_map<uint32_t, PlayerDescription> mapObjects;
 	uint32_t playerID = 0;
 	PlayerDescription descPlayer;
+
+	PlayerObject* localPlayer;
+
+	PlayerDescription& GetLocalPlayer()
+	{
+		return mapObjects.at(playerID);
+	}
 
 	bool waitingForConnection = true;
 
@@ -83,7 +132,7 @@ private: // Networking stuff
 	{
 		if (client->IsConnected())
 		{
-			while (client->Incoming().empty())
+			while (client->Incoming().empty() == false)
 			{
 				auto msg = client->Incoming().pop_front().msg;
 
@@ -146,7 +195,7 @@ private: // Networking stuff
 	{
 		olc::net::message<GameMsg> msg;
 		msg.header.id = GameMsg::Game_UpdatePlayer;
-		msg << mapObjects[playerID];
+		msg << GetLocalPlayer();
 		client->Send(msg);
 	}
 
@@ -168,8 +217,7 @@ public:
 		minimap = new MiniMap();
 		minimap->Initialize(renderer->tileSpriteData->Sprite(), worldData, engine, time);
 
-		if (playMode == PLAY_MODE::CLIENT)
-			TryConnect(); // FIXME: wait for user input to connect to
+		if (playMode == PLAY_MODE::CLIENT) TryConnect(serverIP.c_str());
 
 		return true;
 	}
@@ -192,35 +240,10 @@ public:
 			return false;
 		}
 
-		if (worldData->GetWorldGenerated() == false)
+		// Dont continue if the world is invalid
+		if (ValidateWorld() == false)
 		{
-			if (worldData->GetWorldProgress() < 0.99f)
-			{
-				engine->Clear(olc::DARK_BLUE);
-				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
-				return true;
-			}
-			else
-			{
-				worldData->GenerateMap();
-
-				if (playMode != PLAY_MODE::CLIENT)
-				{ // Auto accept this client
-					print("You're the host!");
-					descPlayer.position = worldData->GetRandomGroundTile();
-
-					if (descPlayer.position.x <= -0.9f && descPlayer.position.y <= -0.9f)
-					{
-						worldData->GenerateMap();
-						return true;
-					}
-
-					mapObjects.insert_or_assign(0, descPlayer);
-					waitingForConnection = false;
-				}
-
-				return true;
-			}
+			return true;
 		}
 
 		// Check for incoming network messages
@@ -238,7 +261,7 @@ public:
 
 		// Handle Pan & Zoom
 		renderer->UpdateZoom();
-		renderer->SetCamera(mapObjects[playerID].position / SPRITE_SCALE);
+		renderer->SetCamera(GetLocalPlayer().position / SPRITE_SCALE);
 
 		renderer->DrawWorld();
 
@@ -318,36 +341,42 @@ public:
 			renderer->viewPort.DrawStringPropDecal(object.second.position - olc::vf2d{ vNameSize.x * 0.5f * 0.25f * 0.125f, -object.second.radius * 1.25f }, "ID: " + std::to_string(object.first), olc::BLUE, { 0.25f, 0.25f });
 		}
 
-		minimap->UpdateMiniMap(mapObjects[playerID].position);
+		minimap->UpdateMiniMap(GetLocalPlayer().position);
 
 		if (playMode != PLAY_MODE::SINGLE_PLAYER)
 		{
 			// Send player description
 			HandleClient();
 
-			if (playMode == PLAY_MODE::SERVER) server->Update(-1, true);
+			if (playMode == PLAY_MODE::SERVER)
+			{
+				//server->Update(-1, true);
+				server->Update();
+			}
 		}
 
 		// Draw UI
 
+		Tools& currentTool = localPlayer->currentTool;
+
 		if (GetKey(olc::Key::K1).bReleased)
 		{
-			switch (mapObjects[playerID].currentTool)
+			switch (currentTool)
 			{
 			case Tools::None:
-				mapObjects[playerID].currentTool = Tools::Hoe;
+				currentTool = Tools::Hoe;
 				break;
 			case Tools::Shovel:
-				mapObjects[playerID].currentTool = Tools::None;
+				currentTool = Tools::None;
 				break;
 			case Tools::Axe:
-				mapObjects[playerID].currentTool = Tools::Shovel;
+				currentTool = Tools::Shovel;
 				break;
 			case Tools::Pickaxe:
-				mapObjects[playerID].currentTool = Tools::Axe;
+				currentTool = Tools::Axe;
 				break;
 			case Tools::Hoe:
-				mapObjects[playerID].currentTool = Tools::Pickaxe;
+				currentTool = Tools::Pickaxe;
 				break;
 			default:
 				break;
@@ -356,22 +385,22 @@ public:
 
 		if (GetKey(olc::Key::K2).bReleased)
 		{
-			switch (mapObjects[playerID].currentTool)
+			switch (currentTool)
 			{
 			case Tools::None:
-				mapObjects[playerID].currentTool = Tools::Shovel;
+				currentTool = Tools::Shovel;
 				break;
 			case Tools::Shovel:
-				mapObjects[playerID].currentTool = Tools::Axe;
+				currentTool = Tools::Axe;
 				break;
 			case Tools::Axe:
-				mapObjects[playerID].currentTool = Tools::Pickaxe;
+				currentTool = Tools::Pickaxe;
 				break;
 			case Tools::Pickaxe:
-				mapObjects[playerID].currentTool = Tools::Hoe;
+				currentTool = Tools::Hoe;
 				break;
 			case Tools::Hoe:
-				mapObjects[playerID].currentTool = Tools::None;
+				currentTool = Tools::None;
 				break;
 			default:
 				break;
@@ -379,9 +408,9 @@ public:
 		}
 
 		// Draw current tool
-		if (mapObjects[playerID].currentTool != Tools::None)
+		if (currentTool != Tools::None)
 		{
-			olc::vi2d toolSpritePos = { int(mapObjects[playerID].currentTool) - 1 , 0 };
+			olc::vi2d toolSpritePos = { int(currentTool) - 1 , 0 };
 			engine->DrawPartialDecal({ 0,0 }, { SPRITE_SCALE * 2, SPRITE_SCALE * 2 }, toolsRenderable->Decal(),
 				toolSpritePos * (SPRITE_SCALE * 2), { SPRITE_SCALE * 2, SPRITE_SCALE * 2 });
 		}
@@ -389,3 +418,5 @@ public:
 		return true;
 	}
 };
+
+#endif // !GAME_SCENE

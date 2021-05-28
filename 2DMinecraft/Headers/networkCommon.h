@@ -31,7 +31,6 @@ struct PlayerDescription
 
 	uint32_t health = 100;
 	uint32_t ammo = 20;
-	Tools currentTool = Tools::None;
 	uint32_t kills = 0;
 	uint32_t deaths = 0;
 
@@ -39,6 +38,18 @@ struct PlayerDescription
 
 	olc::vf2d position;
 	olc::vf2d velocity;
+};
+
+class PlayerObject
+{
+public:
+	PlayerDescription* desc;
+	Tools currentTool = Tools::None;
+
+	PlayerObject(PlayerDescription* desc)
+	{
+		this->desc = desc;
+	}
 };
 
 class GameServer : public olc::net::server_interface<GameMsg>

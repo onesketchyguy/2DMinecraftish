@@ -16,20 +16,21 @@ private:
 	const float MIN_ZOOM = 6.0f;
 	const float MAX_ZOOM = 36.0f;
 
+	olc::vi2d topLeft;
+	olc::vi2d bottomRight;
+
 public:
 	Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 	{
 		this->engine = engine;
 		this->worldData = worldData;
 
-		// Render scale shit
-
-		print("Generating sprites...");
-
 		viewPort = olc::TileTransformedView({ engine->ScreenWidth(), engine->ScreenHeight() },
 			{ SPRITE_SCALE, SPRITE_SCALE });
 
 		print("Created viewport.");
+
+		print("Generating sprites...");
 
 		// Player shit
 		playerSpriteData = new olc::Renderable();
@@ -83,10 +84,10 @@ public:
 		engine->SetPixelMode(olc::Pixel::NORMAL);
 
 		olc::vi2d decalScale = {
-			obj->GetLookDir() == ANIMATION::left ? -spriteScale.x : spriteScale.x, spriteScale.y };
+			obj->GetLookDir() == LOOK_DIR::left ? -spriteScale.x : spriteScale.x, spriteScale.y };
 		olc::vi2d spriteCell = { spriteScale.x * obj->GetCellIndex().x, spriteScale.y * obj->GetCellIndex().y };
 
-		olc::vf2d offset = { obj->GetLookDir() == ANIMATION::left ? spriteScale.x : 0.0f , 0.0f };
+		olc::vf2d offset = { obj->GetLookDir() == LOOK_DIR::left ? spriteScale.x : 0.0f , 0.0f };
 
 		DrawPartialDecal(obj->GetPosition() + offset, decalScale,
 			obj->GetRenderable()->Decal(), spriteCell);
@@ -141,8 +142,8 @@ public:
 		engine->Clear(olc::BLACK);
 
 		// Draw World
-		olc::vi2d topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
-		olc::vi2d bottomRight = viewPort.GetBottomRightTile().min({ MAP_WIDTH, MAP_HEIGHT });
+		topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
+		bottomRight = viewPort.GetBottomRightTile().min({ MAP_WIDTH, MAP_HEIGHT });
 		olc::vi2d tile;
 		for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
 		{
@@ -289,17 +290,17 @@ public:
 	void DrawPartialDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal, olc::vi2d cell = { 0,0 }, olc::Pixel color = { 255,255,255,255 })
 	{
 		pos *= ZOOM_SCALE;
-		engine->DrawPartialDecal(pos - cameraPosition * ZOOM_SCALE, scale * ZOOM_SCALE, decal, cell, ANIMATION::spriteScale, color);
+		engine->DrawPartialDecal(pos - cameraPosition * ZOOM_SCALE, scale * ZOOM_SCALE, decal, cell, LOOK_DIR::spriteScale, color);
 	}
 
 	void DrawObject(Object* obj) {
 		engine->SetPixelMode(olc::Pixel::NORMAL);
 
 		olc::vi2d decalScale = {
-			obj->GetLookDir() == ANIMATION::left ? -ANIMATION::spriteScale.x : ANIMATION::spriteScale.x, ANIMATION::spriteScale.y };
-		olc::vi2d spriteCell = { ANIMATION::spriteScale.x * obj->GetCellIndex().x, ANIMATION::spriteScale.y * obj->GetCellIndex().y };
+			obj->GetLookDir() == LOOK_DIR::left ? -LOOK_DIR::spriteScale.x : LOOK_DIR::spriteScale.x, LOOK_DIR::spriteScale.y };
+		olc::vi2d spriteCell = { LOOK_DIR::spriteScale.x * obj->GetCellIndex().x, LOOK_DIR::spriteScale.y * obj->GetCellIndex().y };
 
-		olc::vf2d offset = { obj->GetLookDir() == ANIMATION::left ? ANIMATION::spriteScale.x : 0.0f , 0.0f };
+		olc::vf2d offset = { obj->GetLookDir() == LOOK_DIR::left ? LOOK_DIR::spriteScale.x : 0.0f , 0.0f };
 
 		DrawPartialDecal(obj->GetPosition() + offset, decalScale,
 			obj->GetRenderable()->Decal(), spriteCell);
@@ -325,20 +326,20 @@ public:
 			auto& tile = worldData->tiles[i];
 
 			olc::vf2d pos = { float(tile.x),  float(tile.y) };
-			pos *= ANIMATION::spriteScale;
+			pos *= LOOK_DIR::spriteScale;
 
 			int cellIndex_x = tile.tileID % WORLD_TILES_WIDTH;
 			int cellIndex_y = tile.tileID / WORLD_TILES_WIDTH;
 
-			olc::vi2d tileSpriteCell = { ANIMATION::spriteScale.x * cellIndex_x, ANIMATION::spriteScale.y * cellIndex_y };
-			DrawPartialDecal(pos, ANIMATION::spriteScale, tileSpriteData->Decal(), tileSpriteCell);
+			olc::vi2d tileSpriteCell = { LOOK_DIR::spriteScale.x * cellIndex_x, LOOK_DIR::spriteScale.y * cellIndex_y };
+			DrawPartialDecal(pos, LOOK_DIR::spriteScale, tileSpriteData->Decal(), tileSpriteCell);
 
 			uint8_t foliage = tile.foliageID;
 			if (foliage == 0) continue; // 0 = no foliage
 			foliage -= 1; // Subtract 1 to put this layer back into sprite space
 
-			olc::vi2d foliageSpriteCell = { ANIMATION::spriteScale.x * foliage, ANIMATION::spriteScale.x * 2 };
-			DrawPartialDecal(pos, ANIMATION::spriteScale, tileSpriteData->Decal(), foliageSpriteCell);
+			olc::vi2d foliageSpriteCell = { LOOK_DIR::spriteScale.x * foliage, LOOK_DIR::spriteScale.x * 2 };
+			DrawPartialDecal(pos, LOOK_DIR::spriteScale, tileSpriteData->Decal(), foliageSpriteCell);
 		}
 	}
 
@@ -363,7 +364,7 @@ public:
 			auto& tile = worldData->tiles[i];
 
 			olc::vf2d pos = { float(tile.x),  float(tile.y) };
-			pos *= ANIMATION::spriteScale;
+			pos *= LOOK_DIR::spriteScale;
 
 			//if (pos.y >= engine->ScreenHeight() || pos.y < 0 || pos.x >= engine->ScreenWidth() || pos.x < 0) continue;
 
@@ -378,13 +379,13 @@ public:
 
 	void SnapCamera(olc::vf2d targetPosition)
 	{
-		targetCameraPosition = targetPosition - ANIMATION::spriteScale * 5;
+		targetCameraPosition = targetPosition - LOOK_DIR::spriteScale * 5;
 		cameraPosition = targetCameraPosition;
 	}
 
 	void UpdateCameraPosition(olc::vf2d targetPosition, float fElapsedTime)
 	{
-		targetCameraPosition = targetPosition - ANIMATION::spriteScale * 5;
+		targetCameraPosition = targetPosition - LOOK_DIR::spriteScale * 5;
 		olc::vf2d moveAmount = (targetCameraPosition - cameraPosition) * cameraSpeed * fElapsedTime;
 
 		cameraPosition += moveAmount;

@@ -28,9 +28,7 @@ public:
 
 	IntroScene* introScene = nullptr;
 	MainMenu* mainMenu = nullptr;
-	MultiplayerLobby* multiplayerLobby = nullptr;
-	MultiPlayer* singlePlayer = nullptr;
-	MultiPlayer* multiPlayer = nullptr;
+	GameScene* gameScene = nullptr;
 
 public:
 	void HandleScenes()
@@ -67,69 +65,23 @@ public:
 				introScene = nullptr;
 			}
 
-			if (singlePlayer != nullptr)
+			if (gameScene != nullptr)
 			{
-				delete singlePlayer;
-				singlePlayer = nullptr;
-			}
-
-			if (multiplayerLobby != nullptr)
-			{
-				delete multiplayerLobby;
-				multiplayerLobby = nullptr;
+				delete gameScene;
+				gameScene = nullptr;
 			}
 
 			break;
 
-		case SCENE::SCENE_MP_LOBBY:
-			if (multiplayerLobby == nullptr)
+		case SCENE::SCENE_GAME:
+			if (gameScene == nullptr)
 			{
-				multiplayerLobby = new MultiplayerLobby();
-				multiplayerLobby->Initialize(time, this);
+				gameScene = new GameScene();
+				gameScene->Initialize(time, this);
 			}
 			else
 			{
-				multiplayerLobby->UpdateScene();
-			}
-
-			// Cleanup old scenes
-			if (mainMenu != nullptr)
-			{
-				delete mainMenu;
-				mainMenu = nullptr;
-			}
-
-			break;
-
-		case SCENE::SCENE_SINGLE_PLAYER:
-			if (singlePlayer == nullptr)
-			{
-				singlePlayer = new MultiPlayer();
-				singlePlayer->Initialize(time, this);
-			}
-			else
-			{
-				singlePlayer->UpdateScene();
-			}
-
-			// Cleanup old scenes
-			if (mainMenu != nullptr)
-			{
-				delete mainMenu;
-				mainMenu = nullptr;
-			}
-
-			break;
-
-		case SCENE::SCENE_MULTI_PLAYER:
-			if (multiPlayer == nullptr)
-			{
-				multiPlayer = new MultiPlayer();
-				multiPlayer->Initialize(time, this);
-			}
-			else
-			{
-				multiPlayer->UpdateScene();
+				gameScene->UpdateScene();
 			}
 
 			// Cleanup old scenes

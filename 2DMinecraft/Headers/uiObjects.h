@@ -1,4 +1,6 @@
 #pragma once
+#ifndef UI_OBJECTS
+#define UI_OBJECTS
 
 class UIElement
 {
@@ -46,6 +48,7 @@ public:
 		this->pos = { x, y };
 		this->scale = { width, height };
 	}
+
 	~UIElement() {
 		delete child;
 	}
@@ -61,7 +64,8 @@ public:
 
 	olc::Pixel fillColor = olc::NONE;
 
-	void Draw() override {
+	void Draw() override
+	{
 		if (fillColor != olc::NONE) gameEngine->FillRectDecal(pos - textOffset, scale, fillColor);
 		gameEngine->DrawStringDecal(pos, text, color, textScale);
 
@@ -76,15 +80,18 @@ public:
 			&& mouseY > y - textOffset.y && mouseY < y + height - textOffset.y;
 	}
 
-	void SetString(const char* text) {
+	void SetString(const char* text)
+	{
 		this->text = text;
 	}
 
-	void SetString(std::string text) {
+	void SetString(std::string text)
+	{
 		this->text = text;
 	}
 
-	std::string GetString() {
+	std::string GetString()
+	{
 		return text;
 	}
 
@@ -115,7 +122,8 @@ protected:
 	TextBox() = default;
 };
 
-class SliderBar : public UIElement {
+class SliderBar : public UIElement
+{
 private:
 	float value = 0;
 
@@ -128,7 +136,8 @@ public:
 	float borderSize = 1;
 	olc::vf2d border = { borderSize, borderSize };
 
-	void Draw() override {
+	void Draw() override
+	{
 		SetValue();
 
 		gameEngine->FillRectDecal(pos, scale, backColor);
@@ -137,15 +146,18 @@ public:
 		TryDrawChild();
 	}
 
-	float GetValue() {
+	float GetValue()
+	{
 		return this->value;
 	}
 
-	void SetValue(float value) {
+	void SetValue(float value)
+	{
 		this->value = value;
 	}
 
-	void SetValue() {
+	void SetValue()
+	{
 		if (interactable == false) return;
 
 		if (MouseOver()) {
@@ -179,7 +191,8 @@ public:
 	}
 };
 
-class Menu {
+class Menu
+{
 public:
 	bool open = false;
 
@@ -192,8 +205,10 @@ public:
 		return nullptr;
 	}
 
-	void Draw() {
-		for (auto element : elements) {
+	void Draw()
+	{
+		for (auto element : elements)
+		{
 			element->Draw();
 		}
 	}
@@ -249,3 +264,5 @@ public:
 		this->timeLeft = messageTime;
 	}
 };
+
+#endif // !UI_OBJECTS
