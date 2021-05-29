@@ -19,92 +19,8 @@ private:
 	olc::vi2d vWorldSize = { MAP_WIDTH, MAP_HEIGHT };
 
 private:
-	void MovePlayer()
-	{
-		float speed = 50.0f * time->elapsedTime;
-
-		olc::vf2d velocity = { 0.0f, 0.0f };
-
-		if (GetKey(olc::A).bHeld || GetKey(olc::LEFT).bHeld) {
-			velocity += { -1.0f, 0.0f };
-		}
-		if (GetKey(olc::D).bHeld || GetKey(olc::RIGHT).bHeld) {
-			velocity += { +1.0f, 0.0f };
-		}
-
-		if (GetKey(olc::W).bHeld || GetKey(olc::UP).bHeld) {
-			velocity += { 0.0f, -1.0f };
-		}
-		if (GetKey(olc::S).bHeld || GetKey(olc::DOWN).bHeld) {
-			velocity += { 0.0f, +1.0f };
-		}
-
-		velocity *= speed;
-
-		if (velocity.mag2() > 0) velocity = velocity.norm() * 4.0f;
-
-		// Basic world collision here
-		olc::vf2d playerPos = GetLocalPlayer().position;
-		playerPos += velocity;
-
-		int tileId = worldData->GetTileID(playerPos.x, playerPos.y);
-
-		// in water
-		//localPlayer->inWater = (tileId == 0 || tileId == 1);
-
-		if (tileId != 0)
-		{
-			// FIXME: do things here
-			// There is a tile where the player is trying to go!
-		}
-		else
-		{
-			// FIXME: Check for a boat
-			velocity = { 0, 0 };
-		}
-
-		GetLocalPlayer().velocity = velocity;
-		//localPlayer->Update(fElapsedTime);
-	}
-
-	bool ValidateWorld()
-	{
-		if (worldData->GetWorldGenerated() == false)
-		{
-			if (worldData->GetWorldProgress() < 0.99f)
-			{
-				engine->Clear(olc::DARK_BLUE);
-				engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
-				return false;
-			}
-			else
-			{
-				worldData->GenerateMap();
-
-				if (playMode != PLAY_MODE::CLIENT)
-				{ // Auto accept this client
-					print("You're the host!");
-					descPlayer.position = worldData->GetRandomGroundTile();
-
-					if (descPlayer.position.x <= -0.9f && descPlayer.position.y <= -0.9f)
-					{
-						worldData->GenerateMap();
-						return false;
-					}
-
-					mapObjects.insert_or_assign(0, descPlayer);
-					waitingForConnection = false;
-
-					localPlayer = new PlayerObject(&GetLocalPlayer());
-				}
-
-				return false;
-			}
-		}
-
-		// Done
-		return true;
-	}
+	void MovePlayer();
+	bool ValidateWorld();
 
 private: // Networking stuff
 	std::unordered_map<uint32_t, PlayerDescription> mapObjects;
@@ -128,76 +44,8 @@ private: // Networking stuff
 		return client->Connect(ip, port);
 	}
 
-	void HandleNetworkingMessages()
-	{
-		if (client->IsConnected())
-		{
-			while (client->Incoming().empty() == false)
-			{
-				auto msg = client->Incoming().pop_front().msg;
-
-				switch (msg.header.id)
-				{
-				case(GameMsg::Client_Accepted):
-				{
-					print("Server accepted client - you're in!");
-					olc::net::message<GameMsg> msg;
-					msg.header.id = GameMsg::Client_RegisterWithServer;
-					descPlayer.position = worldData->GetRandomGroundTile();
-					msg << descPlayer;
-					client->Send(msg);
-					break;
-				}
-
-				case(GameMsg::Client_AssignID):
-				{
-					// Server is assigning us OUR id
-					msg >> playerID;
-					print("Assigned Client ID = " + playerID);
-					break;
-				}
-
-				case(GameMsg::Game_AddPlayer):
-				{
-					PlayerDescription desc;
-					msg >> desc;
-					mapObjects.insert_or_assign(desc.uniqueID, desc);
-
-					if (desc.uniqueID == playerID)
-					{
-						// Now we exist in game world
-						waitingForConnection = false;
-					}
-					break;
-				}
-
-				case(GameMsg::Game_RemovePlayer):
-				{
-					uint32_t nRemovalID = 0;
-					msg >> nRemovalID;
-					mapObjects.erase(nRemovalID);
-					break;
-				}
-
-				case(GameMsg::Game_UpdatePlayer):
-				{
-					PlayerDescription desc;
-					msg >> desc;
-					mapObjects.insert_or_assign(desc.uniqueID, desc);
-					break;
-				}
-				}
-			}
-		}
-	}
-
-	void HandleClient()
-	{
-		olc::net::message<GameMsg> msg;
-		msg.header.id = GameMsg::Game_UpdatePlayer;
-		msg << GetLocalPlayer();
-		client->Send(msg);
-	}
+	void HandleNetworkingMessages();
+	void HandleClient();
 
 public:
 	bool OnLoad() override
@@ -327,14 +175,14 @@ public:
 		for (auto& object : mapObjects)
 		{
 			// Draw object
-			renderer->DrawPlayer(object.second.position);
+			renderer->DrawPlayer(object.second.position / SPRITE_SCALE);
 
 			// Draw Boundary
-			renderer->viewPort.DrawCircle(object.second.position, object.second.radius);
+			renderer->viewPort.DrawCircle(object.second.position / SPRITE_SCALE, object.second.radius);
 
 			// Draw Velocity
 			if (object.second.velocity.mag2() > 0)
-				renderer->viewPort.DrawLine(object.second.position, object.second.position + object.second.velocity.norm() * object.second.radius, olc::MAGENTA);
+				renderer->viewPort.DrawLine(object.second.position / SPRITE_SCALE, object.second.position + object.second.velocity.norm() * object.second.radius, olc::MAGENTA);
 
 			// Draw Name
 			olc::vi2d vNameSize = engine->GetTextSizeProp("ID: " + std::to_string(object.first));
@@ -407,16 +255,176 @@ public:
 			}
 		}
 
-		// Draw current tool
+		// Draw current tool in the bottom right corner
 		if (currentTool != Tools::None)
 		{
 			olc::vi2d toolSpritePos = { int(currentTool) - 1 , 0 };
-			engine->DrawPartialDecal({ 0,0 }, { SPRITE_SCALE * 2, SPRITE_SCALE * 2 }, toolsRenderable->Decal(),
+			engine->DrawPartialDecal(
+				{ engine->ScreenWidth() - SPRITE_SCALE * 2.0f, engine->ScreenHeight() - SPRITE_SCALE * 2.0f },
+				{ SPRITE_SCALE * 2, SPRITE_SCALE * 2 }, toolsRenderable->Decal(),
 				toolSpritePos * (SPRITE_SCALE * 2), { SPRITE_SCALE * 2, SPRITE_SCALE * 2 });
 		}
 
 		return true;
 	}
 };
+
+void GameScene::MovePlayer()
+{
+	float speed = 50.0f * time->elapsedTime;
+
+	olc::vf2d velocity = { 0.0f, 0.0f };
+
+	if (GetKey(olc::A).bHeld || GetKey(olc::LEFT).bHeld) {
+		velocity += { -1.0f, 0.0f };
+	}
+	if (GetKey(olc::D).bHeld || GetKey(olc::RIGHT).bHeld) {
+		velocity += { +1.0f, 0.0f };
+	}
+
+	if (GetKey(olc::W).bHeld || GetKey(olc::UP).bHeld) {
+		velocity += { 0.0f, -1.0f };
+	}
+	if (GetKey(olc::S).bHeld || GetKey(olc::DOWN).bHeld) {
+		velocity += { 0.0f, +1.0f };
+	}
+
+	velocity *= speed;
+
+	if (velocity.mag2() > 0) velocity = velocity.norm() * 4.0f;
+
+	// Basic world collision here
+	olc::vf2d playerPos = GetLocalPlayer().position;
+	playerPos += velocity;
+
+	int tileId = worldData->GetTileID(playerPos.x, playerPos.y);
+
+	// in water
+	//localPlayer->inWater = (tileId == 0 || tileId == 1);
+
+	if (tileId != 0)
+	{
+		// FIXME: do things here
+		// There is a tile where the player is trying to go!
+	}
+	else
+	{
+		// FIXME: Check for a boat
+		velocity = { 0, 0 };
+	}
+
+	GetLocalPlayer().velocity = velocity;
+	//localPlayer->Update(fElapsedTime);
+}
+
+bool GameScene::ValidateWorld()
+{
+	if (worldData->GetWorldGenerated() == false)
+	{
+		if (worldData->GetWorldProgress() < 0.99f)
+		{
+			engine->Clear(olc::DARK_BLUE);
+			engine->DrawStringDecal({ 10,10 }, "Loading...", olc::WHITE);
+			return false;
+		}
+		else
+		{
+			worldData->GenerateMap();
+
+			if (playMode != PLAY_MODE::CLIENT)
+			{ // Auto accept this client
+				print("You're the host!");
+				descPlayer.position = worldData->GetRandomGroundTile();
+
+				if (descPlayer.position.x <= -0.9f && descPlayer.position.y <= -0.9f)
+				{
+					worldData->GenerateMap();
+					return false;
+				}
+
+				mapObjects.insert_or_assign(0, descPlayer);
+				waitingForConnection = false;
+
+				localPlayer = new PlayerObject(&GetLocalPlayer());
+			}
+
+			return false;
+		}
+	}
+
+	// Done
+	return true;
+}
+
+void GameScene::HandleNetworkingMessages()
+{
+	if (client->IsConnected())
+	{
+		while (client->Incoming().empty() == false)
+		{
+			auto msg = client->Incoming().pop_front().msg;
+
+			switch (msg.header.id)
+			{
+			case(GameMsg::Client_Accepted):
+			{
+				print("Server accepted client - you're in!");
+				olc::net::message<GameMsg> msg;
+				msg.header.id = GameMsg::Client_RegisterWithServer;
+				descPlayer.position = worldData->GetRandomGroundTile();
+				msg << descPlayer;
+				client->Send(msg);
+				break;
+			}
+
+			case(GameMsg::Client_AssignID):
+			{
+				// Server is assigning us OUR id
+				msg >> playerID;
+				print("Assigned Client ID = " + playerID);
+				break;
+			}
+
+			case(GameMsg::Game_AddPlayer):
+			{
+				PlayerDescription desc;
+				msg >> desc;
+				mapObjects.insert_or_assign(desc.uniqueID, desc);
+
+				if (desc.uniqueID == playerID)
+				{
+					// Now we exist in game world
+					waitingForConnection = false;
+				}
+				break;
+			}
+
+			case(GameMsg::Game_RemovePlayer):
+			{
+				uint32_t nRemovalID = 0;
+				msg >> nRemovalID;
+				mapObjects.erase(nRemovalID);
+				break;
+			}
+
+			case(GameMsg::Game_UpdatePlayer):
+			{
+				PlayerDescription desc;
+				msg >> desc;
+				mapObjects.insert_or_assign(desc.uniqueID, desc);
+				break;
+			}
+			}
+		}
+	}
+}
+
+void GameScene::HandleClient()
+{
+	olc::net::message<GameMsg> msg;
+	msg.header.id = GameMsg::Game_UpdatePlayer;
+	msg << GetLocalPlayer();
+	client->Send(msg);
+}
 
 #endif // !GAME_SCENE

@@ -1,6 +1,8 @@
 // Forrest Lowe 2021
 #pragma once
 
+//#define DEBUG_BUILD
+
 #define OLC_PGEX_NETWORK
 #include "olcPGEX_Network.h"
 #include "networkCommon.h"
@@ -262,11 +264,10 @@ private:
 			}
 
 			title->Draw();
-			singlePlayerButton->Draw();
-			multiPlayerButton->Draw();
-			quitButton->Draw();
 
 			// Singleplayer button
+			singlePlayerButton->Draw();
+
 			if (singlePlayerButton->MouseOver())
 			{
 				singlePlayerButton->fillColor = highlightColor;
@@ -279,20 +280,25 @@ private:
 			}
 			else singlePlayerButton->fillColor = defaultColor;
 
+#ifdef DEBUG_BUILD
 			// Multiplayer button
+			multiPlayerButton->Draw();
+
 			if (multiPlayerButton->MouseOver())
 			{
 				multiPlayerButton->fillColor = highlightColor;
 
 				if (engine->GetMouse(0).bReleased)
 				{
-					// FIXME: We really should be switching to a scene where the user can input an IP
 					currentMenu = MAIN_SUBMENU::MENU_MPLOBBY;
 				}
 			}
 			else multiPlayerButton->fillColor = defaultColor;
+#endif
 
 			// Quit button
+			quitButton->Draw();
+
 			if (quitButton->MouseOver())
 			{
 				quitButton->fillColor = highlightColor;
