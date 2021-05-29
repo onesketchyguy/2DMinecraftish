@@ -1,5 +1,11 @@
 #pragma once
 
+#ifndef NETWORKCOMMON_H
+#define NETWORKCOMMON_H
+
+#include "olcPGEX_Network.h"
+#include "ConstantData.h"
+
 enum class GameMsg : uint32_t
 {
 	Server_GetStatus,
@@ -27,12 +33,11 @@ enum class Tools : uint32_t
 struct PlayerDescription
 {
 	uint32_t uniqueID = 0;
-	uint32_t avatarID = 0;
+	uint32_t avatarIndex_x = 0;
+	uint32_t avatarIndex_y = 0;
+	bool flip_x = false;
 
 	uint32_t health = 100;
-	uint32_t ammo = 20;
-	uint32_t kills = 0;
-	uint32_t deaths = 0;
 
 	float radius = 0.5f;
 
@@ -46,6 +51,64 @@ public:
 	PlayerDescription* desc;
 	Tools currentTool = Tools::None;
 
+	const byte WATER_INDEX = 3;
+	olc::vi2d cellIndex = { 0, 0 };
+
+	LOOK_DIR lookDir = LOOK_DIR::down;
+
+	bool inWater = false;
+
+	void Update(float fElapsedTime)
+	{
+		if (desc->velocity.x > 0)
+		{
+			// Should face right
+			lookDir = LOOK_DIR::right;
+		}
+		else if (desc->velocity.x < 0)
+		{
+			// Should face left
+			lookDir = LOOK_DIR::left;
+		}
+
+		if (desc->velocity.y > 0)
+		{
+			// Should face down
+			lookDir = LOOK_DIR::down;
+		}
+		else if (desc->velocity.y < 0)
+		{
+			// Should face up
+			lookDir = LOOK_DIR::up;
+		}
+
+		int waterIndex = inWater ? WATER_INDEX : 0;
+
+		switch (lookDir)
+		{
+		case LOOK_DIR::down:
+			cellIndex = { waterIndex + 2, 0 };
+			break;
+		case LOOK_DIR::right:
+			cellIndex = { waterIndex + 0, 0 };
+			break;
+		case LOOK_DIR::up:
+			cellIndex = { waterIndex + 1, 0 };
+			break;
+		case LOOK_DIR::left:
+			cellIndex = { waterIndex + 0, 0 };
+			break;
+		default:
+			break;
+		}
+
+		desc->avatarIndex_x = cellIndex.x;
+		desc->avatarIndex_y = cellIndex.y;
+
+		desc->flip_x = lookDir == LOOK_DIR::left;
+	}
+
+public:
 	PlayerObject(PlayerDescription* desc)
 	{
 		this->desc = desc;
@@ -159,3 +222,5 @@ protected:
 class Client : public olc::net::client_interface<GameMsg>
 {
 };
+
+#endif // !NETWORKCOMMON_H

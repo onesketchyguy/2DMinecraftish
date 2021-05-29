@@ -1,5 +1,8 @@
 // Forrest Lowe 2021
+
 #pragma once
+#ifndef SCENE_DEFINITIONS_H
+#define SCENE_DEFINITIONS_H
 
 //#define DEBUG_BUILD
 
@@ -8,8 +11,6 @@
 #include "networkCommon.h"
 
 #include "ConstantData.h"
-
-std::string serverIP = "127.0.0.1";
 
 #include "timeConstruct.h"
 
@@ -477,4 +478,4 @@ public:
 	}
 };
 
-#include "gameScene.h";
+#endif // !SCENE_DEFINITIONS_H

@@ -1,4 +1,10 @@
 // Forrest Lowe 2021
+
+#pragma once
+
+#ifndef WORLDDATA_H
+#define WORLDDATA_H
+
 const uint8_t TILE_COUNT = 160; // The constant for how many MAX tiles can be drawn at once
 
 const uint8_t MAP_WIDTH = 255;
@@ -324,7 +330,7 @@ public:
 		if (xPos < 0) {
 			xPos *= -1;
 			xPos %= MAP_WIDTH;
-			xPos = MAP_WIDTH - x;
+			xPos = static_cast<int>(MAP_WIDTH - x);
 		}
 
 		if (yPos < 0) {
@@ -354,13 +360,13 @@ public:
 		if (xPos < 0) {
 			xPos *= -1;
 			xPos %= MAP_WIDTH;
-			xPos = MAP_WIDTH - x;
+			xPos = static_cast<int>(MAP_WIDTH - x);
 		}
 
 		if (yPos < 0) {
 			yPos *= -1;
 			yPos %= MAP_WIDTH;
-			yPos = MAP_HEIGHT - y;
+			yPos = static_cast<int>(MAP_HEIGHT - y);
 		}
 
 		if (xPos > MAP_WIDTH) {
@@ -398,3 +404,5 @@ public:
 		}
 	}
 };
+
+#endif // !WORLDDATA_H

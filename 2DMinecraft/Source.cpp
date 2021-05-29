@@ -1,16 +1,12 @@
 // Forrest Lowe 2021
 
-bool DEBUG = false;
-bool APPLICATION_RUNNING = true;
-const int SERVER_PORT = 60000;
-
 #define OLC_PGE_APPLICATION
 #include "Headers/olcPixelGameEngine.h"
 
 #include "Headers/uiObjects.h"
 #include "Headers/debugger.h"
 
-#include "Headers/sceneDefinition.h"
+#include "Headers/gameScene.h"
 
 // Override base class with your custom functionality
 class MiniMinecraft : public olc::PixelGameEngine

@@ -1,7 +1,18 @@
 #pragma once
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #define OLC_PGEX_TRANSFORMEDVIEW
 #include "olcPGEX_TransformedView.h"
+
+#include "Headers/uiObjects.h"
+#include "Headers/debugger.h"
+#include "networkCommon.h"
+#include "ConstantData.h"
+#include "timeConstruct.h"
+#include "worldData.h"
+#include "miniMap.h"
+#include "objectDefinitions.h"
 
 struct DecalData
 {
@@ -130,25 +141,25 @@ public:
 		viewPort.DrawPartialDecal(worldPos, scale, decal, cell, sprScale, color);
 	}
 
-	void DrawObject(Object* obj)
+	void DrawPlayer(PlayerDescription& player)
 	{
 		engine->SetPixelMode(olc::Pixel::NORMAL);
 
-		olc::vi2d decalScale = {
-			obj->GetLookDir() == LOOK_DIR::left ? -spriteScale.x : spriteScale.x, spriteScale.y };
-		olc::vi2d spriteCell = { spriteScale.x * obj->GetCellIndex().x, spriteScale.y * obj->GetCellIndex().y };
+		olc::vf2d sprScale{ static_cast<float>(spriteScale.x), static_cast<float>(spriteScale.y) };
+		olc::vf2d pos = player.position;
 
-		olc::vf2d offset = { obj->GetLookDir() == LOOK_DIR::left ? spriteScale.x : 0.0f , 0.0f };
+		if (player.flip_x)
+		{
+			pos.x += sprScale.x;
+			sprScale.x *= -1;
+		}
 
-		DrawPartialDecal(obj->GetPosition() + offset, decalScale,
-			obj->GetRenderable()->Decal(), spriteCell);
-	}
-
-	void DrawPlayer(olc::vf2d pos)
-	{
-		engine->SetPixelMode(olc::Pixel::NORMAL);
-
-		DrawPartialDecal(pos, spriteScale, playerSpriteData->Decal(), { 0, 0 });
+		DrawPartialDecal(pos / static_cast<float>(SPRITE_SCALE),
+			sprScale, playerSpriteData->Decal(),
+			{
+				static_cast<int>(player.avatarIndex_x * SPRITE_SCALE),
+				static_cast<int>(player.avatarIndex_y * SPRITE_SCALE)
+			});
 	}
 
 	void DrawTile(int mapIndex, float x, float y)
@@ -218,46 +229,53 @@ public:
 			itemSpriteData->Decal(), spriteCell);
 	}
 
-	void DrawWorld()
-	{
-		// Clear World
-		engine->Clear(olc::BLACK);
+	void DrawWorld();
 
-		// Draw World
-		topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
-		bottomRight = viewPort.GetBottomRightTile().min({ MAP_WIDTH, MAP_HEIGHT });
-		olc::vi2d tile;
-		for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
-		{
-			for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
-			{
-				int mapIndex = tile.y * MAP_WIDTH + tile.x;
-
-				EnqueueDrawTile(mapIndex, tile.x, tile.y);
-			}
-		}
-
-		DrawQueue();
-	}
-
-	void UpdateZoom()
-	{
-		if (engine->GetMouseWheel() > 0) viewPort.ZoomAtScreenPos(1.5f, engine->GetMousePos());
-		if (engine->GetMouseWheel() < 0) viewPort.ZoomAtScreenPos(0.5f, engine->GetMousePos());
-
-		// Clamp the zoom
-		if (viewPort.GetWorldScale().x <= MIN_ZOOM)
-			viewPort.SetZoom(MIN_ZOOM, camTarget);
-
-		if (viewPort.GetWorldScale().x >= MAX_ZOOM)
-			viewPort.SetZoom(MAX_ZOOM, camTarget);
-
-		screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenWidth() / 2.0f });
-	}
-
-	void SetCamera(olc::vf2d pos)
-	{
-		camTarget = pos - screenCenter;
-		viewPort.SetWorldOffset(camTarget);
-	}
+	void UpdateZoom();
+	void SetCamera(olc::vf2d pos);
 };
+
+void Renderer::DrawWorld()
+{
+	// Clear World
+	engine->Clear(olc::BLACK);
+
+	// Draw World
+	topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
+	bottomRight = viewPort.GetBottomRightTile().min({ MAP_WIDTH, MAP_HEIGHT });
+	olc::vi2d tile;
+	for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
+	{
+		for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
+		{
+			int mapIndex = tile.y * MAP_WIDTH + tile.x;
+
+			EnqueueDrawTile(mapIndex, tile.x, tile.y);
+		}
+	}
+
+	DrawQueue();
+}
+
+void Renderer::UpdateZoom()
+{
+	if (engine->GetMouseWheel() > 0) viewPort.ZoomAtScreenPos(1.5f, engine->GetMousePos());
+	if (engine->GetMouseWheel() < 0) viewPort.ZoomAtScreenPos(0.5f, engine->GetMousePos());
+
+	// Clamp the zoom
+	if (viewPort.GetWorldScale().x <= MIN_ZOOM)
+		viewPort.SetZoom(MIN_ZOOM, camTarget);
+
+	if (viewPort.GetWorldScale().x >= MAX_ZOOM)
+		viewPort.SetZoom(MAX_ZOOM, camTarget);
+
+	screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenWidth() / 2.0f });
+}
+
+void Renderer::SetCamera(olc::vf2d pos)
+{
+	camTarget = pos - screenCenter;
+	viewPort.SetWorldOffset(camTarget);
+}
+
+#endif // !RENDERER_H
