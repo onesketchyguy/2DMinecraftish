@@ -1,10 +1,4 @@
-﻿  IntroScene.cpp
-D:\repos\2DMinecraftish\2DMinecraft\IntroScene.cpp(44,60): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\IntroScene.cpp(44,52): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\IntroScene.cpp(44,44): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
-D:\repos\2DMinecraftish\2DMinecraft\IntroScene.cpp(44,36): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
-  MainMenu.cpp
-  Source.cpp
-  sceneDefinition.cpp
+﻿  Source.cpp
+  WorldData.cpp
   Generating Code...
   2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe

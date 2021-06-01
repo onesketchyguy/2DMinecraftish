@@ -1,4 +1,5 @@
 #include "Headers/sceneDefinition.h"
+#include "Headers/debugger.h"
 
 void Scene::Initialize(TimeConstruct* time, olc::PixelGameEngine* engine)
 {
@@ -253,7 +254,7 @@ void Scene::DrawWarpedDecal(olc::Decal* decal, const olc::vf2d(&pos)[4],
 	const olc::Pixel& tint)
 {
 	// FIXME: fix this
-	//print("ERROR: Function not implemented! -> DrawWarpedDecal(olc::Decal*, const olc::vf2d(&)[4], const olc::Pixel& )");
+	print("ERROR: Function not implemented! -> DrawWarpedDecal(olc::Decal*, const olc::vf2d(&)[4], const olc::Pixel& )");
 	//engine->DrawWarpedDecal(decal, pos, tint);
 }
 void Scene::DrawWarpedDecal(olc::Decal* decal, const olc::vf2d* pos,
@@ -272,7 +273,7 @@ void Scene::DrawPartialWarpedDecal(olc::Decal* decal, const olc::vf2d(&pos)[4],
 	const olc::Pixel& tint)
 {
 	// FIXME: fix this
-	//print("ERROR: Function not implemented! -> DrawPartialWarpedDecal(olc::Decal*, const olc::vf2d()[4], const olc::vf2d&, const olc::vf2d&,const olc::Pixel&)");
+	print("ERROR: Function not implemented! -> DrawPartialWarpedDecal(olc::Decal*, const olc::vf2d()[4], const olc::vf2d&, const olc::vf2d&,const olc::Pixel&)");
 	//engine->DrawPartialWarpedDecal(decal, pos, source_pos, source_size, tint);
 }
 void Scene::DrawPartialWarpedDecal(olc::Decal* decal, const olc::vf2d* pos,

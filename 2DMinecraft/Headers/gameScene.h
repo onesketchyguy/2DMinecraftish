@@ -46,7 +46,7 @@ public:
 	}
 
 private:
-	olc::vi2d vWorldSize = { MAP_WIDTH, MAP_HEIGHT };
+	olc::vi2d vWorldSize;
 
 private:
 	void MovePlayer();
@@ -77,13 +77,12 @@ private: // Networking stuff
 
 public:
 	bool OnLoad() override;
-
 	bool Update() override;
 };
 
 void GameScene::MovePlayer()
 {
-	float speed = 50.0f * time->elapsedTime;
+	float speed = 500.0f * time->elapsedTime;
 
 	olc::vf2d velocity = { 0.0f, 0.0f };
 
@@ -101,9 +100,8 @@ void GameScene::MovePlayer()
 		velocity += { 0.0f, +1.0f };
 	}
 
-	velocity *= speed;
-
 	if (velocity.mag2() > 0) velocity = velocity.norm() * 4.0f;
+	velocity *= speed;
 
 	// Basic world collision here
 	olc::vf2d playerPos = GetLocalPlayer().position;
@@ -142,6 +140,7 @@ bool GameScene::ValidateWorld()
 		else
 		{
 			worldData->GenerateMap();
+			vWorldSize = { worldData->GetMapWidth(), worldData->GetMapHeight() };
 
 			if (playMode != PLAY_MODE::CLIENT)
 			{ // Auto accept this client

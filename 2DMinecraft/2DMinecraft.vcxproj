@@ -147,7 +147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\AABBCollider.h" />
     <ClInclude Include="Headers\ConstantData.h" />
     <ClInclude Include="Headers\debugger.h" />
     <ClInclude Include="Headers\fileManager.h" />
@@ -168,14 +167,14 @@
     <ClInclude Include="Headers\worldData.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AABBCollider.cpp" />
-    <ClCompile Include="gameScene.cpp" />
+    <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="IntroScene.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="sceneDefinition.cpp" />
+    <ClCompile Include="SceneDefinition.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="WorldData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

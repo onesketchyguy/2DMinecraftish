@@ -40,7 +40,7 @@ bool IntroScene::Update()
 		X = 1.0f;
 	}
 
-	float colVal = 255.0f * X;
+	int colVal = static_cast<int>(ceil(255.0f * X));
 	olc::Pixel tintColor = olc::Pixel(colVal, colVal, colVal, colVal);
 
 	DrawDecal({ logoPos.x, logoPos.y - 35 }, olc_logo->Decal(), olc_logoSize, tintColor);

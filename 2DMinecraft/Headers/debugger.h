@@ -7,9 +7,9 @@
 
 #include "fileManager.h"
 
-uint64_t debug_prints;
+inline uint64_t debug_prints;
 
-void print(std::string text) {
+inline void print(std::string text) {
 	// Print to console.
 	std::cout << debug_prints << ":" << text << std::endl;
 

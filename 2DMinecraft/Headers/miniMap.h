@@ -32,8 +32,8 @@ private:
 	void UpdateDecal(olc::vf2d localPlayer)
 	{
 		// Called once per frame, draws random coloured pixels
-		for (int x = 0; x < MAP_WIDTH; x++)
-			for (int y = 0; y < MAP_HEIGHT; y++)
+		for (int x = 0; x < worldData->GetMapWidth(); x++)
+			for (int y = 0; y < worldData->GetMapHeight(); y++)
 			{
 				float distY = abs((y * SPRITE_SCALE) - (localPlayer.y));
 				float distX = abs((x * SPRITE_SCALE) - (localPlayer.x));
@@ -44,7 +44,7 @@ private:
 				}
 				else
 				{
-					int dat = worldData->tileData[y * MAP_WIDTH + x];
+					int dat = worldData->tileData[y * worldData->GetMapWidth() + x];
 
 					miniMapSprite->SetPixel(x, y, mapColors[dat]);
 				}
@@ -60,7 +60,7 @@ public:
 		this->engine = engine;
 		this->time = time;
 
-		miniMapSprite = new olc::Sprite(MAP_WIDTH, MAP_HEIGHT);
+		miniMapSprite = new olc::Sprite(worldData->GetMapWidth(), worldData->GetMapHeight());
 		miniMapDecal = new olc::Decal(miniMapSprite);
 
 		uint8_t length = WORLD_TILES_WIDTH * WORLD_TILES_HEIGHT;

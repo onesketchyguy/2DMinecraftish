@@ -57,9 +57,6 @@
     <ClInclude Include="Headers\Item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\AABBCollider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\timeConstruct.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -80,22 +77,22 @@
     <ClCompile Include="Item.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AABBCollider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sceneDefinition.cpp">
+    <ClCompile Include="SceneDefinition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gameScene.cpp">
+    <ClCompile Include="GameScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IntroScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

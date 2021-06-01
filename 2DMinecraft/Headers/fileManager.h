@@ -11,7 +11,7 @@
 
 namespace FILESYSTEM
 {
-	std::string GetInputFromUser()
+	static const std::string GetInputFromUser()
 	{
 		std::string input;
 		std::cin >> input;
@@ -19,14 +19,14 @@ namespace FILESYSTEM
 		return input;
 	}
 
-	int GetFileSize(const char* fileName)
+	static const int GetFileSize(const char* fileName)
 	{
 		std::ifstream fileStream(fileName, std::ifstream::ate | std::ifstream::binary);
 
 		return static_cast<int>(fileStream.tellg());
 	}
 
-	std::string GetFileData(const char* fileName)
+	static const std::string GetFileData(const char* fileName)
 	{
 		std::ifstream readFileStream(fileName);
 
@@ -48,7 +48,7 @@ namespace FILESYSTEM
 		return data;
 	}
 
-	std::string WriteFile(const char* fileName, std::string data, std::fstream::_Openmode openMode = std::fstream::app)
+	static const std::string WriteFile(const char* fileName, std::string data, std::fstream::_Openmode openMode = std::fstream::app)
 	{
 		std::ofstream writeFileStream(fileName, openMode);
 		double size = 0.0;

@@ -17,10 +17,10 @@ const uint8_t WORLD_TILES_HEIGHT = 3;
 const uint8_t WORLD_ITEMS_WIDTH = 3;
 const uint8_t WORLD_ITEMS_HEIGHT = 1;
 
+const uint8_t WATER_SPRITE_INDEX = 3;
+
 std::string serverIP = "127.0.0.1";
 const int SERVER_PORT = 60000;
-
-const uint8_t WATER_SPRITE_INDEX = 3;
 
 #include "Headers/uiObjects.h"
 #include "Headers/debugger.h"
