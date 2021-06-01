@@ -24,7 +24,8 @@ void MiniMap::UpdateDecal(olc::vf2d localPlayer)
 	miniMapDecal->Update();
 }
 
-void MiniMap::Initialize(olc::Sprite* tileSprite, WorldData* worldData, olc::PixelGameEngine* engine, TimeConstruct* time)
+void MiniMap::Initialize(olc::Sprite* tileSprite, WorldData* worldData,
+	olc::PixelGameEngine* engine, TimeConstruct* time)
 {
 	this->worldData = worldData;
 	this->engine = engine;

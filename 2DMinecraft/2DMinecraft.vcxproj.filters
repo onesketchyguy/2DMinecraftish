@@ -57,9 +57,6 @@
     <ClInclude Include="Headers\worldData.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\renderer.h">
-      <Filter>Header Files\World</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\objectDefinitions.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
@@ -85,6 +82,9 @@
       <Filter>Header Files\System</Filter>
     </ClInclude>
     <ClInclude Include="Headers\uiObjects.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\renderer.h">
       <Filter>Header Files\System</Filter>
     </ClInclude>
   </ItemGroup>

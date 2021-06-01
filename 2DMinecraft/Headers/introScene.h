@@ -13,11 +13,11 @@ class IntroScene : public Scene
 	olc::vf2d olc_logoSize = { 0.25f, 0.25f };
 	olc::vf2d flowe_logoSize = { 1.25f, 1.25f };
 
-	const float TOTAL_LOGO_TIME = 5.0f;
+	const float TOTAL_LOGO_TIME = 3.0f;
 
 	float logoTime = TOTAL_LOGO_TIME;
 	float halfTime = 0.0f;
-	float showTime = 3.5f;
+	float showTime = 1.5f;
 
 public:
 	~IntroScene()

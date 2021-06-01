@@ -1,5 +1,5 @@
-/*#include "Headers/renderer.h"
 #define OLC_PGEX_TRANSFORMEDVIEW
+#include "Headers/renderer.h"
 
 Renderer::Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 {
@@ -11,7 +11,7 @@ Renderer::Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 
 	print("Created viewport.");
 
-	print("Generating sprites...");
+	print("Loading all sprites...");
 
 	// Player shit
 	playerSpriteData = new olc::Renderable();
@@ -53,7 +53,7 @@ void Renderer::DrawPartialDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* deca
 	viewPort.DrawPartialDecal(pos, scale, decal, cell, spriteScale, color);
 }
 
-void Renderer::DrawQueue(bool clearOnDrawn)
+void Renderer::DrawQueue()
 {
 	for (DecalData& data : drawQueue)
 	{
@@ -61,10 +61,7 @@ void Renderer::DrawQueue(bool clearOnDrawn)
 			spriteScale, data.color);
 	}
 
-	if (clearOnDrawn)
-	{
-		drawQueue.clear();
-	}
+	drawQueue.clear();
 }
 
 void Renderer::EnqueueDrawPartialDecal(olc::vf2d pos, olc::vf2d scale,
@@ -148,16 +145,17 @@ void Renderer::EnqueueDrawTile(int mapIndex, float x, float y)
 		spriteScale.y * cellIndex_y };
 
 	// Draw tile
-	EnqueueDrawPartialDecal(pos, spriteScale + olc::vf2d{ 1.5f, 1.5f }, tileSpriteData->Decal(), tileSpriteCell);
+	EnqueueDrawPartialDecal(pos, spriteScale + olc::vf2d{ 1.5f, 1.5f },
+		tileSpriteData->Decal(), tileSpriteCell);
 
 	if (foliage > 0) // 0 = no foliage
 	{
 		foliage -= 1; // Subtract 1 to put this layer back into sprite space
 
-		olc::vi2d foliageSpriteCell = { spriteScale.x * foliage, spriteScale.x * 2 };
+		olc::vi2d foliageSpriteCell = { spriteScale.x * foliage, spriteScale.y * 2 };
 
 		// Draw foliage
-		EnqueueDrawPartialDecal(pos, spriteScale, tileSpriteData->Decal(), tileSpriteCell);
+		EnqueueDrawPartialDecal(pos, spriteScale, tileSpriteData->Decal(), foliageSpriteCell);
 	}
 }
 
@@ -215,4 +213,5 @@ void Renderer::SetCamera(olc::vf2d pos)
 	camTarget = pos - screenCenter;
 	viewPort.SetWorldOffset(camTarget);
 }
-#undef OLC_PGEX_TRANSFORMEDVIEW*/
+
+#undef OLC_PGEX_TRANSFORMEDVIEW
