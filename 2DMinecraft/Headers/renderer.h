@@ -7,8 +7,8 @@
 #define OLC_PGEX_TRANSFORMEDVIEW
 #include "olcPGEX_TransformedView.h"
 
-#include "Headers/uiObjects.h"
-#include "Headers/debugger.h"
+#include "uiObjects.h"
+#include "debugger.h"
 #include "networkCommon.h"
 #include "ConstantData.h"
 #include "timeConstruct.h"

@@ -177,13 +177,13 @@ void Renderer::DrawWorld()
 
 	// Draw World
 	topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
-	bottomRight = viewPort.GetBottomRightTile().min({ MAP_WIDTH, MAP_HEIGHT });
+	bottomRight = viewPort.GetBottomRightTile().min({ worldData->GetMapWidth(), worldData->GetMapHeight() });
 	olc::vi2d tile;
 	for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
 	{
 		for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
 		{
-			int mapIndex = tile.y * MAP_WIDTH + tile.x;
+			int mapIndex = tile.y * worldData->GetMapWidth() + tile.x;
 
 			float x = static_cast<float>(tile.x);
 			float y = static_cast<float>(tile.y);
@@ -215,5 +215,4 @@ void Renderer::SetCamera(olc::vf2d pos)
 	camTarget = pos - screenCenter;
 	viewPort.SetWorldOffset(camTarget);
 }
-
 #undef OLC_PGEX_TRANSFORMEDVIEW*/

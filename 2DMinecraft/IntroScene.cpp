@@ -23,30 +23,32 @@ bool IntroScene::OnLoad()
 
 bool IntroScene::Update()
 {
-	Clear(olc::Pixel{ 240, 240, 240, 240 });
+	Clear(olc::Pixel{ 240, 240, 245, 255 });
 
-	float X = 0.0;
+	float fadeVal = 0.0;
 
 	if (logoTime > showTime + halfTime)
 	{
-		X = (showTime + halfTime) - logoTime;
+		fadeVal = (showTime + halfTime) - logoTime;
 	}
-	else if (logoTime < halfTime)
+	else if (logoTime <= halfTime)
 	{
-		X = logoTime;
+		fadeVal = logoTime / (TOTAL_LOGO_TIME - (showTime + halfTime));
+
+		if (logoTime < 0) fadeVal = 0;
 	}
 	else
 	{
-		X = 1.0f;
+		fadeVal = 1.0f;
 	}
 
-	int colVal = static_cast<int>(ceil(255.0f * X));
+	int colVal = static_cast<int>(ceil(255.0f * fadeVal));
 	olc::Pixel tintColor = olc::Pixel(colVal, colVal, colVal, colVal);
 
 	DrawDecal({ logoPos.x, logoPos.y - 35 }, olc_logo->Decal(), olc_logoSize, tintColor);
 	DrawDecal({ logoPos.x, logoPos.y + 35 }, flowe_logo->Decal(), flowe_logoSize, tintColor);
 
-	if (logoTime <= 0)
+	if (logoTime <= -0.1f)
 	{
 		currentScene = SCENE::SCENE_MAIN_MENU;
 	}
