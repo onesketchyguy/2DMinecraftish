@@ -1,4 +1,11 @@
+// Forrest Lowe 2021
+
 #pragma once
+
+#ifndef MINI_MAP
+#define MINI_MAP
+
+#include "olcPixelGameEngine.h"
 
 class MiniMap
 {
@@ -18,7 +25,7 @@ private:
 	olc::Decal* miniMapDecal;
 
 	bool drawMiniMap = false;
-	byte miniMapDrawLocation = 1;
+	uint8_t miniMapDrawLocation = 1;
 	float miniMapDrawScale = 0.25f;
 	olc::Pixel* mapColors;
 
@@ -136,3 +143,4 @@ public:
 		}
 	}
 };
+#endif // !MINI_MAP

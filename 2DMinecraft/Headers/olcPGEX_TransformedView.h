@@ -63,7 +63,7 @@
 
 	Revisions:
 	1.00:	Initial Release
-        1.01:   DrawLine bug fix, thanks Fern
+		1.01:   DrawLine bug fix, thanks Fern
 */
 
 #pragma once
@@ -71,8 +71,6 @@
 #define OLC_PGEX_TRANSFORMEDVIEW_H
 
 #include "olcPixelGameEngine.h"
-
-
 
 namespace olc
 {
@@ -103,7 +101,7 @@ namespace olc
 		virtual olc::vi2d ScaleToScreen(const olc::vf2d& vWorldSize) const;
 		virtual bool IsPointVisible(const olc::vf2d& vPos) const;
 		virtual bool IsRectVisible(const olc::vf2d& vPos, const olc::vf2d& vSize) const;
-		
+
 	protected:
 		olc::vf2d m_vWorldOffset = { 0.0f, 0.0f };
 		olc::vf2d m_vWorldScale = { 1.0f, 1.0f };
@@ -116,7 +114,7 @@ namespace olc
 	public: // Hopefully, these should look familiar!
 		// Plots a single point
 		virtual bool Draw(float x, float y, olc::Pixel p = olc::WHITE);
-		bool Draw(const olc::vf2d& pos, olc::Pixel p = olc::WHITE);		
+		bool Draw(const olc::vf2d& pos, olc::Pixel p = olc::WHITE);
 		// Draws a line from (x1,y1) to (x2,y2)
 		void DrawLine(float x1, float y1, float x2, float y2, olc::Pixel p = olc::WHITE, uint32_t pattern = 0xFFFFFFFF);
 		void DrawLine(const olc::vf2d& pos1, const olc::vf2d& pos2, olc::Pixel p = olc::WHITE, uint32_t pattern = 0xFFFFFFFF);
@@ -148,7 +146,6 @@ namespace olc
 		void DrawString(float x, float y, const std::string& sText, Pixel col, const olc::vf2d& scale);
 		void DrawString(const olc::vf2d& pos, const std::string& sText, const Pixel col, const olc::vf2d& scale);
 
-		
 		// Draws a whole decal, with optional scale and tinting
 		void DrawDecal(const olc::vf2d& pos, olc::Decal* decal, const olc::vf2d& scale = { 1.0f,1.0f }, const olc::Pixel& tint = olc::WHITE);
 		// Draws a region of a decal, with optional scale and tinting
@@ -176,15 +173,14 @@ namespace olc
 		void GradientFillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel colTL, const olc::Pixel colBL, const olc::Pixel colBR, const olc::Pixel colTR);
 		// Draws an arbitrary convex textured polygon using GPU
 		void DrawPolygonDecal(olc::Decal* decal, const std::vector<olc::vf2d>& pos, const std::vector<olc::vf2d>& uv, const olc::Pixel tint = olc::WHITE);
-
 	};
 
 	class TileTransformedView : public TransformedView
 	{
 	public:
-		TileTransformedView() = default;	
+		TileTransformedView() = default;
 		TileTransformedView(const olc::vi2d& vViewArea, const olc::vi2d& vTileSize);
-	
+
 	public:
 		void SetRangeX(const bool bRanged, const int32_t nMin = 0, const int32_t nMax = 0);
 		void SetRangeY(const bool bRanged, const int32_t nMin = 0, const int32_t nMax = 0);
@@ -193,7 +189,7 @@ namespace olc
 		olc::vi2d GetVisibleTiles() const;
 		olc::vi2d GetTileUnderScreenPos(const olc::vi2d& vPos) const;
 		const olc::vi2d GetTileOffset() const;
-		
+
 	private:
 		bool m_bRangedX = false;
 		int32_t m_nMinRangeX = 0;
@@ -209,7 +205,6 @@ namespace olc
 
 namespace olc
 {
-
 	void TransformedView::Initialise(const olc::vi2d& vViewArea, const olc::vf2d& vPixelScale)
 	{
 		SetViewArea(vViewArea);
@@ -319,11 +314,11 @@ namespace olc
 
 	olc::vi2d TransformedView::ScaleToScreen(const olc::vf2d& vWorldSize) const
 	{
-		olc::vf2d vFloat = vWorldSize * m_vWorldScale;		
+		olc::vf2d vFloat = vWorldSize * m_vWorldScale;
 		return vFloat.floor();
 	}
 
-	bool TransformedView::IsPointVisible(const olc::vf2d & vPos) const
+	bool TransformedView::IsPointVisible(const olc::vf2d& vPos) const
 	{
 		olc::vi2d vScreen = WorldToScreen(vPos);
 		return vScreen.x >= 0 && vScreen.x < m_vViewArea.x&& vScreen.y >= 0 && vScreen.y < m_vViewArea.y;
@@ -341,27 +336,27 @@ namespace olc
 		return Draw({ x, y }, p);
 	}
 
-	bool TransformedView::Draw(const olc::vf2d & pos, olc::Pixel p)
+	bool TransformedView::Draw(const olc::vf2d& pos, olc::Pixel p)
 	{
 		return pge->Draw(WorldToScreen(pos), p);
 	}
-	
+
 	void TransformedView::DrawLine(float x1, float y1, float x2, float y2, olc::Pixel p, uint32_t pattern)
 	{
 		DrawLine({ x1, y1 }, { x2, y2 }, p, pattern);
 	}
 
-	void TransformedView::DrawLine(const olc::vf2d & pos1, const olc::vf2d & pos2, olc::Pixel p, uint32_t pattern)
+	void TransformedView::DrawLine(const olc::vf2d& pos1, const olc::vf2d& pos2, olc::Pixel p, uint32_t pattern)
 	{
 		pge->DrawLine(WorldToScreen(pos1), WorldToScreen(pos2), p, pattern);
 	}
-	
+
 	void TransformedView::DrawCircle(float x, float y, float radius, olc::Pixel p, uint8_t mask)
 	{
 		DrawCircle({ x,y }, radius, p, mask);
 	}
 
-	void TransformedView::DrawCircle(const olc::vf2d & pos, float radius, olc::Pixel p, uint8_t mask)
+	void TransformedView::DrawCircle(const olc::vf2d& pos, float radius, olc::Pixel p, uint8_t mask)
 	{
 		pge->DrawCircle(WorldToScreen(pos), int32_t(radius * m_vWorldScale.x), p, mask);
 	}
@@ -371,7 +366,7 @@ namespace olc
 		FillCircle({ x,y }, radius, p);
 	}
 
-	void TransformedView::FillCircle(const olc::vf2d & pos, float radius, olc::Pixel p)
+	void TransformedView::FillCircle(const olc::vf2d& pos, float radius, olc::Pixel p)
 	{
 		pge->FillCircle(WorldToScreen(pos), int32_t(radius * m_vWorldScale.x), p);
 	}
@@ -381,37 +376,37 @@ namespace olc
 		DrawRect({ x, y }, { w, h }, p);
 	}
 
-	void TransformedView::DrawRect(const olc::vf2d & pos, const olc::vf2d & size, olc::Pixel p)
+	void TransformedView::DrawRect(const olc::vf2d& pos, const olc::vf2d& size, olc::Pixel p)
 	{
 		pge->DrawRect(WorldToScreen(pos), ((size * m_vWorldScale) + olc::vf2d(0.5f, 0.5f)).floor(), p);
 	}
-	
+
 	void TransformedView::FillRect(float x, float y, float w, float h, olc::Pixel p)
 	{
 		FillRect({ x, y }, { w, h }, p);
 	}
 
-	void TransformedView::FillRect(const olc::vf2d & pos, const olc::vf2d & size, olc::Pixel p)
+	void TransformedView::FillRect(const olc::vf2d& pos, const olc::vf2d& size, olc::Pixel p)
 	{
 		pge->FillRect(WorldToScreen(pos), size * m_vWorldScale, p);
 	}
-	
+
 	void TransformedView::DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, olc::Pixel p)
 	{
 		DrawTriangle({ x1, y1 }, { x2, y2 }, { x3, y3 }, p);
 	}
 
-	void TransformedView::DrawTriangle(const olc::vf2d & pos1, const olc::vf2d & pos2, const olc::vf2d & pos3, olc::Pixel p)
+	void TransformedView::DrawTriangle(const olc::vf2d& pos1, const olc::vf2d& pos2, const olc::vf2d& pos3, olc::Pixel p)
 	{
 		pge->DrawTriangle(WorldToScreen(pos1), WorldToScreen(pos2), WorldToScreen(pos3), p);
 	}
-	
+
 	void TransformedView::FillTriangle(float x1, float y1, float x2, float y2, float x3, float y3, olc::Pixel p)
 	{
 		FillTriangle({ x1, y1 }, { x2, y2 }, { x3, y3 }, p);
 	}
 
-	void TransformedView::FillTriangle(const olc::vf2d & pos1, const olc::vf2d & pos2, const olc::vf2d & pos3, olc::Pixel p)
+	void TransformedView::FillTriangle(const olc::vf2d& pos1, const olc::vf2d& pos2, const olc::vf2d& pos3, olc::Pixel p)
 	{
 		pge->FillTriangle(WorldToScreen(pos1), WorldToScreen(pos2), WorldToScreen(pos3), p);
 	}
@@ -421,7 +416,7 @@ namespace olc
 		DrawSprite({ x, y }, sprite, { scalex, scaley }, flip);
 	}
 
-	void TransformedView::DrawSprite(const olc::vf2d & pos, olc::Sprite * sprite, const olc::vf2d & scale, uint8_t flip)
+	void TransformedView::DrawSprite(const olc::vf2d& pos, olc::Sprite* sprite, const olc::vf2d& scale, uint8_t flip)
 	{
 		olc::vf2d vSpriteSize = olc::vf2d(float(sprite->width), float(sprite->height));
 		if (IsRectVisible(pos, vSpriteSize * scale))
@@ -439,7 +434,6 @@ namespace olc
 			}
 		}
 	}
-
 
 	void TransformedView::DrawPartialSprite(float x, float y, Sprite* sprite, int32_t ox, int32_t oy, int32_t w, int32_t h, float scalex, float scaley, uint8_t flip)
 	{
@@ -478,7 +472,7 @@ namespace olc
 		Pixel::Mode m = pge->GetPixelMode();
 
 		auto StringPlot = [&col](const int x, const int y, const olc::Pixel& pSource, const olc::Pixel& pDest)
-		{		
+		{
 			return pSource.r > 1 ? col : pDest;
 		};
 
@@ -501,33 +495,32 @@ namespace olc
 		pge->SetPixelMode(m);
 	}
 
-
-	void TransformedView::DrawDecal(const olc::vf2d & pos, olc::Decal * decal, const olc::vf2d & scale, const olc::Pixel & tint)
+	void TransformedView::DrawDecal(const olc::vf2d& pos, olc::Decal* decal, const olc::vf2d& scale, const olc::Pixel& tint)
 	{
 		pge->DrawDecal(WorldToScreen(pos), decal, scale * m_vWorldScale * m_vRecipPixel, tint);
 	}
 
-	void TransformedView::DrawPartialDecal(const olc::vf2d & pos, olc::Decal * decal, const olc::vf2d & source_pos, const olc::vf2d & source_size, const olc::vf2d & scale, const olc::Pixel & tint)
+	void TransformedView::DrawPartialDecal(const olc::vf2d& pos, olc::Decal* decal, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::vf2d& scale, const olc::Pixel& tint)
 	{
 		pge->DrawPartialDecal(WorldToScreen(pos), decal, source_pos, source_size, scale * m_vWorldScale * m_vRecipPixel, tint);
 	}
 
-	void TransformedView::DrawPartialDecal(const olc::vf2d & pos, const olc::vf2d & size, olc::Decal * decal, const olc::vf2d & source_pos, const olc::vf2d & source_size, const olc::Pixel & tint)
+	void TransformedView::DrawPartialDecal(const olc::vf2d& pos, const olc::vf2d& size, olc::Decal* decal, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::Pixel& tint)
 	{
 		pge->DrawPartialDecal(WorldToScreen(pos), size * m_vWorldScale * m_vRecipPixel, decal, source_pos, source_size, tint);
 	}
-	
+
 	void TransformedView::DrawExplicitDecal(olc::Decal* decal, const olc::vf2d* pos, const olc::vf2d* uv, const olc::Pixel* col, uint32_t elements)
 	{
 		std::vector<olc::vf2d> vTransformed(elements);
 		for (uint32_t n = 0; n < elements; n++)
-			vTransformed[n] = WorldToScreen(pos[n]);		
+			vTransformed[n] = WorldToScreen(pos[n]);
 		pge->DrawExplicitDecal(decal, vTransformed.data(), uv, col, elements);
 	}
 
 	void TransformedView::DrawWarpedDecal(olc::Decal* decal, const olc::vf2d* pos, const olc::Pixel& tint)
 	{
-		std::array<olc::vf2d, 4> vTransformed = 
+		std::array<olc::vf2d, 4> vTransformed =
 		{ {
 			WorldToScreen(pos[0]), WorldToScreen(pos[1]),
 			WorldToScreen(pos[2]), WorldToScreen(pos[3]),
@@ -567,32 +560,32 @@ namespace olc
 		DrawPartialWarpedDecal(decal, pos.data(), source_pos, source_size, tint);
 	}
 
-	void TransformedView::DrawRotatedDecal(const olc::vf2d & pos, olc::Decal * decal, const float fAngle, const olc::vf2d & center, const olc::vf2d & scale, const olc::Pixel & tint)
+	void TransformedView::DrawRotatedDecal(const olc::vf2d& pos, olc::Decal* decal, const float fAngle, const olc::vf2d& center, const olc::vf2d& scale, const olc::Pixel& tint)
 	{
 		pge->DrawRotatedDecal(WorldToScreen(pos), decal, fAngle, center, scale * m_vWorldScale * m_vRecipPixel, tint);
 	}
 
-	void TransformedView::DrawPartialRotatedDecal(const olc::vf2d & pos, olc::Decal * decal, const float fAngle, const olc::vf2d & center, const olc::vf2d & source_pos, const olc::vf2d & source_size, const olc::vf2d & scale, const olc::Pixel & tint)
+	void TransformedView::DrawPartialRotatedDecal(const olc::vf2d& pos, olc::Decal* decal, const float fAngle, const olc::vf2d& center, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::vf2d& scale, const olc::Pixel& tint)
 	{
 		pge->DrawPartialRotatedDecal(WorldToScreen(pos), decal, fAngle, center, source_pos, source_size, scale * m_vWorldScale * m_vRecipPixel, tint);
 	}
-	
-	void TransformedView::DrawStringDecal(const olc::vf2d & pos, const std::string & sText, const olc::Pixel col, const olc::vf2d & scale)
+
+	void TransformedView::DrawStringDecal(const olc::vf2d& pos, const std::string& sText, const olc::Pixel col, const olc::vf2d& scale)
 	{
 		pge->DrawStringDecal(WorldToScreen(pos), sText, col, scale * m_vWorldScale * m_vRecipPixel);
 	}
 
-	void TransformedView::DrawStringPropDecal(const olc::vf2d & pos, const std::string & sText, const olc::Pixel col, const olc::vf2d & scale )
+	void TransformedView::DrawStringPropDecal(const olc::vf2d& pos, const std::string& sText, const olc::Pixel col, const olc::vf2d& scale)
 	{
 		pge->DrawStringPropDecal(WorldToScreen(pos), sText, col, scale * m_vWorldScale * m_vRecipPixel);
 	}
 
-	void TransformedView::FillRectDecal(const olc::vf2d & pos, const olc::vf2d & size, const olc::Pixel col)
+	void TransformedView::FillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel col)
 	{
 		pge->FillRectDecal(WorldToScreen(pos), (size * m_vWorldScale).ceil(), col);
 	}
-	
-	void TransformedView::GradientFillRectDecal(const olc::vf2d & pos, const olc::vf2d & size, const olc::Pixel colTL, const olc::Pixel colBL, const olc::Pixel colBR, const olc::Pixel colTR)
+
+	void TransformedView::GradientFillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel colTL, const olc::Pixel colBL, const olc::Pixel colBR, const olc::Pixel colTR)
 	{
 		pge->GradientFillRectDecal(WorldToScreen(pos), size * m_vWorldScale, colTL, colBL, colBR, colTR);
 	}
@@ -608,9 +601,8 @@ namespace olc
 	/////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////
 
-
-	TileTransformedView::TileTransformedView(const olc::vi2d& vViewArea, const olc::vi2d& vTileSize)		
-	{ 
+	TileTransformedView::TileTransformedView(const olc::vi2d& vViewArea, const olc::vi2d& vTileSize)
+	{
 		Initialise(vViewArea, vTileSize);
 	}
 
@@ -630,7 +622,7 @@ namespace olc
 
 	olc::vi2d TileTransformedView::GetTopLeftTile() const
 	{
-		return ScreenToWorld({ 0,0 }).floor();		
+		return ScreenToWorld({ 0,0 }).floor();
 	}
 
 	olc::vi2d TileTransformedView::GetBottomRightTile() const
@@ -645,7 +637,7 @@ namespace olc
 
 	olc::vi2d TileTransformedView::GetTileUnderScreenPos(const olc::vi2d& vPos) const
 	{
-		return ScreenToWorld(vPos).floor();		
+		return ScreenToWorld(vPos).floor();
 	}
 
 	const olc::vi2d TileTransformedView::GetTileOffset() const

@@ -1,3 +1,7 @@
+// Forrest Lowe 2021
+
+#pragma once
+
 #ifndef DEBUGGER
 #define DEBUGGER
 

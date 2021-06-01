@@ -6,21 +6,19 @@
 
 //#define DEBUG_BUILD
 
+#include "olcPixelGameEngine.h"
+
 #define OLC_PGEX_NETWORK
 #include "olcPGEX_Network.h"
 #include "networkCommon.h"
 
 #include "ConstantData.h"
 
+//#include "debugger.h"
+
+#include "uiObjects.h"
+
 #include "timeConstruct.h"
-
-#include "worldData.h"
-#include "miniMap.h"
-
-#include "objectDefinitions.h"
-#include "renderer.h"
-
-#include <unordered_map>
 
 /* example of use
 class MainMenu : public Scene
@@ -37,445 +35,117 @@ public:
 	}
 };*/
 
-enum class PLAY_MODE : uint8_t
-{
-	SINGLE_PLAYER,
-	CLIENT,
-	SERVER
-};
-
-PLAY_MODE playMode = PLAY_MODE::SINGLE_PLAYER;
-
-enum class SCENE : uint8_t
-{
-	SCENE_INTRO,
-	SCENE_MAIN_MENU,
-	SCENE_GAME
-};
-
-SCENE currentScene = SCENE::SCENE_INTRO;
-
 class Scene
 {
 public:
-	void Initialize(TimeConstruct* time, olc::PixelGameEngine* engine)
-	{
-		this->time = time;
-		this->engine = engine;
-	}
+	void Initialize(TimeConstruct* time, olc::PixelGameEngine* engine);
 
 protected:
 	olc::PixelGameEngine* engine;
 
 	TimeConstruct* time;
 
-	olc::HWButton GetKey(olc::Key key)
-	{
-		return engine->GetKey(key);
-	}
+	olc::HWButton GetKey(olc::Key key) const;
+	olc::HWButton GetMouse(uint32_t button) const;
+	int32_t ScreenWidth() const;
+	int32_t ScreenHeight() const;
+	uint32_t GetFPS() const;
+	int32_t GetMouseX() const;
+	int32_t GetMouseY() const;
+	const olc::vi2d& GetMousePos() const;
+	int32_t GetMouseWheel() const;
+	float GetElapsedTime() const;
+	const olc::vi2d& GetWindowSize() const;
+	const olc::vi2d& GetPixelSize() const;
+	const olc::vi2d& GetScreenPixelSize() const;
+	const olc::vi2d& GetWindowMouse() const;
 
-	olc::HWButton GetMouse(uint32_t button)
-	{
-		return engine->GetMouse(button);
-	}
+protected: // DRAWING ROUTINES
 
-	int32_t ScreenWidth()
-	{
-		return engine->ScreenWidth();
-	}
+	// Draws a single Pixel
+	bool Draw(const olc::vi2d& pos, olc::Pixel p = olc::WHITE);
+	// Draws a line from (x1,y1) to (x2,y2)
+	void DrawLine(int32_t x1, int32_t y1, int32_t x2, int32_t y2, olc::Pixel p = olc::WHITE, uint32_t pattern = 0xFFFFFFFF);
+	void DrawLine(const olc::vi2d& pos1, const olc::vi2d& pos2, olc::Pixel p = olc::WHITE, uint32_t pattern = 0xFFFFFFFF);
+	// Draws a circle located at (x,y) with radius
+	void DrawCircle(int32_t x, int32_t y, int32_t radius, olc::Pixel p = olc::WHITE, uint8_t mask = 0xFF);
+	void DrawCircle(const olc::vi2d& pos, int32_t radius, olc::Pixel p = olc::WHITE, uint8_t mask = 0xFF);
+	// Fills a circle located at (x,y) with radius
+	void FillCircle(int32_t x, int32_t y, int32_t radius, olc::Pixel p = olc::WHITE);
+	void FillCircle(const olc::vi2d& pos, int32_t radius, olc::Pixel p = olc::WHITE);
+	// Draws a rectangle at (x,y) to (x+w,y+h)
+	void DrawRect(int32_t x, int32_t y, int32_t w, int32_t h, olc::Pixel p = olc::WHITE);
+	void DrawRect(const olc::vi2d& pos, const olc::vi2d& size, olc::Pixel p = olc::WHITE);
+	// Fills a rectangle at (x,y) to (x+w,y+h)
+	void FillRect(int32_t x, int32_t y, int32_t w, int32_t h, olc::Pixel p = olc::WHITE);
+	void FillRect(const olc::vi2d& pos, const olc::vi2d& size, olc::Pixel p = olc::WHITE);
+	// Draws a triangle between points (x1,y1), (x2,y2) and (x3,y3)
+	void DrawTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, olc::Pixel p = olc::WHITE);
+	void DrawTriangle(const olc::vi2d& pos1, const olc::vi2d& pos2, const olc::vi2d& pos3, olc::Pixel p = olc::WHITE);
+	// Flat fills a triangle between points (x1,y1), (x2,y2) and (x3,y3)
+	void FillTriangle(int32_t x1, int32_t y1, int32_t x2, int32_t y2, int32_t x3, int32_t y3, olc::Pixel p = olc::WHITE);
+	void FillTriangle(const olc::vi2d& pos1, const olc::vi2d& pos2, const olc::vi2d& pos3, olc::Pixel p = olc::WHITE);
+	// Draws an entire sprite at location (x,y)
+	void DrawSprite(int32_t x, int32_t y, olc::Sprite* sprite, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE);
+	void DrawSprite(const olc::vi2d& pos, olc::Sprite* sprite, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE);
+	// Draws an area of a sprite at location (x,y), where the
+	// selected area is (ox,oy) to (ox+w,oy+h)
+	void DrawPartialSprite(int32_t x, int32_t y, olc::Sprite* sprite, int32_t ox, int32_t oy, int32_t w, int32_t h, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE);
+	void DrawPartialSprite(const olc::vi2d& pos, olc::Sprite* sprite, const olc::vi2d& sourcepos, const olc::vi2d& size, uint32_t scale = 1, uint8_t flip = olc::Sprite::NONE);
+	// Draws a single line of text - traditional monospaced
+	void DrawString(int32_t x, int32_t y, const std::string& sText, olc::Pixel col = olc::WHITE, uint32_t scale = 1);
+	void DrawString(const olc::vi2d& pos, const std::string& sText, olc::Pixel col = olc::WHITE, uint32_t scale = 1);
+	olc::vi2d GetTextSize(const std::string& s);
+	// Draws a single line of text - non-monospaced
+	void DrawStringProp(int32_t x, int32_t y, const std::string& sText, olc::Pixel col = olc::WHITE, uint32_t scale = 1);
+	void DrawStringProp(const olc::vi2d& pos, const std::string& sText, olc::Pixel col = olc::WHITE, uint32_t scale = 1);
+	olc::vi2d GetTextSizeProp(const std::string& s);
 
-	int32_t ScreenHeight()
-	{
-		return engine->ScreenHeight();
-	}
+	// Decal Quad functions
+	void SetDecalMode(const olc::DecalMode& mode);
+	// Draws a whole decal, with optional scale and tinting
+	void DrawDecal(const olc::vf2d& pos, olc::Decal* decal, const olc::vf2d& scale = { 1.0f,1.0f }, const olc::Pixel& tint = olc::WHITE);
+	// Draws a region of a decal, with optional scale and tinting
+	void DrawPartialDecal(const olc::vf2d& pos, olc::Decal* decal, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::vf2d& scale = { 1.0f,1.0f }, const olc::Pixel& tint = olc::WHITE);
+	void DrawPartialDecal(const olc::vf2d& pos, const olc::vf2d& size, olc::Decal* decal, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::Pixel& tint = olc::WHITE);
+	// Draws fully user controlled 4 vertices, pos(pixels), uv(pixels), colours
+	void DrawExplicitDecal(olc::Decal* decal, const olc::vf2d* pos, const olc::vf2d* uv, const olc::Pixel* col, uint32_t elements = 4);
+	// Draws a decal with 4 arbitrary points, warping the texture to look "correct"
+	void DrawWarpedDecal(olc::Decal* decal, const olc::vf2d(&pos)[4], const olc::Pixel& tint = olc::WHITE);
+	void DrawWarpedDecal(olc::Decal* decal, const olc::vf2d* pos, const olc::Pixel& tint = olc::WHITE);
+	void DrawWarpedDecal(olc::Decal* decal, const std::array<olc::vf2d, 4>& pos, const olc::Pixel& tint = olc::WHITE);
+	// As above, but you can specify a region of a decal source sprite
+	void DrawPartialWarpedDecal(olc::Decal* decal, const olc::vf2d(&pos)[4], const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::Pixel& tint = olc::WHITE);
+	void DrawPartialWarpedDecal(olc::Decal* decal, const olc::vf2d* pos, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::Pixel& tint = olc::WHITE);
+	void DrawPartialWarpedDecal(olc::Decal* decal, const std::array<olc::vf2d, 4>& pos, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::Pixel& tint = olc::WHITE);
+	// Draws a decal rotated to specified angle, wit point of rotation offset
+	void DrawRotatedDecal(const olc::vf2d& pos, olc::Decal* decal, const float fAngle, const olc::vf2d& center = { 0.0f, 0.0f }, const olc::vf2d& scale = { 1.0f,1.0f }, const olc::Pixel& tint = olc::WHITE);
+	void DrawPartialRotatedDecal(const olc::vf2d& pos, olc::Decal* decal, const float fAngle, const olc::vf2d& center, const olc::vf2d& source_pos, const olc::vf2d& source_size, const olc::vf2d& scale = { 1.0f, 1.0f }, const olc::Pixel& tint = olc::WHITE);
+	// Draws a multiline string as a decal, with tiniting and scaling
+	void DrawStringDecal(const olc::vf2d& pos, const std::string& sText, const  olc::Pixel col = olc::WHITE, const olc::vf2d& scale = { 1.0f, 1.0f });
+	void DrawStringPropDecal(const olc::vf2d& pos, const std::string& sText, const  olc::Pixel col = olc::WHITE, const olc::vf2d& scale = { 1.0f, 1.0f });
+	// Draws a single shaded filled rectangle as a decal
+	void FillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel col = olc::WHITE);
+	// Draws a corner shaded rectangle as a decal
+	void GradientFillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel colTL, const olc::Pixel colBL, const olc::Pixel colBR, const olc::Pixel colTR);
+	// Draws an arbitrary convex textured polygon using GPU
+	void DrawPolygonDecal(olc::Decal* decal, const std::vector<olc::vf2d>& pos, const std::vector<olc::vf2d>& uv, const olc::Pixel tint = olc::WHITE);
+
+	// Clears entire draw target to Pixel
+	void Clear(olc::Pixel p);
+	// Clears the rendering back buffer
+	void ClearBuffer(olc::Pixel p, bool bDepth = true);
+	// Returns the font image
+	olc::Sprite* GetFontSprite();
 
 private:
 	bool sceneLoaded = false;
 
 public:
-	bool UpdateScene()
-	{
-		if (!sceneLoaded)
-		{
-			sceneLoaded = OnLoad();
-		}
-		else
-		{
-			sceneLoaded = Update();
-		}
+	bool UpdateScene();
 
-		return sceneLoaded;
-	}
-
-	virtual bool OnLoad() { return true; }
-	virtual bool Update() { return true; }
-};
-
-class IntroScene : public Scene
-{
-	olc::Renderable* olc_logo;
-	olc::Renderable* flowe_logo;
-	olc::vf2d logoPos;
-	olc::vf2d olc_logoSize = { 0.25f, 0.25f };
-	olc::vf2d flowe_logoSize = { 1.25f, 1.25f };
-
-	float logoTime = 3;
-
-public:
-	~IntroScene()
-	{
-		delete olc_logo;
-		delete flowe_logo;
-	}
-
-public:
-	bool OnLoad() override
-	{
-		logoPos.x = ScreenWidth() / 2;
-		logoPos.y = ScreenHeight() / 2;
-
-		olc_logo = new olc::Renderable();
-		olc_logo->Load("Data/olc_logo.png");
-
-		flowe_logo = new olc::Renderable();
-		flowe_logo->Load("Data/flowe_logo.png");
-
-		logoPos.x -= olc_logo->Sprite()->width * (olc_logoSize.x / 2.0f);
-		logoPos.y -= olc_logo->Sprite()->height * (olc_logoSize.y / 2.0f);
-
-		return true;
-	}
-
-	bool Update() override
-	{
-		engine->Clear(olc::DARK_BLUE);
-
-		engine->DrawDecal({ logoPos.x, logoPos.y - 50 }, olc_logo->Decal(), olc_logoSize);
-		engine->DrawDecal({ logoPos.x, logoPos.y + 50 }, flowe_logo->Decal(), flowe_logoSize);
-
-		logoTime -= time->elapsedTime;
-		if (logoTime <= 0)
-		{
-			currentScene = SCENE::SCENE_MAIN_MENU;
-		}
-
-		return true;
-	}
-};
-
-class MainMenu : public Scene
-{
-private:
-	TextBox* title;
-
-	TextBox* singlePlayerButton;
-	TextBox* multiPlayerButton;
-	TextBox* quitButton;
-
-	TextBox* hostButton;
-	TextBox* serverIpText;
-	TextBox* joinButton;
-	TextBox* backButton;
-
-	bool typing = false;
-	bool cursorVisable = true;
-	const float CURSOR_FLASH_TIME = 0.25f;
-	float flashTime = 0;
-
-	olc::Pixel defaultColor = olc::WHITE;
-	olc::Pixel highlightColor = olc::GREY;
-
-	enum class MAIN_SUBMENU : uint8_t
-	{
-		MENU_MAIN,
-		MENU_MPLOBBY
-	};
-
-	MAIN_SUBMENU currentMenu;
-
-public:
-	~MainMenu()
-	{
-		delete title;
-		delete singlePlayerButton;
-		delete multiPlayerButton;
-		delete quitButton;
-		delete hostButton;
-		delete joinButton;
-		delete backButton;
-	}
-
-private:
-	void RecieveIpInput()
-	{
-		// Backspace
-		if (GetKey(olc::Key::BACK).bReleased && serverIP.length() > 0)
-		{
-			serverIP.pop_back();
-		}
-
-		// Numpad numbers
-		for (size_t i = 69; i < 79; i++)
-		{
-			if (GetKey((olc::Key)i).bReleased)
-			{
-				serverIP += char(i + 48 - 69);
-			}
-		}
-
-		// Keyboard numbers
-		for (size_t i = 27; i < 37; i++)
-		{
-			if (GetKey((olc::Key)i).bReleased)
-			{
-				serverIP += char(i + 48 - 27);
-			}
-		}
-
-		// Decimal place
-		if (GetKey(olc::Key::PERIOD).bReleased || GetKey(olc::Key::NP_DECIMAL).bReleased)
-		{
-			serverIP += '.';
-		}
-
-		// Flash the cursor on screen
-		flashTime += time->elapsedTime;
-
-		if (flashTime > CURSOR_FLASH_TIME)
-		{
-			cursorVisable = !cursorVisable;
-			flashTime = 0;
-		}
-
-		char cursor = cursorVisable ? '_' : ' ';
-
-		// Update the string when needed
-		serverIpText->SetString(serverIP + cursor);
-	}
-
-	void HandleMenus()
-	{
-		switch (currentMenu)
-		{
-		case MAIN_SUBMENU::MENU_MAIN:
-			if (time->frameCount % 10 == 0)
-			{
-				// Reseed the world generator
-				srand(static_cast<unsigned int>(std::time(0)));
-			}
-
-			title->Draw();
-
-			// Singleplayer button
-			singlePlayerButton->Draw();
-
-			if (singlePlayerButton->MouseOver())
-			{
-				singlePlayerButton->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					currentScene = SCENE::SCENE_GAME;
-					playMode = PLAY_MODE::SINGLE_PLAYER;
-				}
-			}
-			else singlePlayerButton->fillColor = defaultColor;
-
-#ifdef DEBUG_BUILD
-			// Multiplayer button
-			multiPlayerButton->Draw();
-
-			if (multiPlayerButton->MouseOver())
-			{
-				multiPlayerButton->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					currentMenu = MAIN_SUBMENU::MENU_MPLOBBY;
-				}
-			}
-			else multiPlayerButton->fillColor = defaultColor;
-#endif
-
-			// Quit button
-			quitButton->Draw();
-
-			if (quitButton->MouseOver())
-			{
-				quitButton->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					APPLICATION_RUNNING = false;
-				}
-			}
-			else quitButton->fillColor = defaultColor;
-
-			break;
-		case MAIN_SUBMENU::MENU_MPLOBBY:
-			hostButton->Draw();
-			joinButton->Draw();
-			serverIpText->Draw();
-			backButton->Draw();
-
-			// Host button
-			if (hostButton->MouseOver())
-			{
-				hostButton->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					currentScene = SCENE::SCENE_GAME;
-					playMode = PLAY_MODE::SERVER;
-				}
-			}
-			else hostButton->fillColor = defaultColor;
-
-			// Ip text
-			if (typing) RecieveIpInput();
-			if (serverIpText->MouseOver())
-			{
-				serverIpText->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					typing = true;
-				}
-			}
-			else
-			{
-				if (typing)
-				{
-					if (engine->GetMouse(0).bReleased)
-					{
-						typing = false;
-						serverIpText->SetString(serverIP);
-					}
-				}
-				else serverIpText->fillColor = defaultColor;
-			}
-
-			// Join button
-			if (joinButton->MouseOver())
-			{
-				joinButton->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					currentScene = SCENE::SCENE_GAME;
-					playMode = PLAY_MODE::CLIENT;
-				}
-			}
-			else joinButton->fillColor = defaultColor;
-
-			// Back button
-			if (backButton->MouseOver())
-			{
-				backButton->fillColor = highlightColor;
-
-				if (engine->GetMouse(0).bReleased)
-				{
-					currentMenu = MAIN_SUBMENU::MENU_MAIN;
-				}
-			}
-			else backButton->fillColor = defaultColor;
-			break;
-		default:
-			break;
-		}
-	}
-
-public:
-	bool OnLoad() override
-	{
-		int xPos = (ScreenWidth() / 2) - 75;
-		int yPos = (ScreenHeight() / 2) - 50;
-
-		title = new TextBox(engine, "Mini-craft",
-			xPos, yPos,
-			100, 25,
-			2, 2,
-			0, 0,
-			olc::WHITE);
-
-		xPos += 25;
-		yPos += 40;
-
-		singlePlayerButton = new TextBox(engine, "single player",
-			xPos, yPos,
-			125, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		yPos += 40;
-
-		multiPlayerButton = new TextBox(engine, "multi player",
-			xPos, yPos,
-			125, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		xPos += 25;
-		yPos += 40;
-
-		quitButton = new TextBox(engine, "quit",
-			xPos, yPos,
-			60, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		xPos = (ScreenWidth() / 2) - 75;
-		yPos = (ScreenHeight() / 2) - 50;
-
-		hostButton = new TextBox(engine, "host game",
-			xPos, yPos,
-			125, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		yPos += 40;
-
-		serverIpText = new TextBox(engine, serverIP,
-			xPos, yPos,
-			125, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		yPos += 40;
-
-		joinButton = new TextBox(engine, "join game",
-			xPos, yPos,
-			125, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		xPos += 25;
-		yPos += 40;
-
-		backButton = new TextBox(engine, "back",
-			xPos, yPos,
-			60, 25,
-			1, 1,
-			10, 10,
-			olc::BLACK, defaultColor);
-
-		return true;
-	}
-
-	bool Update() override
-	{
-		// Draw the menu
-		engine->Clear(olc::DARK_BLUE);
-
-		HandleMenus();
-		return true;
-	}
+	virtual bool OnLoad() = 0;
+	virtual bool Update() = 0;
 };
 
 #endif // !SCENE_DEFINITIONS_H

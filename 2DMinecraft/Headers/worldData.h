@@ -159,8 +159,8 @@ public:
 
 		for (int i = 0; i < mapLength; i++)
 		{
-			float x = i % MAP_WIDTH;
-			float y = i / MAP_WIDTH;
+			float x = static_cast<float>(i % MAP_WIDTH);
+			float y = static_cast<float>(i / MAP_WIDTH);
 
 			if (x == 0 || y == 0 || x == MAP_WIDTH - 1 || y == MAP_HEIGHT - 1) tileData[i] = 0;
 			else
@@ -336,7 +336,7 @@ public:
 		if (yPos < 0) {
 			yPos *= -1;
 			yPos %= MAP_WIDTH;
-			yPos = MAP_HEIGHT - y;
+			yPos = static_cast<int>(MAP_HEIGHT - y);
 		}
 
 		if (xPos > MAP_WIDTH) {
@@ -347,7 +347,7 @@ public:
 			yPos %= MAP_HEIGHT;
 		}
 
-		int index = y * MAP_WIDTH + x;
+		int index = yPos * MAP_WIDTH + xPos;
 		tileData[index] = value;
 		std::cout << "Changing tile index from: " << xPos << "," << yPos << std::endl;
 	}

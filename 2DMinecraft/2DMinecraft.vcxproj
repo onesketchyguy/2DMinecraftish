@@ -152,7 +152,9 @@
     <ClInclude Include="Headers\debugger.h" />
     <ClInclude Include="Headers\fileManager.h" />
     <ClInclude Include="Headers\gameScene.h" />
+    <ClInclude Include="Headers\introScene.h" />
     <ClInclude Include="Headers\Item.h" />
+    <ClInclude Include="Headers\MainMenu.h" />
     <ClInclude Include="Headers\miniMap.h" />
     <ClInclude Include="Headers\networkCommon.h" />
     <ClInclude Include="Headers\objectDefinitions.h" />
@@ -167,8 +169,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABBCollider.cpp" />
+    <ClCompile Include="gameScene.cpp" />
+    <ClCompile Include="IntroScene.cpp" />
     <ClCompile Include="Item.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="sceneDefinition.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

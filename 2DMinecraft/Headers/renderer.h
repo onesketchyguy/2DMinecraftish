@@ -1,3 +1,5 @@
+// Forrest Lowe 2021
+
 #pragma once
 #ifndef RENDERER_H
 #define RENDERER_H
@@ -250,7 +252,10 @@ void Renderer::DrawWorld()
 		{
 			int mapIndex = tile.y * MAP_WIDTH + tile.x;
 
-			EnqueueDrawTile(mapIndex, tile.x, tile.y);
+			float x = static_cast<float>(tile.x);
+			float y = static_cast<float>(tile.y);
+
+			EnqueueDrawTile(mapIndex, x, y);
 		}
 	}
 

@@ -4,9 +4,19 @@
 #ifndef GAME_SCENE
 #define GAME_SCENE
 
+#include <unordered_map>
+
 #include "sceneDefinition.h"
 #include "ConstantData.h"
 #include "debugger.h"
+
+#include "timeConstruct.h"
+
+#include "worldData.h"
+#include "miniMap.h"
+
+#include "objectDefinitions.h"
+#include "renderer.h"
 
 class GameScene : public Scene
 {
@@ -442,9 +452,9 @@ bool GameScene::Update()
 	{
 		olc::vi2d toolSpritePos = { int(currentTool) - 1 , 0 };
 		engine->DrawPartialDecal(
-			{ engine->ScreenWidth() - SPRITE_SCALE * 2.0f, engine->ScreenHeight() - SPRITE_SCALE * 2.0f },
-			{ SPRITE_SCALE * 2, SPRITE_SCALE * 2 }, toolsRenderable->Decal(),
-			toolSpritePos * (SPRITE_SCALE * 2), { SPRITE_SCALE * 2, SPRITE_SCALE * 2 });
+			olc::vf2d{ engine->ScreenWidth() - SPRITE_SCALE * 2.0f, engine->ScreenHeight() - SPRITE_SCALE * 2.0f },
+			olc::vi2d{ SPRITE_SCALE * 2, SPRITE_SCALE * 2 }, toolsRenderable->Decal(),
+			toolSpritePos * (SPRITE_SCALE * 2), olc::vi2d{ SPRITE_SCALE * 2, SPRITE_SCALE * 2 });
 	}
 
 	return true;

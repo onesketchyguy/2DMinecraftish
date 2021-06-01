@@ -1,4 +1,9 @@
+// Forrest Lowe 2021
+
 #pragma once
+#ifndef FILE_SYSTEM
+#define FILE_SYSTEM
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -63,3 +68,5 @@ namespace FILESYSTEM
 		return "Success! File created with a size of: " + std::to_string(size) + " kb";
 	}
 }
+
+#endif // !FILE_SYSTEM

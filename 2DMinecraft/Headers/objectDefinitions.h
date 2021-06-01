@@ -1,4 +1,8 @@
+// Forrest Lowe 2021
+
 #pragma once
+#ifndef OBJECT_DEFINITIONS
+#define OBJECT_DEFINITIONS
 
 struct LightSource
 {
@@ -16,3 +20,5 @@ public:
 };
 
 #include "Item.h"
+
+#endif

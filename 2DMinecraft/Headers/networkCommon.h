@@ -51,7 +51,6 @@ public:
 	PlayerDescription* desc;
 	Tools currentTool = Tools::None;
 
-	const byte WATER_INDEX = 3;
 	olc::vi2d cellIndex = { 0, 0 };
 
 	LOOK_DIR lookDir = LOOK_DIR::down;
@@ -82,7 +81,7 @@ public:
 			lookDir = LOOK_DIR::up;
 		}
 
-		int waterIndex = inWater ? WATER_INDEX : 0;
+		int waterIndex = inWater ? WATER_SPRITE_INDEX : 0;
 
 		switch (lookDir)
 		{

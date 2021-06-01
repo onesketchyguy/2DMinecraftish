@@ -7,20 +7,22 @@
 
 #include "olcPixelGameEngine.h"
 
-bool DEBUG = false;
-bool APPLICATION_RUNNING = true;
+extern bool DEBUG;
+extern bool APPLICATION_RUNNING;
 
-const int8_t SPRITE_SCALE = 12;
-olc::vi2d spriteScale = { (int)SPRITE_SCALE, (int)SPRITE_SCALE };
+extern const int8_t SPRITE_SCALE;
+extern olc::vi2d spriteScale;
 
-const uint8_t WORLD_TILES_WIDTH = 4;
-const uint8_t WORLD_TILES_HEIGHT = 3;
+extern const uint8_t WATER_SPRITE_INDEX;
 
-const uint8_t WORLD_ITEMS_WIDTH = 3;
-const uint8_t WORLD_ITEMS_HEIGHT = 1;
+extern const uint8_t WORLD_TILES_WIDTH;
+extern const uint8_t WORLD_TILES_HEIGHT;
 
-std::string serverIP = "127.0.0.1";
-const int SERVER_PORT = 60000;
+extern const uint8_t WORLD_ITEMS_WIDTH;
+extern const uint8_t WORLD_ITEMS_HEIGHT;
+
+extern std::string serverIP;
+extern const int SERVER_PORT;
 
 enum class LOOK_DIR : uint8_t
 {
@@ -29,5 +31,25 @@ enum class LOOK_DIR : uint8_t
 	up = 2,
 	left = 3
 };
+
+enum class PLAY_MODE : uint8_t
+{
+	SINGLE_PLAYER,
+	CLIENT,
+	SERVER
+};
+
+enum class SCENE : uint8_t
+{
+	SCENE_INTRO,
+	SCENE_MAIN_MENU,
+	SCENE_GAME
+};
+
+//extern PLAY_MODE playMode;
+//extern SCENE currentScene;
+
+inline PLAY_MODE playMode = PLAY_MODE::SINGLE_PLAYER;
+inline SCENE currentScene = SCENE::SCENE_INTRO;
 
 #endif // !CONSTANTS

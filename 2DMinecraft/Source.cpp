@@ -3,9 +3,30 @@
 #define OLC_PGE_APPLICATION
 #include "Headers/olcPixelGameEngine.h"
 
+#include "Headers/ConstantData.h"
+
+bool DEBUG = false;
+bool APPLICATION_RUNNING = true;
+
+const int8_t SPRITE_SCALE = 12;
+olc::vi2d spriteScale = { (int)SPRITE_SCALE, (int)SPRITE_SCALE };
+
+const uint8_t WORLD_TILES_WIDTH = 4;
+const uint8_t WORLD_TILES_HEIGHT = 3;
+
+const uint8_t WORLD_ITEMS_WIDTH = 3;
+const uint8_t WORLD_ITEMS_HEIGHT = 1;
+
+std::string serverIP = "127.0.0.1";
+const int SERVER_PORT = 60000;
+
+const uint8_t WATER_SPRITE_INDEX = 3;
+
 #include "Headers/uiObjects.h"
 #include "Headers/debugger.h"
 
+#include "Headers/introScene.h"
+#include "Headers/mainMenu.h"
 #include "Headers/gameScene.h"
 
 // Override base class with your custom functionality
@@ -136,10 +157,11 @@ int main()
 	if (demo.Construct(264, 216, 3, 3))
 		demo.Start();
 
-	if (DEBUG && debug_prints > 0) {
+	if (DEBUG && debug_prints > 0)
+	{
 		ShowWindow(GetConsoleWindow(), SW_SHOW);
 
-		while (1) {}
+		while (1);
 	}
 
 	return 0;
