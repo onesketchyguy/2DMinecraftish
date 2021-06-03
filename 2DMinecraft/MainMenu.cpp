@@ -1,52 +1,5 @@
 #include "Headers/MainMenu.h"
 
-void MainMenu::RecieveIpInput()
-{
-	// Backspace
-	if (GetKey(olc::Key::BACK).bReleased && serverIP.length() > 0)
-	{
-		serverIP.pop_back();
-	}
-
-	// Numpad numbers
-	for (size_t i = 69; i < 79; i++)
-	{
-		if (GetKey((olc::Key)i).bReleased)
-		{
-			serverIP += char(i + 48 - 69);
-		}
-	}
-
-	// Keyboard numbers
-	for (size_t i = 27; i < 37; i++)
-	{
-		if (GetKey((olc::Key)i).bReleased)
-		{
-			serverIP += char(i + 48 - 27);
-		}
-	}
-
-	// Decimal place
-	if (GetKey(olc::Key::PERIOD).bReleased || GetKey(olc::Key::NP_DECIMAL).bReleased)
-	{
-		serverIP += '.';
-	}
-
-	// Flash the cursor on screen
-	flashTime += time->elapsedTime;
-
-	if (flashTime > CURSOR_FLASH_TIME)
-	{
-		cursorVisable = !cursorVisable;
-		flashTime = 0;
-	}
-
-	char cursor = cursorVisable ? '_' : ' ';
-
-	// Update the string when needed
-	serverIpText->SetString(serverIP + cursor);
-}
-
 void MainMenu::HandleMenus()
 {
 	switch (currentMenu)
@@ -126,7 +79,17 @@ void MainMenu::HandleMenus()
 		else hostButton->fillColor = defaultColor;
 
 		// Ip text
-		if (typing) RecieveIpInput();
+		if (typing)
+		{
+			RecieveNumericalInput(serverIP);
+			// Update the string when needed
+
+			// FIXME: this is fine
+			char cursor = cursorVisable ? '_' : ' ';
+
+			serverIpText->SetString(serverIP + cursor);
+		}
+
 		if (serverIpText->MouseOver())
 		{
 			serverIpText->fillColor = highlightColor;
@@ -202,7 +165,7 @@ bool MainMenu::OnLoad()
 		olc::BLACK, defaultColor);
 
 	yPos += 40;
-
+#ifdef DEBUG_BUILD
 	multiPlayerButton = new TextBox(engine, "multi player",
 		xPos, yPos,
 		125, 25,
@@ -212,7 +175,7 @@ bool MainMenu::OnLoad()
 
 	xPos += 25;
 	yPos += 40;
-
+#endif
 	quitButton = new TextBox(engine, "quit",
 		xPos, yPos,
 		60, 25,

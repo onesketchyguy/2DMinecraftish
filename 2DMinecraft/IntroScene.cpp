@@ -16,31 +16,20 @@ bool IntroScene::OnLoad()
 	logoPos.x -= olc_logo->Sprite()->width * (olc_logoSize.x / 2.0f);
 	logoPos.y -= olc_logo->Sprite()->height * (olc_logoSize.y / 2.0f);
 
-	halfTime = (logoTime - showTime) / 2.0f;
-
 	return true;
 }
 
 bool IntroScene::Update()
 {
-	Clear(olc::Pixel{ 240, 240, 245, 255 });
+	// Set back ground to be an off white
+	Clear(olc::Pixel{ 240, 240, 240, 255 });
 
-	float fadeVal = 0.0;
+	// Lerp fade value from 0.0 to 1.0 back to 0.0
+	float fadeVal = SHOW_LOGO_TIME * sin(logoTime);
 
-	if (logoTime > showTime + halfTime)
-	{
-		fadeVal = (showTime + halfTime) - logoTime;
-	}
-	else if (logoTime <= halfTime)
-	{
-		fadeVal = logoTime / (TOTAL_LOGO_TIME - (showTime + halfTime));
-
-		if (logoTime < 0) fadeVal = 0;
-	}
-	else
-	{
-		fadeVal = 1.0f;
-	}
+	// Clamp fade value
+	if (fadeVal > 1.0f) fadeVal = 1.0f;
+	if (fadeVal < 0.0f) fadeVal = 0.0f;
 
 	int colVal = static_cast<int>(ceil(255.0f * fadeVal));
 	olc::Pixel tintColor = olc::Pixel(colVal, colVal, colVal, colVal);

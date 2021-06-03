@@ -21,6 +21,48 @@ bool Scene::UpdateScene()
 	return sceneLoaded;
 }
 
+void Scene::RecieveNumericalInput(std::string& input)
+{
+	// Backspace
+	if (GetKey(olc::Key::BACK).bReleased && input.length() > 0)
+	{
+		input.pop_back();
+	}
+
+	// Numpad numbers
+	for (size_t i = 69; i < 79; i++)
+	{
+		if (GetKey((olc::Key)i).bReleased)
+		{
+			input += char(i + 48 - 69);
+		}
+	}
+
+	// Keyboard numbers
+	for (size_t i = 27; i < 37; i++)
+	{
+		if (GetKey((olc::Key)i).bReleased)
+		{
+			input += char(i + 48 - 27);
+		}
+	}
+
+	// Decimal place
+	if (GetKey(olc::Key::PERIOD).bReleased || GetKey(olc::Key::NP_DECIMAL).bReleased)
+	{
+		input += '.';
+	}
+
+	// Flash the cursor on screen
+	flashTime += time->elapsedTime;
+
+	if (flashTime > CURSOR_FLASH_TIME)
+	{
+		cursorVisable = !cursorVisable;
+		flashTime = 0;
+	}
+}
+
 olc::HWButton Scene::GetKey(olc::Key key) const
 {
 	return engine->GetKey(key);

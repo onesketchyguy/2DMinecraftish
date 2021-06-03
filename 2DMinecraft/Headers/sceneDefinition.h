@@ -37,13 +37,18 @@ public:
 
 class Scene
 {
+protected: // FIXME: make this private
+	olc::PixelGameEngine* engine;
+
 public:
 	void Initialize(TimeConstruct* time, olc::PixelGameEngine* engine);
 
 protected:
-	olc::PixelGameEngine* engine;
-
 	TimeConstruct* time;
+
+	bool cursorVisable = true;
+	const float CURSOR_FLASH_TIME = 0.25f;
+	float flashTime = 0;
 
 	olc::HWButton GetKey(olc::Key key) const;
 	olc::HWButton GetMouse(uint32_t button) const;
@@ -59,6 +64,7 @@ protected:
 	const olc::vi2d& GetPixelSize() const;
 	const olc::vi2d& GetScreenPixelSize() const;
 	const olc::vi2d& GetWindowMouse() const;
+	void RecieveNumericalInput(std::string& input);
 
 protected: // DRAWING ROUTINES
 

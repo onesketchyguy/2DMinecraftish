@@ -24,9 +24,6 @@ private:
 	olc::vf2d backGroundImageDir{ 5.0f, 5.0f };
 
 	bool typing = false;
-	bool cursorVisable = true;
-	const float CURSOR_FLASH_TIME = 0.25f;
-	float flashTime = 0;
 
 	olc::Pixel defaultColor = olc::WHITE;
 	olc::Pixel highlightColor = olc::GREY;
@@ -52,7 +49,6 @@ public:
 	}
 
 private:
-	void RecieveIpInput();
 	void HandleMenus();
 public:
 	bool OnLoad();
