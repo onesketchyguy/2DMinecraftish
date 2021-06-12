@@ -17,11 +17,8 @@ private:
 
 	const float NOISE_SCALE = 10.0f;
 
-	uint16_t mapLength = 0;
 	// 2D noise variables
-	int outputLength;
-	float* noiseSeed = nullptr;
-	float* perlinNoise = nullptr;
+	uint16_t mapLength = 0;
 
 	int nOctaveCount = 6;
 	float fScalingBias = 1.3f;
@@ -30,18 +27,14 @@ private:
 	uint8_t generatingWorld = 255;
 	uint8_t generatingFalloff = 255;
 
-	void PerlinNoise2D(int nWidth, int nHeight, int nOctaves,
-		float fBias, float* output);
+	void PerlinNoise2D(int nWidth, int nHeight, int nOctaves, float fBias, float* noiseSeed, float* output);
 	float Evaluate(float value, float falloffPoint = 1.75f);
-	void ReseedNoise();
+	void ReseedNoise(float* noiseSeed);
 	void ApplySeed(std::string seedString);
-	void InitNoise();
 
 public:
-	WorldData()
-	{
-		mapLength = MAP_WIDTH * MAP_HEIGHT;
-	}
+	WorldData() = default;
+	~WorldData();
 
 public:
 	uint8_t* tileData = nullptr;

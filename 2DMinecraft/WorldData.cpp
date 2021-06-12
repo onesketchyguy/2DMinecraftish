@@ -1,8 +1,15 @@
 #include "Headers/worldData.h"
 
-void WorldData::PerlinNoise2D(int nWidth, int nHeight, int nOctaves, float fBias, float* output)
+WorldData::~WorldData()
 {
-	// Used 1D Perlin Noise
+	if (tileData != nullptr)
+		delete[] tileData;
+	if (foliageData != nullptr)
+		delete[] foliageData;
+}
+
+void WorldData::PerlinNoise2D(int nWidth, int nHeight, int nOctaves, float fBias, float* noiseSeed, float* output)
+{
 	for (int x = 0; x < nWidth; x++)
 		for (int y = 0; y < nHeight; y++)
 		{
@@ -44,15 +51,9 @@ float WorldData::Evaluate(float value, float falloffPoint)
 	return pow(value, a) / (pow(value, a) + pow(falloffPoint - falloffPoint * value, a));
 }
 
-void WorldData::ReseedNoise()
+void WorldData::ReseedNoise(float* noiseSeed)
 {
-	if (noiseSeed != nullptr)
-	{
-		delete[] noiseSeed;
-	}
-
-	noiseSeed = new float[outputLength];
-	for (int i = 0; i < outputLength; i++)
+	for (int i = 0; i < mapLength; i++)
 	{
 		noiseSeed[i] = (float)rand() / (float)RAND_MAX;
 	}
@@ -67,21 +68,18 @@ void WorldData::ApplySeed(std::string seedString)
 	srand(value);
 }
 
-void WorldData::InitNoise()
-{
-	outputLength = MAP_WIDTH * MAP_HEIGHT;
-	perlinNoise = new float[outputLength];
-	ReseedNoise();
-}
-
 void WorldData::GenerateMap()
 {
+	mapLength = MAP_WIDTH * MAP_HEIGHT;
+
 	tileData = new uint8_t[mapLength];
 	foliageData = new uint8_t[mapLength];
 	float* fallOffMapA = new float[mapLength];
 	float* fallOffMapB = new float[mapLength];
 
-	InitNoise();
+	float* perlinNoise = new float[mapLength];
+	float* noiseSeed = new float[mapLength];
+	ReseedNoise(noiseSeed);
 
 	print("Generating map...");
 
@@ -91,35 +89,35 @@ void WorldData::GenerateMap()
 	print("Generating falloff map...");
 
 	// Seed the noise
-	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, perlinNoise);
+	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, noiseSeed, perlinNoise);
 
 	generatingFalloff = 0;
 
 	// Feed the noise
 	// Generate falloff map
-	for (int x = 0; x < MAP_WIDTH; x++)
+	for (int mapX = 0; mapX < MAP_WIDTH; mapX++)
 	{
-		for (int y = 0; y < MAP_HEIGHT; y++)
+		for (int mapY = 0; mapY < MAP_HEIGHT; mapY++)
 		{
-			float _x = abs(x / (float)MAP_WIDTH * 2 - 1);
-			float _y = abs(y / (float)MAP_HEIGHT * 2 - 1);
+			float evalX = abs(mapX / (float)MAP_WIDTH * 2 - 1);
+			float evalY = abs(mapY / (float)MAP_HEIGHT * 2 - 1);
 
 			// Generate the noise
-			int noiseIndex = y * MAP_WIDTH + x;
+			int noiseIndex = mapY * MAP_WIDTH + mapX;
 			float perlinValue = perlinNoise[noiseIndex];
 
-			float value = _x > _y ? _x : _y;
-			fallOffMapA[y * MAP_WIDTH + x] = Evaluate(perlinValue);
-			fallOffMapB[y * MAP_WIDTH + x] = Evaluate(value);
+			float value = evalX > evalY ? evalX : evalY;
+			fallOffMapA[mapY * MAP_WIDTH + mapX] = Evaluate(perlinValue);
+			fallOffMapB[mapY * MAP_WIDTH + mapX] = Evaluate(value);
 
-			generatingFalloff = static_cast<int>(x + y / static_cast<float>(mapLength));
+			generatingFalloff = static_cast<int>(mapX + mapY / static_cast<float>(mapLength));
 		}
 	}
 
 	print("Generated falloff map.");
 
-	ReseedNoise();
-	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, perlinNoise);
+	ReseedNoise(noiseSeed);
+	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, noiseSeed, perlinNoise);
 
 	for (int i = 0; i < mapLength; i++)
 	{
@@ -168,8 +166,14 @@ void WorldData::GenerateMap()
 
 	delete[] perlinNoise;
 	delete[] noiseSeed;
+	delete[] fallOffMapA;
+	delete[] fallOffMapB;
 
-	worldGenerated = true;
+	auto groundTile = GetRandomGroundTile();
+
+	if (groundTile.x == 0 && groundTile.y == 0) worldGenerated = false;
+	else worldGenerated = true;
+
 	generatingWorld = 255;
 
 	print("Generated map.");
@@ -373,7 +377,7 @@ olc::vf2d WorldData::GetRandomGroundTile()
 
 		if (attempts > 100) {
 			print("Unable to get spawn point.");
-			return { -1.0f, 1.0f };
+			return { 0.0f, 0.0f };
 		}
 	}
 }
