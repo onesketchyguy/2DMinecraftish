@@ -179,6 +179,142 @@ void WorldData::GenerateMap()
 	print("Generated map.");
 }
 
+bool WorldData::GenerateMapAsync()
+{
+	if (worldGenData == nullptr)
+	{
+		mapLength = MAP_WIDTH * MAP_HEIGHT;
+
+		worldGenData = new WorldGenerationData(mapLength);
+
+		ReseedNoise(worldGenData->noiseSeed);
+
+		print("Generating map...");
+
+		worldGenerated = false;
+		generatingWorld = 0;
+
+		print("Generating falloff map...");
+
+		// Seed the noise
+		PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, worldGenData->noiseSeed, worldGenData->perlinNoise);
+
+		generatingFalloff = 0;
+		falloffIndex_x = 0;
+		falloffIndex_y = 0;
+		generationIndex = 0;
+	}
+
+	// Feed the noise
+	// Generate falloff map
+	if (falloffIndex_x < MAP_WIDTH)
+	{
+		float evalX = abs(falloffIndex_x / (float)MAP_WIDTH * 2 - 1);
+		float evalY = abs(falloffIndex_y / (float)MAP_HEIGHT * 2 - 1);
+
+		// Generate the noise
+		int noiseIndex = falloffIndex_y * MAP_WIDTH + falloffIndex_x;
+		float perlinValue = worldGenData->perlinNoise[noiseIndex];
+
+		float value = evalX > evalY ? evalX : evalY;
+		worldGenData->fallOffMapA[falloffIndex_y * MAP_WIDTH + falloffIndex_x] = Evaluate(perlinValue);
+		worldGenData->fallOffMapB[falloffIndex_y * MAP_WIDTH + falloffIndex_x] = Evaluate(value);
+
+		generatingFalloff = static_cast<int>(falloffIndex_x + falloffIndex_y / static_cast<float>(mapLength));
+
+		falloffIndex_y++;
+		if (falloffIndex_y < MAP_HEIGHT)
+		{
+			falloffIndex_x++;
+			falloffIndex_y = 0;
+		}
+
+		return false;
+	}
+
+	if (tileData == nullptr && foliageData == nullptr)
+	{
+		print("Generated falloff map.");
+
+		tileData = new uint8_t[mapLength];
+		foliageData = new uint8_t[mapLength];
+	}
+	else
+	{
+		if (worldGenData->worldSeeded == false)
+		{
+			ReseedNoise(worldGenData->noiseSeed);
+			PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, worldGenData->noiseSeed, worldGenData->perlinNoise);
+
+			worldGenData->worldSeeded = true;
+		}
+
+		if (generationIndex < mapLength)
+		{
+			int i = generationIndex;
+
+			float x = static_cast<float>(i % MAP_WIDTH);
+			float y = static_cast<float>(i / MAP_WIDTH);
+
+			if (x == 0 || y == 0 || x == MAP_WIDTH - 1 || y == MAP_HEIGHT - 1) tileData[i] = 0;
+			else
+			{
+				// As the world reaches the edge we should blend it into the water
+				float fallOff = worldGenData->fallOffMapA[i] + worldGenData->fallOffMapB[i];
+
+				// Generate the noise
+				float perlinValue = worldGenData->perlinNoise[i] - fallOff;
+				if (perlinValue < 0) perlinValue = 0;
+				int pixel_bw = static_cast<int>(perlinValue * NOISE_SCALE);
+
+				tileData[i] = pixel_bw;
+
+				// Place some foliage
+				bool shouldPlace = rand() % 100 > 89; // 10% chance of spanwing foliage
+
+				if (shouldPlace) {
+					switch (tileData[i])
+					{
+					case 3: // Dead earth layer
+						foliageData[i] = 1;
+						break;
+					case 4: // grass layer
+						foliageData[i] = rand() % 5;
+						break;
+					default: // Who fucking knows
+						foliageData[i] = 0;
+						break;
+					}
+				}
+				else
+				{
+					foliageData[i] = 0;
+				}
+
+				// Set the progress bar
+				generatingWorld = static_cast<int>(i / static_cast<float>(mapLength)) * 255;
+			}
+
+			generationIndex++;
+
+			return false;
+		}
+
+		delete worldGenData;
+
+		auto groundTile = GetRandomGroundTile();
+
+		if (groundTile.x == 0 && groundTile.y == 0) worldGenerated = false;
+		else worldGenerated = true;
+
+		generatingWorld = 255;
+
+		print("Generated map.");
+	}
+
+	return true;
+}
+
 bool WorldData::GetWorldGenerated()
 {
 	return worldGenerated;

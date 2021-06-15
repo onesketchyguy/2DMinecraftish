@@ -9,11 +9,46 @@
 #include "ConstantData.h"
 #include "debugger.h"
 
+struct WorldGenerationData
+{
+public:
+	float* fallOffMapA = nullptr;
+	float* fallOffMapB = nullptr;
+
+	float* perlinNoise = nullptr;
+	float* noiseSeed = nullptr;
+
+	bool worldSeeded = false;
+
+public:
+	WorldGenerationData(int mapLength)
+	{
+		float* fallOffMapA = new float[mapLength];
+		float* fallOffMapB = new float[mapLength];
+
+		float* perlinNoise = new float[mapLength];
+		float* noiseSeed = new float[mapLength];
+	}
+
+	~WorldGenerationData()
+	{
+		delete[] perlinNoise;
+		delete[] noiseSeed;
+		delete[] fallOffMapA;
+		delete[] fallOffMapB;
+	}
+};
+
 class WorldData
 {
 private:
 	const uint8_t MAP_WIDTH = 255;
 	const uint8_t MAP_HEIGHT = 255;
+
+	uint8_t falloffIndex_x;
+	uint8_t falloffIndex_y;
+	uint32_t generationIndex;
+	WorldGenerationData* worldGenData = nullptr;
 
 	const float NOISE_SCALE = 10.0f;
 
@@ -41,6 +76,7 @@ public:
 	uint8_t* foliageData = nullptr;
 
 	void GenerateMap();
+	bool GenerateMapAsync();
 	bool GetWorldGenerated();
 	float GetWorldProgress();
 	float GetFalloffProgress();

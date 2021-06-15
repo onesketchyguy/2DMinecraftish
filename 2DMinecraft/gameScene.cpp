@@ -67,7 +67,7 @@ bool GameScene::ValidateWorld()
 				print("You're the host!");
 				descPlayer.position = worldData->GetRandomGroundTile();
 
-				if (descPlayer.position.x <= -0.9f && descPlayer.position.y <= -0.9f)
+				if (descPlayer.position.x <= 0.001f && descPlayer.position.y <= 0.001f)
 				{
 					worldData->GenerateMap();
 					return false;
