@@ -1,4 +1,4 @@
 ﻿  GameScene.cpp
-  WorldData.cpp
-  Generating Code...
+D:\repos\2DMinecraftish\2DMinecraft\Headers\gameScene.h(93,9): warning C4018: '>=': signed/unsigned mismatch
+D:\repos\2DMinecraftish\2DMinecraft\GameScene.cpp(199,17): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   2DMinecraft.vcxproj -> D:\repos\2DMinecraftish\2DMinecraft\Debug\2DMinecraft.exe

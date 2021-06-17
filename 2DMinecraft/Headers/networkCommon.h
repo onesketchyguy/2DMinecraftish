@@ -21,13 +21,14 @@ enum class GameMsg : uint32_t
 	Game_UpdatePlayer,
 };
 
+const int TOOLS_COUNT = 5;
 enum class Tools : uint32_t
 {
 	None,
 	Shovel,
 	Pickaxe,
 	Axe,
-	Hoe
+	Hoe,
 };
 
 struct PlayerDescription
