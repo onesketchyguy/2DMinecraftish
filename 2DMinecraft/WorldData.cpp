@@ -70,16 +70,14 @@ void WorldData::ApplySeed(std::string seedString)
 
 void WorldData::GenerateMap()
 {
+	generating = true;
+
 	mapLength = MAP_WIDTH * MAP_HEIGHT;
 
 	tileData = new uint8_t[mapLength];
 	foliageData = new uint8_t[mapLength];
-	float* fallOffMapA = new float[mapLength];
-	float* fallOffMapB = new float[mapLength];
-
-	float* perlinNoise = new float[mapLength];
-	float* noiseSeed = new float[mapLength];
-	ReseedNoise(noiseSeed);
+	worldGenData = new WorldGenerationData(mapLength);
+	ReseedNoise(worldGenData->noiseSeed);
 
 	print("Generating map...");
 
@@ -89,7 +87,7 @@ void WorldData::GenerateMap()
 	print("Generating falloff map...");
 
 	// Seed the noise
-	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, noiseSeed, perlinNoise);
+	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, worldGenData->noiseSeed, worldGenData->perlinNoise);
 
 	generatingFalloff = 0;
 
@@ -104,11 +102,11 @@ void WorldData::GenerateMap()
 
 			// Generate the noise
 			int noiseIndex = mapY * MAP_WIDTH + mapX;
-			float perlinValue = perlinNoise[noiseIndex];
+			float perlinValue = worldGenData->perlinNoise[noiseIndex];
 
 			float value = evalX > evalY ? evalX : evalY;
-			fallOffMapA[mapY * MAP_WIDTH + mapX] = Evaluate(perlinValue);
-			fallOffMapB[mapY * MAP_WIDTH + mapX] = Evaluate(value);
+			worldGenData->fallOffMapA[mapY * MAP_WIDTH + mapX] = Evaluate(perlinValue);
+			worldGenData->fallOffMapB[mapY * MAP_WIDTH + mapX] = Evaluate(value);
 
 			generatingFalloff = static_cast<int>(mapX + mapY / static_cast<float>(mapLength));
 		}
@@ -116,8 +114,8 @@ void WorldData::GenerateMap()
 
 	print("Generated falloff map.");
 
-	ReseedNoise(noiseSeed);
-	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, noiseSeed, perlinNoise);
+	ReseedNoise(worldGenData->noiseSeed);
+	PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, worldGenData->noiseSeed, worldGenData->perlinNoise);
 
 	for (int i = 0; i < mapLength; i++)
 	{
@@ -128,10 +126,10 @@ void WorldData::GenerateMap()
 		else
 		{
 			// As the world reaches the edge we should blend it into the water
-			float fallOff = fallOffMapA[i] + fallOffMapB[i];
+			float fallOff = worldGenData->fallOffMapA[i] + worldGenData->fallOffMapB[i];
 
 			// Generate the noise
-			float perlinValue = perlinNoise[i] - fallOff;
+			float perlinValue = worldGenData->perlinNoise[i] - fallOff;
 			if (perlinValue < 0) perlinValue = 0;
 			int pixel_bw = static_cast<int>(perlinValue * NOISE_SCALE);
 
@@ -164,10 +162,7 @@ void WorldData::GenerateMap()
 		}
 	}
 
-	delete[] perlinNoise;
-	delete[] noiseSeed;
-	delete[] fallOffMapA;
-	delete[] fallOffMapB;
+	delete worldGenData;
 
 	auto groundTile = GetRandomGroundTile();
 
@@ -176,7 +171,16 @@ void WorldData::GenerateMap()
 
 	generatingWorld = 255;
 
-	print("Generated map.");
+	if (worldGenerated)
+	{
+		print("Generated map.");
+	}
+	else
+	{
+		print("Failed to generate map.");
+	}
+
+	generating = false;
 }
 
 bool WorldData::GenerateMapAsync()
@@ -189,12 +193,12 @@ bool WorldData::GenerateMapAsync()
 
 		ReseedNoise(worldGenData->noiseSeed);
 
-		print("Generating map...");
+		print("Generating map aync...");
 
 		worldGenerated = false;
 		generatingWorld = 0;
 
-		print("Generating falloff map...");
+		print("Generating falloff map async...");
 
 		// Seed the noise
 		PerlinNoise2D(MAP_WIDTH, MAP_HEIGHT, nOctaveCount, fScalingBias, worldGenData->noiseSeed, worldGenData->perlinNoise);
@@ -313,6 +317,11 @@ bool WorldData::GenerateMapAsync()
 	}
 
 	return true;
+}
+
+bool WorldData::GetWorldGenerating()
+{
+	return generating;
 }
 
 bool WorldData::GetWorldGenerated()

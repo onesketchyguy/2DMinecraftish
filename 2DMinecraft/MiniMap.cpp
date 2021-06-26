@@ -31,6 +31,8 @@ void MiniMap::Initialize(olc::Sprite* tileSprite, WorldData* worldData,
 	this->engine = engine;
 	this->time = time;
 
+	miniMapDrawScale = 0.5f;
+
 	miniMapSprite = new olc::Sprite(worldData->GetMapWidth(), worldData->GetMapHeight());
 	miniMapDecal = new olc::Decal(miniMapSprite);
 
@@ -65,51 +67,16 @@ void MiniMap::UpdateMiniMap(olc::vf2d localPlayer)
 	// Draw ye bloody minimap
 	if (drawMiniMap == true)
 	{
-		// Change location
-		if (engine->GetKey(MOVE_MAP_KEY).bReleased)
-		{
-			miniMapDrawLocation++;
-			miniMapDrawLocation %= 4;
-		}
-
-		// Scale in
-		if (engine->GetKey(SCALE_IN_KEY).bHeld)
-		{
-			miniMapDrawScale += 0.01f;
-			if (miniMapDrawScale > 1) miniMapDrawScale = 1;
-		}
-
-		// Scale out
-		if (engine->GetKey(SCALE_OUT_KEY).bHeld)
-		{
-			miniMapDrawScale -= 0.01f;
-			if (miniMapDrawScale < 0.05f) miniMapDrawScale = 0.05f;
-		}
-
 		// Only update the minimap every 'n'th frame
-		if (time->frameCount % 20 == 0)
-			UpdateDecal(localPlayer);
+		if (time->frameCount % 20 == 0) UpdateDecal(localPlayer);
 
 		// Draw the minimap
-		olc::vf2d drawLocation;
-		switch (miniMapDrawLocation)
+		olc::vf2d drawLocation =
 		{
-		case 0:
-			drawLocation = { 0,0 };
-			break;
-		case 1:
-			drawLocation = { engine->ScreenWidth() - miniMapSprite->width * miniMapDrawScale, 0 };
-			break;
-		case 2:
-			drawLocation = { engine->ScreenWidth() - miniMapSprite->width * miniMapDrawScale, engine->ScreenHeight() - miniMapSprite->height * miniMapDrawScale };
-			break;
-		case 3:
-			drawLocation = { 0, engine->ScreenHeight() - miniMapSprite->height * miniMapDrawScale };
-			break;
-		default:
-			break;
-		}
+			(engine->ScreenWidth() * 0.5f) - (miniMapSprite->width * miniMapDrawScale * 0.5f),
+			(engine->ScreenHeight() * 0.5f) - (miniMapSprite->height * miniMapDrawScale * 0.5f)
+		};
 
-		engine->DrawDecal(drawLocation, miniMapDecal, { miniMapDrawScale, miniMapDrawScale });
+		engine->DrawDecal(drawLocation, miniMapDecal, { miniMapDrawScale,  miniMapDrawScale });
 	}
 }

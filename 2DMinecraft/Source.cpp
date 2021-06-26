@@ -19,6 +19,8 @@ const uint8_t WORLD_ITEMS_HEIGHT = 1;
 
 const uint8_t WATER_SPRITE_INDEX = 3;
 
+std::string worldSeed = "";
+
 std::string serverIP = "127.0.0.1";
 const int SERVER_PORT = 60000;
 
@@ -37,6 +39,14 @@ public:
 	{
 		// Name your application
 		sAppName = "Mini minecraft";
+	}
+
+	~MiniMinecraft()
+	{
+		delete introScene;
+		delete mainMenu;
+		delete gameScene;
+		delete time;
 	}
 
 public:
@@ -150,11 +160,12 @@ int main()
 	// Hide console
 	ShowWindow(GetConsoleWindow(), SW_HIDE);
 
+	clearDebugFile();
 	print("_____Session started____");
 
 	// Show game
 	MiniMinecraft demo;
-	if (demo.Construct(264, 216, 3, 3))
+	if (demo.Construct(364, 216, 3, 3))
 		demo.Start();
 
 	if (DEBUG && debug_prints > 0)

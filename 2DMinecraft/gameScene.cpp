@@ -59,24 +59,33 @@ bool GameScene::ValidateWorld()
 		}
 		else
 		{
-			worldData->GenerateMap();
-			vWorldSize = { worldData->GetMapWidth(), worldData->GetMapHeight() };
+			if (worldData->GetWorldGenerating() == false)
+			{
+				if (worldSeed.empty() == false) worldData->ApplySeed(worldSeed);
+				worldData->GenerateMap();
+				minimap->Initialize(renderer->tileSpriteData->Sprite(), worldData, engine, time);
+				vWorldSize = { worldData->GetMapWidth(), worldData->GetMapHeight() };
 
-			if (playMode != PLAY_MODE::CLIENT)
-			{ // Auto accept this client
-				print("You're the host!");
-				descPlayer.position = worldData->GetRandomGroundTile();
+				if (playMode != PLAY_MODE::CLIENT)
+				{ // Auto accept this client
+					if (playMode == PLAY_MODE::SERVER) print("Server started.");
+					if (playMode == PLAY_MODE::SINGLE_PLAYER) print("Single player session started.");
 
-				if (descPlayer.position.x <= 0.001f && descPlayer.position.y <= 0.001f)
-				{
-					worldData->GenerateMap();
-					return false;
+					descPlayer.position = worldData->GetRandomGroundTile();
+
+					if (descPlayer.position.x <= 0.001f && descPlayer.position.y <= 0.001f)
+					{
+						DEBUG = true;
+						print("Failed to generate map properly!");
+
+						return false;
+					}
+
+					mapObjects.insert_or_assign(0, descPlayer);
+					waitingForConnection = false;
+
+					localPlayer = new PlayerObject(&GetLocalPlayer());
 				}
-
-				mapObjects.insert_or_assign(0, descPlayer);
-				waitingForConnection = false;
-
-				localPlayer = new PlayerObject(&GetLocalPlayer());
 			}
 
 			return false;
@@ -93,7 +102,7 @@ void GameScene::HandleNetworkingMessages()
 	{
 		while (client->Incoming().empty() == false)
 		{
-			auto msg = client->Incoming().pop_front().msg;
+			olc::net::message<GameMsg> msg = client->Incoming().pop_front().msg;
 
 			switch (msg.header.id)
 			{
@@ -158,88 +167,6 @@ void GameScene::HandleClient()
 	client->Send(msg);
 }
 
-void GameScene::ModifyHotbarSlots(int mod)
-{
-	slotCount += mod;
-
-	if (slotCount > MAX_HOTBAR_SLOTS)
-	{
-		slotCount = MAX_HOTBAR_SLOTS;
-	}
-
-	if (slotCount < MIN_HOTBAR_SLOTS)
-	{
-		slotCount = MIN_HOTBAR_SLOTS;
-	}
-
-	if (currentSlot != -1)
-	{
-		if (currentSlot >= slotCount)
-		{
-			currentSlot = -1;
-		}
-	}
-}
-
-void GameScene::DrawToolbarArea()
-{
-	Tools& currentTool = localPlayer->currentTool;
-	olc::vi2d slotHudScale = olc::vi2d{ SPRITE_SCALE * 2,  SPRITE_SCALE * 2 };
-	const olc::vi2d SLOT_HUD_SOURCE_SCALE = olc::vi2d{ SPRITE_SCALE * 2, SPRITE_SCALE * 2 };
-	olc::vf2d pos{};
-	olc::vi2d itemSlotPos{};
-
-	float halfTotalSlotCount = static_cast<float>(slotCount) * 0.5f;
-	halfTotalSlotCount *= SPRITE_SCALE * 2.0f;
-
-	for (uint8_t i = 0; i < slotCount; i++)
-	{
-		Tools currentSlotTool = GetToolItemFromInventory(i);
-
-		int slotPoint = SPRITE_SCALE * 2.0f * i;
-
-		// Draw the hotbar from left to right in the middle of the screen
-		pos = olc::vf2d{ ScreenWidth() / 2.0f - halfTotalSlotCount + slotPoint,
-			ScreenHeight() - SPRITE_SCALE * 2.0f };
-		itemSlotPos = { i == currentSlot ? 1 : 0 , 0 };
-
-		if (i == currentSlot)
-		{
-			currentTool = currentSlotTool;
-			pos.y -= SPRITE_SCALE * 0.15f;
-		}
-
-		engine->DrawPartialDecal(pos, slotHudScale, itemSlotRenderable->Decal(),
-			itemSlotPos * (SPRITE_SCALE * 2), SLOT_HUD_SOURCE_SCALE);
-
-		if (currentSlotTool != Tools::None)
-		{
-			olc::vi2d toolSpritePos = { TOOLS_COUNT - int(currentSlotTool) - 1 , 0 };
-			engine->DrawPartialDecal(pos, slotHudScale, toolsRenderable->Decal(),
-				toolSpritePos * (SPRITE_SCALE * 2), SLOT_HUD_SOURCE_SCALE);
-		}
-
-		// Input stuff
-
-		if (GetKey(olc::Key(28 + i)).bPressed)
-		{
-			ChangeCurrentHotbarSlot(i);
-		}
-
-		if (GetMouse(0).bPressed)
-		{
-			// NOTE: Maybe send a "on tool changed event" here
-			olc::vi2d mousePos = GetMousePos();
-
-			if (mousePos.x > pos.x && mousePos.x < pos.x + slotHudScale.x &&
-				mousePos.y > pos.y && mousePos.y < pos.y + slotHudScale.y)
-			{
-				ChangeCurrentHotbarSlot(i);
-			}
-		}
-	}
-}
-
 bool GameScene::OnLoad()
 {
 	if (playMode == PLAY_MODE::SERVER)
@@ -258,7 +185,6 @@ bool GameScene::OnLoad()
 	itemSlotRenderable->Load("Data/item_slot.png");
 
 	minimap = new MiniMap();
-	minimap->Initialize(renderer->tileSpriteData->Sprite(), worldData, engine, time);
 
 	if (playMode == PLAY_MODE::CLIENT) TryConnect(serverIP.c_str());
 
@@ -304,7 +230,7 @@ bool GameScene::Update()
 
 	// Handle Pan & Zoom
 	renderer->UpdateZoom();
-	renderer->SetCamera((GetLocalPlayer().position + CAM_OFFSET) / SPRITE_SCALE);
+	renderer->SetCamera(GetLocalPlayer().position);
 
 	renderer->DrawWorld();
 
@@ -402,6 +328,20 @@ bool GameScene::Update()
 	// Draw UI
 	DrawToolbarArea();
 
+	if (GetKey(olc::Key::E).bPressed || GetKey(olc::Key::I).bPressed)
+	{
+		inventoryOpen = !inventoryOpen;
+	}
+
+	if (inventoryOpen)
+	{
+		DrawInventory();
+	}
+
+	// Show notifications on top
+	HandleNotifications();
+	HandleToolTip();
+
 	// DEBUG: just for testing here we have some upgrades for the slotbar
 	int newHotbar = 0;
 
@@ -421,7 +361,11 @@ bool GameScene::Update()
 	for (size_t i = 1; i < TOOLS_COUNT; i++)
 	{
 		if (GetKey(olc::Key(69 + i)).bPressed)
-			AddToolItemFromInventory((Tools)i);
+		{
+			Tools item = (Tools)i;
+
+			AddToolItemToInventory(item);
+		}
 	}
 
 	return true;

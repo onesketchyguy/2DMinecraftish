@@ -24,6 +24,12 @@ Renderer::Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 	// World shit
 	tileSpriteData = new olc::Renderable();
 	LoadSprites(tileSpriteData, "Data/tiles.png");
+
+	// Debug shit
+	squareSprite = new olc::Sprite(1, 1);
+	squareSprite->SetPixel(0, 0, olc::WHITE);
+
+	squareDecal = new olc::Decal(squareSprite);
 }
 
 void Renderer::LoadSprites(olc::Renderable* renderable, std::string dir)
@@ -205,11 +211,14 @@ void Renderer::UpdateZoom()
 	if (viewPort.GetWorldScale().x >= MAX_ZOOM)
 		viewPort.SetZoom(MAX_ZOOM, camTarget);
 
-	screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenWidth() / 2.0f });
+	screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenHeight() / 2.0f });
 }
 
 void Renderer::SetCamera(olc::vf2d pos)
 {
+	pos += olc::vf2d(SPRITE_SCALE * 0.5f, SPRITE_SCALE * 0.5f);
+	pos /= SPRITE_SCALE;
+
 	camTarget = pos - screenCenter;
 	viewPort.SetWorldOffset(camTarget);
 }

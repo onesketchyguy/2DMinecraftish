@@ -9,6 +9,12 @@
 
 inline uint64_t debug_prints;
 
+inline void clearDebugFile() {
+	debug_prints = 0;
+
+	std::remove("Data/output_log.txt");
+}
+
 inline void print(std::string text) {
 	// Print to console.
 	std::cout << debug_prints << ":" << text << std::endl;

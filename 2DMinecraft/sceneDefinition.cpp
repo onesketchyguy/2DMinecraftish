@@ -63,6 +63,35 @@ void Scene::RecieveNumericalInput(std::string& input)
 	}
 }
 
+void Scene::RecieveStringInput(std::string& input)
+{
+	RecieveNumericalInput(input);
+
+	// Letters
+	for (size_t i = 1; i < 26; i++)
+	{
+		if (GetKey((olc::Key)i).bReleased)
+		{
+			input += char(i + 64);
+		}
+	}
+
+	// Space
+	if (GetKey(olc::Key::SPACE).bReleased)
+	{
+		input += ' ';
+	}
+
+	// Flash the cursor on screen
+	flashTime += time->elapsedTime;
+
+	if (flashTime > CURSOR_FLASH_TIME)
+	{
+		cursorVisable = !cursorVisable;
+		flashTime = 0;
+	}
+}
+
 olc::HWButton Scene::GetKey(olc::Key key) const
 {
 	return engine->GetKey(key);
@@ -352,7 +381,7 @@ void Scene::DrawStringDecal(const olc::vf2d& pos, const std::string& sText,
 void Scene::DrawStringPropDecal(const olc::vf2d& pos, const std::string& sText,
 	const  olc::Pixel col, const olc::vf2d& scale)
 {
-	engine->DrawStringDecal(pos, sText, col, scale);
+	engine->DrawStringPropDecal(pos, sText, col, scale);
 }
 
 void Scene::FillRectDecal(const olc::vf2d& pos, const olc::vf2d& size,

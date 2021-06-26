@@ -65,6 +65,7 @@ protected:
 	const olc::vi2d& GetScreenPixelSize() const;
 	const olc::vi2d& GetWindowMouse() const;
 	void RecieveNumericalInput(std::string& input);
+	void RecieveStringInput(std::string& input);
 
 protected: // DRAWING ROUTINES
 

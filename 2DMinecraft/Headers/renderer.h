@@ -50,6 +50,14 @@ private:
 
 public:
 	Renderer(olc::PixelGameEngine* engine, WorldData* worldData);
+	~Renderer()
+	{
+		delete squareSprite;
+		delete squareDecal;
+		delete tileSpriteData;
+		delete itemSpriteData;
+		delete playerSpriteData;
+	}
 
 public:
 	olc::PixelGameEngine* engine = nullptr;
@@ -57,6 +65,8 @@ public:
 	olc::TileTransformedView viewPort;
 
 	WorldData* worldData = nullptr;
+	olc::Sprite* squareSprite = nullptr;
+	olc::Decal* squareDecal = nullptr;
 	olc::Renderable* tileSpriteData = nullptr;
 	olc::Renderable* itemSpriteData = nullptr;
 	olc::Renderable* playerSpriteData = nullptr;

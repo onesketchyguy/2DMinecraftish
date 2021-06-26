@@ -29,6 +29,8 @@ extern std::string serverIP;
 extern const int SERVER_PORT;
 
 // Gameplay stuff
+extern std::string worldSeed;
+
 enum class LOOK_DIR : uint8_t
 {
 	down = 0,

@@ -22,8 +22,8 @@ void MainMenu::HandleMenus()
 
 			if (engine->GetMouse(0).bReleased)
 			{
-				currentScene = SCENE::SCENE_GAME;
-				playMode = PLAY_MODE::SINGLE_PLAYER;
+				currentMenu = MAIN_SUBMENU::MENU_SPLOBBY;
+				serverIpText->SetString("SEED: " + worldSeed);
 			}
 		}
 		else singlePlayerButton->fillColor = defaultColor;
@@ -137,6 +137,72 @@ void MainMenu::HandleMenus()
 		}
 		else backButton->fillColor = defaultColor;
 		break;
+
+	case MAIN_SUBMENU::MENU_SPLOBBY: // FIXME: do things correctly
+		hostButton->SetString("Play");
+		hostButton->Draw();
+		serverIpText->Draw();
+		backButton->Draw();
+
+		// Host button
+		if (hostButton->MouseOver())
+		{
+			hostButton->fillColor = highlightColor;
+
+			if (engine->GetMouse(0).bReleased)
+			{
+				currentScene = SCENE::SCENE_GAME;
+				playMode = PLAY_MODE::SINGLE_PLAYER;
+			}
+		}
+		else hostButton->fillColor = defaultColor;
+
+		// Ip text
+		if (typing)
+		{
+			RecieveStringInput(worldSeed);
+			// Update the string when needed
+
+			// FIXME: this is fine
+			char cursor = cursorVisable ? '_' : ' ';
+
+			serverIpText->SetString("SEED: " + worldSeed + cursor);
+		}
+
+		if (serverIpText->MouseOver())
+		{
+			serverIpText->fillColor = highlightColor;
+
+			if (engine->GetMouse(0).bReleased)
+			{
+				typing = true;
+			}
+		}
+		else
+		{
+			if (typing)
+			{
+				if (engine->GetMouse(0).bReleased)
+				{
+					typing = false;
+					serverIpText->SetString("SEED: " + worldSeed);
+				}
+			}
+			else serverIpText->fillColor = defaultColor;
+		}
+
+		// Back button
+		if (backButton->MouseOver())
+		{
+			backButton->fillColor = highlightColor;
+
+			if (engine->GetMouse(0).bReleased)
+			{
+				currentMenu = MAIN_SUBMENU::MENU_MAIN;
+			}
+		}
+		else backButton->fillColor = defaultColor;
+		break;
 	default:
 		break;
 	}
@@ -157,7 +223,7 @@ bool MainMenu::OnLoad()
 	xPos += 25;
 	yPos += 40;
 
-	singlePlayerButton = new TextBox(engine, "single player",
+	singlePlayerButton = new TextBox(engine, "single-player",
 		xPos, yPos,
 		125, 25,
 		1, 1,
@@ -166,7 +232,7 @@ bool MainMenu::OnLoad()
 
 	yPos += 40;
 #ifdef DEBUG_BUILD
-	multiPlayerButton = new TextBox(engine, "multi player",
+	multiPlayerButton = new TextBox(engine, "multi-player",
 		xPos, yPos,
 		125, 25,
 		1, 1,

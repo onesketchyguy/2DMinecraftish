@@ -31,7 +31,8 @@ private:
 	enum class MAIN_SUBMENU : uint8_t
 	{
 		MENU_MAIN,
-		MENU_MPLOBBY
+		MENU_MPLOBBY,
+		MENU_SPLOBBY
 	};
 
 	MAIN_SUBMENU currentMenu;
@@ -44,6 +45,7 @@ public:
 		delete multiPlayerButton;
 		delete quitButton;
 		delete hostButton;
+		delete serverIpText;
 		delete joinButton;
 		delete backButton;
 	}

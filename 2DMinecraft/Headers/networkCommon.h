@@ -21,7 +21,7 @@ enum class GameMsg : uint32_t
 	Game_UpdatePlayer,
 };
 
-const int TOOLS_COUNT = 5;
+const int TOOLS_COUNT = 7;
 enum class Tools : uint32_t
 {
 	None,
@@ -29,7 +29,30 @@ enum class Tools : uint32_t
 	Pickaxe,
 	Axe,
 	Hoe,
+	Sword,
+	FishingPole,
 };
+
+inline const char* ParseToolToString(Tools item)
+{
+	switch (item)
+	{
+	case Tools::Shovel:
+		return "shovel";
+	case Tools::Pickaxe:
+		return "pickaxe";
+	case Tools::Axe:
+		return "axe";
+	case Tools::Hoe:
+		return  "hoe";
+	case Tools::Sword:
+		return  "sword";
+	case Tools::FishingPole:
+		return  "fishing pole";
+	default:
+		return "Non-item";
+	}
+}
 
 struct PlayerDescription
 {

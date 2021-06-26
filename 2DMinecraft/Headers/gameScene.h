@@ -29,19 +29,28 @@ private:
 	Renderer* renderer = nullptr;
 	MiniMap* minimap = nullptr;
 
-	const olc::vf2d CAM_OFFSET{ 0.0f, 25.0f };
-
 	olc::Renderable* toolsRenderable = nullptr;
 	olc::Renderable* itemSlotRenderable = nullptr;
 
 	PlayerObject* localPlayer = nullptr;
 
+	const static int MAX_HOTBAR_SLOTS = 9;
+	const static int MIN_HOTBAR_SLOTS = 2;
+	uint8_t currentHotbarSlot = -1;
+	uint8_t hotbarSlotCount = 3;
+
+	wchar_t hotbarInventory[MAX_HOTBAR_SLOTS];
+
+	bool inventoryOpen = false;
+
+	const static int MAX_INVENTORY_SLOTS = 36;
+	const static int MIN_INVENTORY_SLOTS = 0;
+	uint8_t inventorySlotCount = 36;
+
 	std::wstring playerInventory;
 
-	const int MAX_HOTBAR_SLOTS = 9;
-	const int MIN_HOTBAR_SLOTS = 2;
-	uint8_t currentSlot = -1;
-	uint8_t slotCount = 3;
+	olc::vf2d toolTipPos{};
+	std::string toolTipText = "";
 
 public:
 	~GameScene()
@@ -52,7 +61,9 @@ public:
 		delete renderer;
 		delete minimap;
 		delete toolsRenderable;
+		delete itemSlotRenderable;
 		delete localPlayer;
+		mapObjects.clear();
 	}
 
 private:
@@ -88,64 +99,32 @@ private: // Networking stuff
 public: // Inventory stuff
 
 	// NOTE: later we will need this to be a generic ITEM
-	Tools GetToolItemFromInventory(const int i)
-	{
-		if (i >= playerInventory.length())
-			return Tools::None;
+	Tools GetToolItemFromInventory(const uint32_t i);
+	Tools GetToolItemFromHotbar(const uint32_t i);
 
-		auto c = playerInventory.at(i);
-
-		return static_cast<Tools>(c);
-	}
+	void RemoveToolItemFromHotbar(const uint32_t i);
 
 	// NOTE: later we will need this to be a generic ITEM
-	void AddToolItemFromInventory(const Tools item)
-	{
-		wchar_t itemChar = static_cast<wchar_t>(item);
-
-		switch (item)
-		{
-		case Tools::Shovel:
-			playerInventory.push_back(itemChar);
-			std::cout << itemChar << " Shovel" << std::endl;
-			break;
-		case Tools::Pickaxe:
-			playerInventory.push_back(itemChar);
-			std::cout << itemChar << " Pickaxe" << std::endl;
-			break;
-		case Tools::Axe:
-			playerInventory.push_back(itemChar);
-			std::cout << itemChar << " Axe" << std::endl;
-			break;
-		case Tools::Hoe:
-			playerInventory.push_back(itemChar);
-			std::cout << itemChar << " Hoe" << std::endl;
-			break;
-		default:
-			// Do nothing
-			print("WARNING! Atempted to add item to inventory. No item added.");
-			break;
-		}
-
-		auto val = GetToolItemFromInventory(playerInventory.length() - 1);
-		std::cout << "Item = " << static_cast<wchar_t>(val) << std::endl;
-	}
+	bool AddToolItemToInventory(const Tools item);
+	bool AddToolItemToHotbarSlot(const Tools item, int slot, bool overrideItem = false);
+	bool AddToolItemToHotbar(const Tools item);
 
 public: // HUD
+	std::vector<std::string> notifications;
+	float totalNotificationTime = 0.0f; // Amount of time left on current notication
+	float currentNotificationTime = 0.0f; // Amount of time left on current notication
+	float NOTIFICATION_SHOW_TIME = 3.0f; // Amount of time each notification will show for
+
+	void DisplayNotification(std::string notification);
+	void HandleNotifications();
+
+	void HandleToolTip();
+
+	void DrawInventory();
 	void DrawToolbarArea();
 	void ModifyHotbarSlots(int mod);
-	void ChangeCurrentHotbarSlot(int index)
-	{
-		if (currentSlot != index)
-		{
-			currentSlot = index;
-		}
-		else
-		{
-			currentSlot = -1;
-			localPlayer->currentTool = Tools::None;
-		}
-	}
+	void ModifyInventorySlots(int mod);
+	void ChangeCurrentHotbarSlot(int index);
 
 public:
 	bool OnLoad() override;

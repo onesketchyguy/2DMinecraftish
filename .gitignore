@@ -34,7 +34,6 @@
 
 # VS stuff
 *.VC.db
-2DMinecraft/.vs/
 
 # debug stuff
 output_log.txt
@@ -72,6 +71,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+.vs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

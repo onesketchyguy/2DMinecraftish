@@ -23,11 +23,11 @@ public:
 public:
 	WorldGenerationData(int mapLength)
 	{
-		float* fallOffMapA = new float[mapLength];
-		float* fallOffMapB = new float[mapLength];
+		fallOffMapA = new float[mapLength];
+		fallOffMapB = new float[mapLength];
 
-		float* perlinNoise = new float[mapLength];
-		float* noiseSeed = new float[mapLength];
+		perlinNoise = new float[mapLength];
+		noiseSeed = new float[mapLength];
 	}
 
 	~WorldGenerationData()
@@ -45,9 +45,9 @@ private:
 	const uint8_t MAP_WIDTH = 255;
 	const uint8_t MAP_HEIGHT = 255;
 
-	uint8_t falloffIndex_x;
-	uint8_t falloffIndex_y;
-	uint32_t generationIndex;
+	uint8_t falloffIndex_x = 0;
+	uint8_t falloffIndex_y = 0;
+	uint32_t generationIndex = 0;
 	WorldGenerationData* worldGenData = nullptr;
 
 	const float NOISE_SCALE = 10.0f;
@@ -59,13 +59,13 @@ private:
 	float fScalingBias = 1.3f;
 
 	bool worldGenerated = false;
+	bool generating = false;
 	uint8_t generatingWorld = 255;
 	uint8_t generatingFalloff = 255;
 
 	void PerlinNoise2D(int nWidth, int nHeight, int nOctaves, float fBias, float* noiseSeed, float* output);
 	float Evaluate(float value, float falloffPoint = 1.75f);
 	void ReseedNoise(float* noiseSeed);
-	void ApplySeed(std::string seedString);
 
 public:
 	WorldData() = default;
@@ -75,8 +75,10 @@ public:
 	uint8_t* tileData = nullptr;
 	uint8_t* foliageData = nullptr;
 
+	void ApplySeed(std::string seedString);
 	void GenerateMap();
 	bool GenerateMapAsync();
+	bool GetWorldGenerating();
 	bool GetWorldGenerated();
 	float GetWorldProgress();
 	float GetFalloffProgress();
