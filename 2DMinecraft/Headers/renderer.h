@@ -90,6 +90,8 @@ public:
 	void EnqueueDrawTile(int mapIndex, float x, float y);
 	void DrawItem(Item obj);
 	void DrawWorld();
+	void SetZoomScaleToMax();
+	void SetZoomScaleToMin();
 	void UpdateZoom();
 	void SetCamera(olc::vf2d pos);
 };

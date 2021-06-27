@@ -4,6 +4,8 @@
 #define MAIN_MENU_H
 
 #include "../Headers/sceneDefinition.h"
+#include "../Headers/renderer.h"
+#include "../Headers/worldData.h"
 
 class MainMenu : public Scene
 {
@@ -19,9 +21,10 @@ private:
 	TextBox* joinButton;
 	TextBox* backButton;
 
-	olc::Renderable* backGround;
+	WorldData* worldData;
+	Renderer* renderer;
 	olc::vf2d backGroundImagePos{ 0.0f,0.0f };
-	olc::vf2d backGroundImageDir{ 5.0f, 5.0f };
+	olc::vf2d backGroundImageTarget{ 0.0f,0.0f };
 
 	bool typing = false;
 
@@ -48,6 +51,8 @@ public:
 		delete serverIpText;
 		delete joinButton;
 		delete backButton;
+		delete renderer;
+		delete worldData;
 	}
 
 private:

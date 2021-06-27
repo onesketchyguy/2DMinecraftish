@@ -257,10 +257,8 @@ bool GameScene::Update()
 			for (vCell.x = vAreaTL.x; vCell.x <= vAreaBR.x; vCell.x++)
 			{
 				// Check if the cell is actually solid...
-				//	olc::vf2d vCellMiddle = vCell.floor();
-				int mapIndex = vCell.y * vWorldSize.x + vCell.x;
 
-				if (worldData->tileData[mapIndex] == 0)
+				if (worldData->collisionData[vCell.y * vWorldSize.x + vCell.x] == true)
 				{
 					// ...it is! So work out nearest point to future player position, around perimeter
 					// of cell rectangle. We can test the distance to this point to see if we have

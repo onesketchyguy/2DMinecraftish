@@ -5,12 +5,6 @@ void MainMenu::HandleMenus()
 	switch (currentMenu)
 	{
 	case MAIN_SUBMENU::MENU_MAIN:
-		if (time->frameCount % 10 == 0)
-		{
-			// Reseed the world generator
-			srand(static_cast<unsigned int>(std::time(0)));
-		}
-
 		title->Draw();
 
 		// Singleplayer button
@@ -287,42 +281,42 @@ bool MainMenu::OnLoad()
 		10, 10,
 		olc::BLACK, defaultColor);
 
-	backGround = new olc::Renderable();
-	backGround->Load("Data/mm.png");
+	worldData = new WorldData();
+	renderer = new Renderer(engine, worldData);
 
 	return true;
 }
 
 bool MainMenu::Update()
 {
+	if (worldData->GetWorldGenerated() == false)
+	{
+		if (worldData->GetWorldGenerating() == false)
+		{
+			worldData->GenerateMap();
+		}
+
+		backGroundImagePos = worldData->GetRandomGroundTile();
+		backGroundImageTarget = worldData->GetRandomGroundTile();
+
+		return true;
+	}
+
 	// Draw the menu
+
+	olc::vf2d backGroundImageDir = (backGroundImageTarget - backGroundImagePos) * 0.005f;
 
 	backGroundImagePos.x += backGroundImageDir.x * time->elapsedTime;
 	backGroundImagePos.y += backGroundImageDir.y * time->elapsedTime;
 
-	if (backGroundImagePos.x + ScreenWidth() / 2 >= ScreenWidth() - 1)
+	if (time->frameCount % 200 == 0 || abs(backGroundImageDir.mag()) < 0.001f)
 	{
-		backGroundImageDir.x = -backGroundImageDir.x;
+		backGroundImageTarget = worldData->GetRandomGroundTile();
 	}
 
-	if (backGroundImagePos.x <= 1)
-	{
-		backGroundImageDir.x = -backGroundImageDir.x;
-	}
-
-	if (backGroundImagePos.y + ScreenHeight() / 2 >= ScreenHeight() - 1)
-	{
-		backGroundImageDir.y = -backGroundImageDir.y;
-	}
-
-	if (backGroundImagePos.y <= 1)
-	{
-		backGroundImageDir.y = -backGroundImageDir.y;
-	}
-
-	DrawPartialDecal({ 0,0 }, olc::vi2d{ ScreenWidth(), ScreenHeight() },
-		backGround->Decal(), backGroundImagePos,
-		olc::vi2d{ ScreenWidth(), ScreenHeight() });
+	renderer->SetCamera(backGroundImagePos);
+	renderer->DrawWorld();
+	renderer->SetZoomScaleToMin();
 
 	HandleMenus();
 	return true;

@@ -68,6 +68,24 @@ void WorldData::ApplySeed(std::string seedString)
 	srand(value);
 }
 
+void WorldData::GenerateCollisionMap()
+{
+	for (uint16_t i = 0; i < mapLength; i++)
+	{
+		collisionData[i] = false;
+
+		if (foliageData[i] == 1 || foliageData[i] == 2)
+		{
+			collisionData[i] = true;
+		}
+
+		if (tileData[i] == 0 || tileData[i] == 1)
+		{
+			collisionData[i] = true;
+		}
+	}
+}
+
 void WorldData::GenerateMap()
 {
 	generating = true;
@@ -76,6 +94,7 @@ void WorldData::GenerateMap()
 
 	tileData = new uint8_t[mapLength];
 	foliageData = new uint8_t[mapLength];
+	collisionData = new bool[mapLength];
 	worldGenData = new WorldGenerationData(mapLength);
 	ReseedNoise(worldGenData->noiseSeed);
 
@@ -174,6 +193,7 @@ void WorldData::GenerateMap()
 	if (worldGenerated)
 	{
 		print("Generated map.");
+		GenerateCollisionMap();
 	}
 	else
 	{

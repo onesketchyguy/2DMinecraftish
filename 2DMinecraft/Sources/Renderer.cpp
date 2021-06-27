@@ -189,14 +189,23 @@ void Renderer::DrawWorld()
 		{
 			int mapIndex = tile.y * worldData->GetMapWidth() + tile.x;
 
-			float x = static_cast<float>(tile.x);
-			float y = static_cast<float>(tile.y);
-
-			EnqueueDrawTile(mapIndex, x, y);
+			EnqueueDrawTile(mapIndex, tile.x, tile.y);
 		}
 	}
 
 	DrawQueue();
+}
+
+void Renderer::SetZoomScaleToMax()
+{
+	viewPort.SetZoom(MAX_ZOOM, camTarget);
+	screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenHeight() / 2.0f });
+}
+
+void Renderer::SetZoomScaleToMin()
+{
+	viewPort.SetZoom(MIN_ZOOM, camTarget);
+	screenCenter = viewPort.ScaleToWorld(olc::vf2d{ engine->ScreenWidth() / 2.0f, engine->ScreenHeight() / 2.0f });
 }
 
 void Renderer::UpdateZoom()

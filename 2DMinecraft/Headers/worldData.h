@@ -73,9 +73,11 @@ public:
 
 public:
 	uint8_t* tileData = nullptr;
+	bool* collisionData = nullptr;
 	uint8_t* foliageData = nullptr;
 
 	void ApplySeed(std::string seedString);
+	void GenerateCollisionMap();
 	void GenerateMap();
 	bool GenerateMapAsync();
 	bool GetWorldGenerating();

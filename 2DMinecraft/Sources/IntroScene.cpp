@@ -16,6 +16,9 @@ bool IntroScene::OnLoad()
 	logoPos.x -= olc_logo->Sprite()->width * (olc_logoSize.x / 2.0f);
 	logoPos.y -= olc_logo->Sprite()->height * (olc_logoSize.y / 2.0f);
 
+	// Seed the world generator
+	srand(static_cast<unsigned int>(std::time(0)));
+
 	return true;
 }
 
