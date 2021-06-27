@@ -2,7 +2,7 @@
 #ifndef ITEM
 #define ITEM
 
-#include "Headers/olcPixelGameEngine.h"
+#include "../Headers/olcPixelGameEngine.h"
 
 class Item
 {

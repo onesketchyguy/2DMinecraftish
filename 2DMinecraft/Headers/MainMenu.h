@@ -3,7 +3,7 @@
 #ifndef MAIN_MENU_H
 #define MAIN_MENU_H
 
-#include "Headers/sceneDefinition.h"
+#include "../Headers/sceneDefinition.h"
 
 class MainMenu : public Scene
 {

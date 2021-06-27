@@ -22,14 +22,20 @@
     <Filter Include="Header Files\World">
       <UniqueIdentifier>{c4b8730c-4ee7-4d85-a85d-6c736116ece7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\World">
-      <UniqueIdentifier>{120089fa-77b7-456b-a8e8-9d20fdb758e7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\System">
       <UniqueIdentifier>{7f5e4309-e6c9-47b3-af4e-05665b23aca1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\olc">
       <UniqueIdentifier>{0d1cd6cf-65e2-43b9-902a-a7cbffe6c227}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scenes\GameScene systems">
+      <UniqueIdentifier>{a620dc38-f24a-48f1-abe2-9d0aab6f5b33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scenes\GameScene systems\World">
+      <UniqueIdentifier>{120089fa-77b7-456b-a8e8-9d20fdb758e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems">
+      <UniqueIdentifier>{273d41e0-616b-499b-80ed-f834e2e0b8ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -92,41 +98,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="IntroScene.cpp">
-      <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="MainMenu.cpp">
-      <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneDefinition.cpp">
-      <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>Source Files\World</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files\World</Filter>
-    </ClCompile>
-    <ClCompile Include="WorldData.cpp">
-      <Filter>Source Files\World</Filter>
-    </ClCompile>
-    <ClCompile Include="MiniMap.cpp">
-      <Filter>Source Files\World</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSceneInventory.cpp">
-      <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="GameUI.cpp">
-      <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="2DMinecraft.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
@@ -135,5 +106,40 @@
     <Image Include="gameIcon.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\gameScene.cpp">
+      <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\GameSceneInventory.cpp">
+      <Filter>Source Files\Scenes\GameScene systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\GameUI.cpp">
+      <Filter>Source Files\Scenes\GameScene systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\IntroScene.cpp">
+      <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Item.cpp">
+      <Filter>Source Files\Scenes\GameScene systems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\MainMenu.cpp">
+      <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\WorldData.cpp">
+      <Filter>Source Files\Scenes\GameScene systems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\sceneDefinition.cpp">
+      <Filter>Source Files\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\MiniMap.cpp">
+      <Filter>Source Files\Scenes\GameScene systems\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Renderer.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Source.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

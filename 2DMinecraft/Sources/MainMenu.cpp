@@ -1,4 +1,4 @@
-#include "Headers/MainMenu.h"
+#include "../Headers/MainMenu.h"
 
 void MainMenu::HandleMenus()
 {

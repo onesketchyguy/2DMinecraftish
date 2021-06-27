@@ -1,4 +1,4 @@
-#include "Headers/gameScene.h"
+#include "../Headers/gameScene.h"
 
 olc::vi2d GetToolSprite(Tools tool)
 {

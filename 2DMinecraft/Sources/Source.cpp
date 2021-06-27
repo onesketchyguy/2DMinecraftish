@@ -1,9 +1,9 @@
 // Forrest Lowe 2021
 
 #define OLC_PGE_APPLICATION
-#include "Headers/olcPixelGameEngine.h"
+#include "../Headers/olcPixelGameEngine.h"
 
-#include "Headers/ConstantData.h"
+#include "../Headers/ConstantData.h"
 
 bool DEBUG = false;
 bool APPLICATION_RUNNING = true;
@@ -24,12 +24,12 @@ std::string worldSeed = "";
 std::string serverIP = "127.0.0.1";
 const int SERVER_PORT = 60000;
 
-#include "Headers/uiObjects.h"
-#include "Headers/debugger.h"
+#include "../Headers/uiObjects.h"
+#include "../Headers/debugger.h"
 
-#include "Headers/introScene.h"
-#include "Headers/mainMenu.h"
-#include "Headers/gameScene.h"
+#include "../Headers/introScene.h"
+#include "../Headers/mainMenu.h"
+#include "../Headers/gameScene.h"
 
 // Override base class with your custom functionality
 class MiniMinecraft : public olc::PixelGameEngine

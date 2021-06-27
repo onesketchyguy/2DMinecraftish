@@ -1,4 +1,4 @@
-#include "Headers/gameScene.h"
+#include "../Headers/gameScene.h"
 
 void GameScene::MovePlayer()
 {

@@ -509,7 +509,7 @@ namespace olc
 			void ReadHeader()
 			{
 				// If this function is called, we are expecting asio to wait until it receives
-				// enough bytes to form a header of a message. We know the headers are a fixed
+				// enough bytes to form a header of a message. We know the ../Headers are a fixed
 				// size, so allocate a transmission buffer large enough to store it. In fact,
 				// we will construct the message in a "temporary" message object as it's
 				// convenient to work with.

@@ -1,4 +1,4 @@
-﻿#include "Headers/gameScene.h"
+﻿#include "../Headers/gameScene.h"
 /*
 * Handles all the UI NOT being handled by the inventory
 */

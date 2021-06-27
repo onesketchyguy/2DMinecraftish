@@ -1,5 +1,5 @@
-#include "Headers/sceneDefinition.h"
-#include "Headers/debugger.h"
+#include "../Headers/sceneDefinition.h"
+#include "../Headers/debugger.h"
 
 void Scene::Initialize(TimeConstruct* time, olc::PixelGameEngine* engine)
 {

@@ -168,23 +168,23 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameScene.cpp" />
-    <ClCompile Include="GameSceneInventory.cpp" />
-    <ClCompile Include="GameUI.cpp" />
-    <ClCompile Include="IntroScene.cpp" />
-    <ClCompile Include="Item.cpp" />
-    <ClCompile Include="MainMenu.cpp" />
-    <ClCompile Include="MiniMap.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="SceneDefinition.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="WorldData.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="2DMinecraft.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="gameIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\gameScene.cpp" />
+    <ClCompile Include="Sources\GameSceneInventory.cpp" />
+    <ClCompile Include="Sources\GameUI.cpp" />
+    <ClCompile Include="Sources\IntroScene.cpp" />
+    <ClCompile Include="Sources\Item.cpp" />
+    <ClCompile Include="Sources\MainMenu.cpp" />
+    <ClCompile Include="Sources\MiniMap.cpp" />
+    <ClCompile Include="Sources\Renderer.cpp" />
+    <ClCompile Include="Sources\sceneDefinition.cpp" />
+    <ClCompile Include="Sources\Source.cpp" />
+    <ClCompile Include="Sources\WorldData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

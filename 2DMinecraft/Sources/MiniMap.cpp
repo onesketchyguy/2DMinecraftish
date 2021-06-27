@@ -1,4 +1,4 @@
-#include "Headers/miniMap.h"
+#include "../Headers/miniMap.h"
 
 void MiniMap::UpdateDecal(olc::vf2d localPlayer)
 {
@@ -31,7 +31,8 @@ void MiniMap::Initialize(olc::Sprite* tileSprite, WorldData* worldData,
 	this->engine = engine;
 	this->time = time;
 
-	miniMapDrawScale = 0.5f;
+	// This is just a nice scale, we can really use any value here.
+	miniMapDrawScale = 0.625f;
 
 	miniMapSprite = new olc::Sprite(worldData->GetMapWidth(), worldData->GetMapHeight());
 	miniMapDecal = new olc::Decal(miniMapSprite);
