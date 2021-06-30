@@ -4,8 +4,6 @@
 #ifndef SCENE_DEFINITIONS_H
 #define SCENE_DEFINITIONS_H
 
-//#define DEBUG_BUILD
-
 #include "olcPixelGameEngine.h"
 
 #define OLC_PGEX_NETWORK
@@ -19,6 +17,7 @@
 #include "uiObjects.h"
 
 #include "timeConstruct.h"
+#include "renderer.h"
 
 /* example of use
 class MainMenu : public Scene
@@ -37,14 +36,18 @@ public:
 
 class Scene
 {
+public:
+	Scene() = default;
+
 protected: // FIXME: make this private
-	olc::PixelGameEngine* engine;
+	olc::PixelGameEngine* engine = nullptr;
+	Renderer* renderer = nullptr;
 
 public:
-	void Initialize(TimeConstruct* time, olc::PixelGameEngine* engine);
+	void Initialize(TimeConstruct* time, olc::PixelGameEngine* engine, Renderer* renderer);
 
 protected:
-	TimeConstruct* time;
+	TimeConstruct* time = nullptr;
 
 	bool cursorVisable = true;
 	const float CURSOR_FLASH_TIME = 0.25f;

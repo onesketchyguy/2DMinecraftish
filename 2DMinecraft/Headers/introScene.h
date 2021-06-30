@@ -9,7 +9,7 @@ class IntroScene : public Scene
 {
 	olc::Renderable* olc_logo;
 	olc::Renderable* flowe_logo;
-	olc::vf2d logoPos;
+	olc::vf2d logoPos = { 0.0f, 0.0f };
 	olc::vf2d olc_logoSize = { 0.25f, 0.25f };
 	olc::vf2d flowe_logoSize = { 1.25f, 1.25f };
 
@@ -19,6 +19,7 @@ class IntroScene : public Scene
 	float logoTime = TOTAL_LOGO_TIME;
 
 public:
+	IntroScene() = default;
 	~IntroScene()
 	{
 		delete olc_logo;

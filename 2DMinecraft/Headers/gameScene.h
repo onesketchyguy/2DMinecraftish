@@ -25,12 +25,7 @@ private:
 	Client* client = nullptr;
 
 	WorldData* worldData = nullptr;
-
-	Renderer* renderer = nullptr;
 	MiniMap* minimap = nullptr;
-
-	olc::Renderable* toolsRenderable = nullptr;
-	olc::Renderable* itemSlotRenderable = nullptr;
 
 	PlayerObject* localPlayer = nullptr;
 
@@ -53,15 +48,13 @@ private:
 	std::string toolTipText = "";
 
 public:
+	GameScene() = default;
 	~GameScene()
 	{
 		delete server;
 		delete client;
 		delete worldData;
-		delete renderer;
 		delete minimap;
-		delete toolsRenderable;
-		delete itemSlotRenderable;
 		delete localPlayer;
 		mapObjects.clear();
 	}

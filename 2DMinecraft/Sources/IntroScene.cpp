@@ -8,10 +8,9 @@ bool IntroScene::OnLoad()
 	logoPos.y = ScreenHeight() / 2.0f;
 
 	olc_logo = new olc::Renderable();
-	olc_logo->Load("Data/olc_logo.png");
-
+	renderer->LoadSprites(olc_logo, "Data/olc_logo.png");
 	flowe_logo = new olc::Renderable();
-	flowe_logo->Load("Data/flowe_logo.png");
+	renderer->LoadSprites(flowe_logo, "Data/flowe_logo.png");
 
 	logoPos.x -= olc_logo->Sprite()->width * (olc_logoSize.x / 2.0f);
 	logoPos.y -= olc_logo->Sprite()->height * (olc_logoSize.y / 2.0f);

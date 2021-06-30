@@ -1,15 +1,39 @@
 #define OLC_PGEX_TRANSFORMEDVIEW
 #include "../Headers/renderer.h"
 
-Renderer::Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
+Renderer::Renderer(olc::PixelGameEngine* engine)
 {
 	this->engine = engine;
-	this->worldData = worldData;
 
 	viewPort = olc::TileTransformedView({ engine->ScreenWidth(), engine->ScreenHeight() },
 		{ SPRITE_SCALE, SPRITE_SCALE });
 
 	print("Created viewport.");
+
+	const std::string DATA_LOCATION = "Data/packfile.dat";
+	const std::string RESOURCE_KEY = "resourceKEY";
+
+	resourcePack = new olc::ResourcePack();
+	bool loaded = resourcePack->LoadPack(DATA_LOCATION, RESOURCE_KEY);
+
+	if (loaded == false)
+	{
+		print("Generating resource pack...");
+
+		resourcePack->AddFile("Data/player.png");
+		resourcePack->AddFile("Data/items.png");
+		resourcePack->AddFile("Data/tiles.png");
+		resourcePack->AddFile("Data/tools.png");
+		resourcePack->AddFile("Data/worldTools.png");
+		resourcePack->AddFile("Data/item_slot.png");
+		resourcePack->AddFile("Data/items.png");
+		resourcePack->AddFile("Data/olc_logo.png");
+		resourcePack->AddFile("Data/flowe_logo.png");
+		resourcePack->AddFile("Data/colorPalette.png");
+
+		resourcePack->SavePack(DATA_LOCATION, RESOURCE_KEY);
+		resourcePack->LoadPack(DATA_LOCATION, RESOURCE_KEY);
+	}
 
 	print("Loading all sprites...");
 
@@ -20,6 +44,12 @@ Renderer::Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 	// Item shit
 	itemSpriteData = new olc::Renderable();
 	LoadSprites(itemSpriteData, "Data/items.png");
+	toolsRenderable = new olc::Renderable();
+	LoadSprites(toolsRenderable, "Data/tools.png");
+	worldToolsRenderable = new olc::Renderable();
+	LoadSprites(worldToolsRenderable, "Data/worldTools.png");
+	itemSlotRenderable = new olc::Renderable();
+	LoadSprites(itemSlotRenderable, "Data/item_slot.png");
 
 	// World shit
 	tileSpriteData = new olc::Renderable();
@@ -34,7 +64,7 @@ Renderer::Renderer(olc::PixelGameEngine* engine, WorldData* worldData)
 
 void Renderer::LoadSprites(olc::Renderable* renderable, std::string dir)
 {
-	renderable->Load(dir);
+	renderable->Load(dir, resourcePack);
 	print("Loading sprites from: " + dir);
 
 	if (renderable->Decal() == nullptr)
@@ -43,8 +73,10 @@ void Renderer::LoadSprites(olc::Renderable* renderable, std::string dir)
 		DEBUG = true;
 		APPLICATION_RUNNING = true;
 	}
-
-	print("Loaded sprites.");
+	else
+	{
+		print("Loaded " + dir);
+	}
 }
 
 void Renderer::DrawDecal(olc::vf2d pos, olc::vf2d scale,
@@ -189,7 +221,7 @@ void Renderer::DrawWorld()
 		{
 			int mapIndex = tile.y * worldData->GetMapWidth() + tile.x;
 
-			EnqueueDrawTile(mapIndex, tile.x, tile.y);
+			EnqueueDrawTile(mapIndex, static_cast<float>(tile.x), static_cast<float>(tile.y));
 		}
 	}
 

@@ -40,7 +40,7 @@ class Renderer
 {
 private:
 	const float MIN_ZOOM = 10.0f;
-	const float MAX_ZOOM = 36.0f;
+	const float MAX_ZOOM = 26.0f;
 
 	olc::vf2d screenCenter{ 0.0f, 0.0f };
 	olc::vf2d camTarget{ 0.0f, 0.0f };
@@ -49,7 +49,7 @@ private:
 	olc::vi2d bottomRight{ 0, 0 };
 
 public:
-	Renderer(olc::PixelGameEngine* engine, WorldData* worldData);
+	Renderer(olc::PixelGameEngine* engine);
 	~Renderer()
 	{
 		delete squareSprite;
@@ -57,6 +57,11 @@ public:
 		delete tileSpriteData;
 		delete itemSpriteData;
 		delete playerSpriteData;
+		delete resourcePack;
+		delete toolsRenderable;
+		delete itemSlotRenderable;
+
+		drawQueue.clear();
 	}
 
 public:
@@ -65,13 +70,28 @@ public:
 	olc::TileTransformedView viewPort;
 
 	WorldData* worldData = nullptr;
+
+	olc::ResourcePack* resourcePack = nullptr;
 	olc::Sprite* squareSprite = nullptr;
 	olc::Decal* squareDecal = nullptr;
 	olc::Renderable* tileSpriteData = nullptr;
 	olc::Renderable* itemSpriteData = nullptr;
 	olc::Renderable* playerSpriteData = nullptr;
+	olc::Renderable* toolsRenderable = nullptr;
+	olc::Renderable* worldToolsRenderable = nullptr;
+	olc::Renderable* itemSlotRenderable = nullptr;
 
 	std::vector<DecalData> drawQueue;
+
+	void ClearWorldData()
+	{
+		this->worldData = nullptr;
+	}
+
+	void SetWorldData(WorldData* worldData)
+	{
+		this->worldData = worldData;
+	}
 
 	void LoadSprites(olc::Renderable* renderable, std::string dir);
 	void DrawDecal(olc::vf2d pos, olc::vf2d scale, olc::Decal* decal,

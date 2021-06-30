@@ -86,6 +86,19 @@ void WorldData::GenerateCollisionMap()
 	}
 }
 
+void WorldData::ClearMap()
+{
+	if (tileData != nullptr)
+		delete[] tileData;
+	if (foliageData != nullptr)
+		delete[] foliageData;
+
+	worldGenerated = false;
+	generating = false;
+	generatingWorld = 255;
+	generatingFalloff = 255;
+}
+
 void WorldData::GenerateMap()
 {
 	generating = true;

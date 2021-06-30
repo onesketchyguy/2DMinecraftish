@@ -78,6 +78,7 @@ public:
 
 	void ApplySeed(std::string seedString);
 	void GenerateCollisionMap();
+	void ClearMap();
 	void GenerateMap();
 	bool GenerateMapAsync();
 	bool GetWorldGenerating();

@@ -179,13 +179,13 @@ void GameScene::DrawInventory()
 
 		itemSlotSpritePos = { mouseOver ? 1 : 0 , 0 };
 
-		engine->DrawPartialDecal(pos, slotHudScale, itemSlotRenderable->Decal(),
+		engine->DrawPartialDecal(pos, slotHudScale, renderer->itemSlotRenderable->Decal(),
 			itemSlotSpritePos * (SPRITE_SCALE * 2), SLOT_HUD_SOURCE_SCALE);
 
 		if (currentSlotTool != Tools::None)
 		{
 			// Draw the tool itself
-			engine->DrawPartialDecal(pos, slotHudScale, toolsRenderable->Decal(),
+			engine->DrawPartialDecal(pos, slotHudScale, renderer->toolsRenderable->Decal(),
 				GetToolSprite(currentSlotTool) * (SPRITE_SCALE * 2), SLOT_HUD_SOURCE_SCALE);
 		}
 
@@ -248,13 +248,13 @@ void GameScene::DrawToolbarArea()
 			pos.y -= SPRITE_SCALE * 0.15f;
 		}
 
-		engine->DrawPartialDecal(pos, slotHudScale, itemSlotRenderable->Decal(),
+		engine->DrawPartialDecal(pos, slotHudScale, renderer->itemSlotRenderable->Decal(),
 			itemSlotPos * (SPRITE_SCALE * 2), SLOT_HUD_SOURCE_SCALE);
 
 		if (currentSlotTool != Tools::None)
 		{
 			// Draw the tool itself
-			engine->DrawPartialDecal(pos, slotHudScale, toolsRenderable->Decal(),
+			engine->DrawPartialDecal(pos, slotHudScale, renderer->toolsRenderable->Decal(),
 				GetToolSprite(currentSlotTool) * (SPRITE_SCALE * 2), SLOT_HUD_SOURCE_SCALE);
 		}
 

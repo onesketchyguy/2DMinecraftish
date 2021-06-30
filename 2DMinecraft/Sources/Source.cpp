@@ -1,6 +1,9 @@
 // Forrest Lowe 2021
 
+//#define DEBUG_BUILD
+
 #define OLC_PGE_APPLICATION
+#include "../resource.h"
 #include "../Headers/olcPixelGameEngine.h"
 
 #include "../Headers/ConstantData.h"
@@ -46,12 +49,14 @@ public:
 		delete introScene;
 		delete mainMenu;
 		delete gameScene;
+		delete renderer;
 		delete time;
 	}
 
 public:
 
-	TimeConstruct* time;
+	TimeConstruct* time = nullptr;
+	Renderer* renderer = nullptr;
 
 	IntroScene* introScene = nullptr;
 	MainMenu* mainMenu = nullptr;
@@ -65,8 +70,10 @@ public:
 		case SCENE::SCENE_INTRO:
 			if (introScene == nullptr)
 			{
+				print("Loading intro scene");
+
 				introScene = new IntroScene();
-				introScene->Initialize(time, this);
+				introScene->Initialize(time, this, renderer);
 			}
 			else
 			{
@@ -77,8 +84,10 @@ public:
 		case SCENE::SCENE_MAIN_MENU:
 			if (mainMenu == nullptr)
 			{
+				print("Loading main menu scene");
+
 				mainMenu = new MainMenu();
-				mainMenu->Initialize(time, this);
+				mainMenu->Initialize(time, this, renderer);
 			}
 			else
 			{
@@ -103,8 +112,12 @@ public:
 		case SCENE::SCENE_GAME:
 			if (gameScene == nullptr)
 			{
+				renderer->ClearWorldData();
+
+				print("Loading game scene");
+
 				gameScene = new GameScene();
-				gameScene->Initialize(time, this);
+				gameScene->Initialize(time, this, renderer);
 			}
 			else
 			{
@@ -129,6 +142,8 @@ public:
 	bool OnUserCreate() override
 	{
 		time = new TimeConstruct();
+		renderer = new Renderer(this);
+
 		return !DEBUG;
 	}
 

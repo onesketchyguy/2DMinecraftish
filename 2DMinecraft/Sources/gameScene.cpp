@@ -176,13 +176,8 @@ bool GameScene::OnLoad()
 	}
 
 	worldData = new WorldData();
-	renderer = new Renderer(engine, worldData);
-
-	toolsRenderable = new olc::Renderable();
-	toolsRenderable->Load("Data/tools.png");
-
-	itemSlotRenderable = new olc::Renderable();
-	itemSlotRenderable->Load("Data/item_slot.png");
+	renderer->SetWorldData(worldData);
+	renderer->SetZoomScaleToMax();
 
 	minimap = new MiniMap();
 
@@ -229,7 +224,7 @@ bool GameScene::Update()
 	}
 
 	// Handle Pan & Zoom
-	renderer->UpdateZoom();
+	//renderer->UpdateZoom();
 	renderer->SetCamera(GetLocalPlayer().position);
 
 	renderer->DrawWorld();
@@ -283,6 +278,11 @@ bool GameScene::Update()
 						// Statically resolve the collision
 						vPotentialPosition = vPotentialPosition - vRayToNearest.norm() * fOverlap;
 					}
+
+					if (DEBUG == true)
+					{
+						DrawDecal(vCell / SPRITE_SCALE, renderer->squareDecal, spriteScale, olc::RED);
+					}
 				}
 			}
 		}
@@ -298,7 +298,12 @@ bool GameScene::Update()
 		renderer->DrawPlayer(object.second);
 
 		// Draw Boundary
-		renderer->viewPort.DrawCircle(object.second.position / SPRITE_SCALE, object.second.radius);
+		//renderer->viewPort.DrawCircle(object.second.position / SPRITE_SCALE, object.second.radius);
+
+		if (DEBUG == true)
+		{
+			DrawDecal(object.second.position / SPRITE_SCALE, renderer->squareDecal, spriteScale, olc::RED);
+		}
 
 		// Draw Velocity
 		if (object.second.velocity.mag2() > 0)

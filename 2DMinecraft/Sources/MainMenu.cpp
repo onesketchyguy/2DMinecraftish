@@ -282,7 +282,7 @@ bool MainMenu::OnLoad()
 		olc::BLACK, defaultColor);
 
 	worldData = new WorldData();
-	renderer = new Renderer(engine, worldData);
+	renderer->SetWorldData(worldData);
 
 	return true;
 }

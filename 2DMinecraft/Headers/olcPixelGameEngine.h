@@ -4448,7 +4448,14 @@ namespace olc
 		virtual olc::rcode CreateWindowPane(const olc::vi2d& vWindowPos, olc::vi2d& vWindowSize, bool bFullScreen) override
 		{
 			WNDCLASS wc;
+
+#ifdef IDI_ICON1
+			wc.hIcon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));
+#endif // IDI_ICON1
+#ifndef IDI_ICON1
 			wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+#endif // !IDI_ICON1
+
 			wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 			wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 			wc.hInstance = GetModuleHandle(nullptr);

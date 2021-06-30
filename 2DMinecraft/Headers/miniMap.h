@@ -13,6 +13,7 @@ class MiniMap
 {
 private:
 	const uint8_t PLAYER_ICON_SCALE = 25;
+	const uint8_t CLEAN_AREA_SCALE = 150;
 
 	const olc::Key TOGGLE_KEY = olc::Key::M;
 
@@ -20,13 +21,16 @@ private:
 	olc::PixelGameEngine* engine = nullptr;
 	TimeConstruct* time = nullptr;
 
+	olc::Sprite* cachedMap;
 	olc::Sprite* miniMapSprite;
 	olc::Decal* miniMapDecal;
 
 	bool drawMiniMap = false;
 	float miniMapDrawScale = 0.25f;
 	olc::Pixel* mapColors;
+	olc::Pixel playerColor = olc::Pixel(255, 0, 0, 255);
 
+	void UpdateSprite();
 	void UpdateDecal(olc::vf2d localPlayer);
 
 public:

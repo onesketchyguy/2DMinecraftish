@@ -1,10 +1,12 @@
 #include "../Headers/sceneDefinition.h"
 #include "../Headers/debugger.h"
+#include "../Headers/renderer.h"
 
-void Scene::Initialize(TimeConstruct* time, olc::PixelGameEngine* engine)
+void Scene::Initialize(TimeConstruct* time, olc::PixelGameEngine* engine, Renderer* renderer)
 {
 	this->time = time;
 	this->engine = engine;
+	this->renderer = renderer;
 }
 
 bool Scene::UpdateScene()

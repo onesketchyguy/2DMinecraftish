@@ -10,19 +10,18 @@
 class MainMenu : public Scene
 {
 private:
-	TextBox* title;
+	TextBox* title = nullptr;
 
-	TextBox* singlePlayerButton;
-	TextBox* multiPlayerButton;
-	TextBox* quitButton;
+	TextBox* singlePlayerButton = nullptr;
+	TextBox* multiPlayerButton = nullptr;
+	TextBox* quitButton = nullptr;
 
-	TextBox* hostButton;
-	TextBox* serverIpText;
-	TextBox* joinButton;
-	TextBox* backButton;
+	TextBox* hostButton = nullptr;
+	TextBox* serverIpText = nullptr;
+	TextBox* joinButton = nullptr;
+	TextBox* backButton = nullptr;
 
 	WorldData* worldData;
-	Renderer* renderer;
 	olc::vf2d backGroundImagePos{ 0.0f,0.0f };
 	olc::vf2d backGroundImageTarget{ 0.0f,0.0f };
 
@@ -41,6 +40,7 @@ private:
 	MAIN_SUBMENU currentMenu;
 
 public:
+	MainMenu() = default;
 	~MainMenu()
 	{
 		delete title;
@@ -51,7 +51,6 @@ public:
 		delete serverIpText;
 		delete joinButton;
 		delete backButton;
-		delete renderer;
 		delete worldData;
 	}
 
