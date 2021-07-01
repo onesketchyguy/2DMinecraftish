@@ -64,7 +64,6 @@ private:
 	uint8_t generatingFalloff = 255;
 
 	void PerlinNoise2D(int nWidth, int nHeight, int nOctaves, float fBias, float* noiseSeed, float* output);
-	float Evaluate(float value, float falloffPoint = 1.75f);
 	void ReseedNoise(float* noiseSeed);
 
 public:

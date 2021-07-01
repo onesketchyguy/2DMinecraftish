@@ -1,4 +1,5 @@
 #include "../Headers/worldData.h"
+#include "../Headers/bonusMaths.h";
 
 WorldData::~WorldData()
 {
@@ -40,15 +41,6 @@ void WorldData::PerlinNoise2D(int nWidth, int nHeight, int nOctaves, float fBias
 			// Scale to seed range
 			output[y * nWidth + x] = fNoise / fScaleAcc;
 		}
-}
-
-float WorldData::Evaluate(float value, float falloffPoint)
-{
-	if (value <= 0.001f) return 0;
-
-	float a = 3;
-
-	return pow(value, a) / (pow(value, a) + pow(falloffPoint - falloffPoint * value, a));
 }
 
 void WorldData::ReseedNoise(float* noiseSeed)
@@ -132,13 +124,14 @@ void WorldData::GenerateMap()
 			float evalX = abs(mapX / (float)MAP_WIDTH * 2 - 1);
 			float evalY = abs(mapY / (float)MAP_HEIGHT * 2 - 1);
 
+			float value = evalX > evalY ? evalX : evalY;
+
 			// Generate the noise
 			int noiseIndex = mapY * MAP_WIDTH + mapX;
-			float perlinValue = worldGenData->perlinNoise[noiseIndex];
+			float perlinValue = (worldGenData->perlinNoise[noiseIndex] + value) / 2.0f;
 
-			float value = evalX > evalY ? evalX : evalY;
 			worldGenData->fallOffMapA[mapY * MAP_WIDTH + mapX] = Evaluate(perlinValue);
-			worldGenData->fallOffMapB[mapY * MAP_WIDTH + mapX] = Evaluate(value);
+			worldGenData->fallOffMapB[mapY * MAP_WIDTH + mapX] = Evaluate(mapX, mapY, MAP_WIDTH, MAP_HEIGHT);//Evaluate(value);
 
 			generatingFalloff = static_cast<int>(mapX + mapY / static_cast<float>(mapLength));
 		}

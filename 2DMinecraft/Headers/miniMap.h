@@ -8,6 +8,7 @@
 #include "olcPixelGameEngine.h"
 #include "worldData.h"
 #include "timeConstruct.h"
+#include "bonusMaths.h"
 
 class MiniMap
 {
@@ -26,10 +27,12 @@ private:
 	olc::Decal* miniMapDecal;
 
 	bool drawMiniMap = false;
+	bool updateMap = true;
 	float miniMapDrawScale = 0.25f;
 	olc::Pixel* mapColors;
 	olc::Pixel playerColor = olc::Pixel(255, 0, 0, 255);
 
+	olc::Pixel GetDitherColor(int x, int y, float mutator, double4 error);
 	void UpdateSprite();
 	void UpdateDecal(olc::vf2d localPlayer);
 

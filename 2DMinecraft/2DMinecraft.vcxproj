@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\bonusMaths.h" />
     <ClInclude Include="Headers\ConstantData.h" />
     <ClInclude Include="Headers\debugger.h" />
     <ClInclude Include="Headers\fileManager.h" />

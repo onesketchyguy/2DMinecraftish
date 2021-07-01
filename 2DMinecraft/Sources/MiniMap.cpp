@@ -1,91 +1,73 @@
 #include "../Headers/miniMap.h"
 
-float Evaluate(float value, float falloffPoint = 1.75f)
+olc::Pixel MiniMap::GetDitherColor(int x, int y, float mutator, double4 error)
 {
-	if (value <= 0.001f) return 0;
+	int index = worldData->tileData[y * worldData->GetMapWidth() + x];
+	olc::Pixel col = mapColors[index];
 
-	float a = 3;
-
-	return pow(value, a) / (pow(value, a) + pow(falloffPoint - falloffPoint * value, a));
+	col.r = col.r + static_cast<uint8_t>(round(error.x * mutator / 16.0f));
+	col.g = col.g + static_cast<uint8_t>(round(error.y * mutator / 16.0f));
+	col.b = col.b + static_cast<uint8_t>(round(error.z * mutator / 16.0f));
+	col.a = col.a + static_cast<uint8_t>(round(error.w * mutator / 16.0f));
+	return col;
 }
 
-// FIXME: update this every time the map is modified
 // FIXME: Optimize this code please
 void MiniMap::UpdateSprite()
 {
-	// Clear the existing map
-	for (int y = 0; y < worldData->GetMapHeight(); y++)
-		for (int x = 0; x < worldData->GetMapWidth(); x++)
-		{
-			cachedMap->SetPixel(x, y, olc::BLANK);
-		}
+	olc::Pixel targetPixel;
+	double4 newCol;
+	double4 error;
 
 	// Generate a new map
-	for (int y = 0; y < worldData->GetMapHeight() - 1; y++)
-		for (int x = 1; x < worldData->GetMapWidth() - 1; x++)
+	for (int y = 0; y < worldData->GetMapHeight() - 1; y += 2)
+		for (int x = 1; x < worldData->GetMapWidth() - 1; x += 2)
 		{
-			if (x % 2 == 1 || y % 2 == 1) continue;
+			//if (x % 2 == 1 || y % 2 == 1) continue; // If not doing this then increment 2 instead of 1 in for loops
 
-			float evalX = abs(x / (float)worldData->GetMapWidth() * 2.0f - 1.0f);
-			float evalY = abs(y / (float)worldData->GetMapHeight() * 2.0f - 1.0f);
-			float value = evalX > evalY ? evalX : evalY;
-			float evaluation = Evaluate(value);
+			float factor = Evaluate(x, y, worldData->GetMapWidth(), worldData->GetMapHeight());
 
 			int index = worldData->tileData[y * worldData->GetMapWidth() + x];
-			olc::Pixel targetPixel = mapColors[index];
+			targetPixel = mapColors[index];
 
-			evaluation *= 10;
-			evaluation = ceil(evaluation);
-			evaluation /= 10;
+			if (factor > 0.5)
+			{
+				factor += factor * 2.5f;
+			}
 
-			if (evaluation > 0.7) evaluation += 2.5f;
-			if (evaluation > 0.8) evaluation += 2.5f;
-			if (evaluation > 0.9) evaluation += 2.5f;
+			if (factor > 4.0f) factor = 4.0f;
+			if (factor < 1.0f) factor = 1.0f;
 
-			float factor = ceil(3.5f * evaluation);
+			newCol = double4(static_cast<double>(targetPixel.r), static_cast<double>(targetPixel.g),
+				static_cast<double>(targetPixel.b), static_cast<double>(targetPixel.a));
+			newCol.x = round(factor * static_cast<double>(targetPixel.r) / 255.0f) * floor(255.0f / factor);
+			newCol.y = round(factor * static_cast<double>(targetPixel.g) / 255.0f) * floor(255.0f / factor);
+			newCol.z = round(factor * static_cast<double>(targetPixel.b) / 255.0f) * floor(255.0f / factor);
+			newCol.w = round(factor * static_cast<double>(targetPixel.a) / 255.0f) * floor(255.0f / factor);
 
-			float newR = round(factor * targetPixel.r / 255.0f) * floor(255.0f / factor);
-			float newG = round(factor * targetPixel.g / 255.0f) * floor(255.0f / factor);
-			float newB = round(factor * targetPixel.b / 255.0f) * floor(255.0f / factor);
-			float newA = round(factor * targetPixel.a / 255.0f) * floor(255.0f / factor);
+			error = double4(static_cast<double>(targetPixel.r - newCol.x), static_cast<double>(targetPixel.g - newCol.y),
+				static_cast<double>(targetPixel.b - newCol.z), static_cast<double>(targetPixel.a - newCol.w));
 
-			float errR = targetPixel.r - newR;
-			float errG = targetPixel.g - newG;
-			float errB = targetPixel.b - newB;
-			float errA = targetPixel.a - newA;
-
-			index = worldData->tileData[y * worldData->GetMapWidth() + (x + 1)];
-			olc::Pixel col = mapColors[index];
-			col.r = col.r + errR * 7.0f / 16.0f;
-			col.g = col.g + errG * 7.0f / 16.0f;
-			col.b = col.b + errB * 7.0f / 16.0f;
-			col.a = col.a + errA * 7.0f / 16.0f;
-			cachedMap->SetPixel(x + 1, y, col);
-
-			index = worldData->tileData[(y + 1) * worldData->GetMapWidth() + (x - 1)];
-			col = mapColors[index];
-			col.r = col.r + errR * 3.0f / 16.0f;
-			col.g = col.g + errG * 3.0f / 16.0f;
-			col.b = col.b + errB * 3.0f / 16.0f;
-			col.a = col.a + errA * 3.0f / 16.0f;
-			cachedMap->SetPixel(x - 1, y + 1, col);
-
-			index = worldData->tileData[(y + 1) * worldData->GetMapWidth() + x];
-			col = mapColors[index];
-			col.r = col.r + errR * 5.0f / 16.0f;
-			col.g = col.g + errG * 5.0f / 16.0f;
-			col.b = col.b + errB * 5.0f / 16.0f;
-			col.a = col.a + errA * 5.0f / 16.0f;
-			cachedMap->SetPixel(x, y + 1, col);
-
-			index = worldData->tileData[y * worldData->GetMapWidth() + x];
-			col = mapColors[index];
-			col.r = col.r + errR * 1.0f / 16.0f;
-			col.g = col.g + errG * 1.0f / 16.0f;
-			col.b = col.b + errB * 1.0f / 16.0f;
-			col.a = col.a + errA * 1.0f / 16.0f;
-			cachedMap->SetPixel(x, y, col);
+			cachedMap->SetPixel(x + 1, y, GetDitherColor(x + 1, y, 7.0f, error));
+			cachedMap->SetPixel(x - 1, y + 1, GetDitherColor(x - 1, y + 1, 3.0f, error));
+			cachedMap->SetPixel(x, y + 1, GetDitherColor(x - 1, y + 1, 5.0f, error));
+			cachedMap->SetPixel(x, y, GetDitherColor(x - 1, y + 1, 1.0f, error));
 		}
+
+	/*
+	int evaluateSide = 5;
+	for (size_t x = 0; x <= evaluateSide; x++)
+	{
+		//auto value = Evaluate(x, x, evaluateSide, evaluateSide);
+		//print("Evaluated " + std::to_string(x) + ", " + std::to_string(x) + ": " + std::to_string(value));
+
+		for (size_t y = 0; y <= evaluateSide; y++)
+		{
+			auto value = Evaluate(x, y, evaluateSide, evaluateSide);
+			print("Evaluated " + std::to_string(x) + ", " + std::to_string(y) + ": " + std::to_string(value));
+		}
+	}
+	*/
 }
 
 void MiniMap::UpdateDecal(olc::vf2d localPlayer)
@@ -128,9 +110,13 @@ void MiniMap::Initialize(olc::Sprite* tileSprite, WorldData* worldData,
 	this->time = time;
 
 	// This is just a nice scale, we can really use any value here.
-	miniMapDrawScale = 0.825f;
+	miniMapDrawScale = 0.625f;
 
 	cachedMap = new olc::Sprite(worldData->GetMapWidth(), worldData->GetMapHeight());
+	for (int y = 0; y < worldData->GetMapHeight(); y++)
+		for (int x = 0; x < worldData->GetMapWidth(); x++)
+			cachedMap->SetPixel(x, y, olc::BLANK);
+
 	miniMapSprite = new olc::Sprite(worldData->GetMapWidth(), worldData->GetMapHeight());
 	miniMapDecal = new olc::Decal(miniMapSprite);
 
@@ -158,7 +144,6 @@ void MiniMap::UpdateMiniMap(olc::vf2d localPlayer)
 
 		if (drawMiniMap == true)
 		{
-			UpdateSprite();
 			UpdateDecal(localPlayer);
 		}
 	}
@@ -166,6 +151,13 @@ void MiniMap::UpdateMiniMap(olc::vf2d localPlayer)
 	// Draw ye bloody minimap
 	if (drawMiniMap == true)
 	{
+		// FIXME: update this every time the map is modified
+		if (updateMap == true)
+		{
+			UpdateSprite();
+			updateMap = false;
+		}
+
 		// Only update the minimap every 'n'th frame
 		if (time->frameCount % 20 == 0) UpdateDecal(localPlayer);
 
