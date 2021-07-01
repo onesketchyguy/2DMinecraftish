@@ -4,6 +4,8 @@
 #ifndef GAME_SCENE
 #define GAME_SCENE
 
+#include "playerData.h"
+
 #include <unordered_map>
 
 #include "sceneDefinition.h"
@@ -58,9 +60,6 @@ public:
 		delete localPlayer;
 		mapObjects.clear();
 	}
-
-private:
-	olc::vi2d vWorldSize;
 
 private:
 	void MovePlayer();

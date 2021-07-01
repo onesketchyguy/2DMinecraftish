@@ -2,49 +2,14 @@
 
 void GameScene::MovePlayer()
 {
-	float speed = 500.0f * time->elapsedTime;
+	float speed = 1.0f;
 
-	olc::vf2d velocity = { 0.0f, 0.0f };
-
-	if (GetKey(olc::A).bHeld || GetKey(olc::LEFT).bHeld) {
-		velocity += { -1.0f, 0.0f };
-	}
-	if (GetKey(olc::D).bHeld || GetKey(olc::RIGHT).bHeld) {
-		velocity += { +1.0f, 0.0f };
-	}
-
-	if (GetKey(olc::W).bHeld || GetKey(olc::UP).bHeld) {
-		velocity += { 0.0f, -1.0f };
-	}
-	if (GetKey(olc::S).bHeld || GetKey(olc::DOWN).bHeld) {
-		velocity += { 0.0f, +1.0f };
-	}
-
-	if (velocity.mag2() > 0) velocity = velocity.norm() * 4.0f;
-	velocity *= speed;
-
-	// Basic world collision here
-	olc::vf2d playerPos = GetLocalPlayer().position;
-	playerPos += velocity;
-
-	int tileId = worldData->GetTileID(playerPos.x, playerPos.y);
-
-	// in water
-	//localPlayer->inWater = (tileId == 0 || tileId == 1);
-
-	if (tileId != 0)
-	{
-		// FIXME: do things here
-		// There is a tile where the player is trying to go!
-	}
-	else
-	{
-		// FIXME: Check for a boat
-		velocity = { 0, 0 };
-	}
-
-	GetLocalPlayer().velocity = velocity;
-	//localPlayer->Update(fElapsedTime);
+	// FIXME: don't move the user so quickly
+	localPlayer->desc->velocity = { 0.0f, 0.0f };
+	if (GetKey(olc::Key::W).bHeld || GetKey(olc::UP).bHeld) localPlayer->desc->velocity += { 0.0f, -speed };
+	if (GetKey(olc::Key::S).bHeld || GetKey(olc::DOWN).bHeld) localPlayer->desc->velocity += { 0.0f, +speed };
+	if (GetKey(olc::Key::A).bHeld || GetKey(olc::LEFT).bHeld) localPlayer->desc->velocity += { -speed, 0.0f };
+	if (GetKey(olc::Key::D).bHeld || GetKey(olc::RIGHT).bHeld) localPlayer->desc->velocity += { +speed, 0.0f };
 }
 
 bool GameScene::ValidateWorld()
@@ -61,10 +26,9 @@ bool GameScene::ValidateWorld()
 		{
 			if (worldData->GetWorldGenerating() == false)
 			{
-				if (worldSeed.empty() == false) worldData->ApplySeed(worldSeed);
+				worldData->ApplySeed(worldSeed);
 				worldData->GenerateMap();
 				minimap->Initialize(renderer->tileSpriteData->Sprite(), worldData, engine, time);
-				vWorldSize = { worldData->GetMapWidth(), worldData->GetMapHeight() };
 
 				if (playMode != PLAY_MODE::CLIENT)
 				{ // Auto accept this client
@@ -224,7 +188,7 @@ bool GameScene::Update()
 	}
 
 	// Handle Pan & Zoom
-	//renderer->UpdateZoom();
+	renderer->UpdateZoom();
 	renderer->SetCamera(GetLocalPlayer().position);
 
 	renderer->DrawWorld();
@@ -242,8 +206,8 @@ bool GameScene::Update()
 		// Extract region of world cells that could have collision this frame
 		olc::vi2d vCurrentCell = object.second.position.floor();
 		olc::vi2d vTargetCell = vPotentialPosition;
-		olc::vi2d vAreaTL = (vCurrentCell.min(vTargetCell) - olc::vi2d(1, 1)).max({ 0,0 });
-		olc::vi2d vAreaBR = (vCurrentCell.max(vTargetCell) + olc::vi2d(1, 1)).min(vWorldSize);
+		olc::vi2d vAreaTL = (vCurrentCell.min(vTargetCell) - olc::vi2d(2, 2)).max({ 0,0 });
+		olc::vi2d vAreaBR = (vCurrentCell.max(vTargetCell) + olc::vi2d(2, 2)).min(olc::vi2d{ worldData->GetMapWidth(), worldData->GetMapHeight() });
 
 		// Iterate through each cell in test area
 		olc::vi2d vCell;
@@ -251,9 +215,10 @@ bool GameScene::Update()
 		{
 			for (vCell.x = vAreaTL.x; vCell.x <= vAreaBR.x; vCell.x++)
 			{
-				// Check if the cell is actually solid...
+				int tileIndex = vCell.y * worldData->GetMapWidth() + vCell.x;
 
-				if (worldData->collisionData[vCell.y * vWorldSize.x + vCell.x] == true)
+				// Check if the cell is actually solid...
+				if (worldData->collisionData[tileIndex] == true)
 				{
 					// ...it is! So work out nearest point to future player position, around perimeter
 					// of cell rectangle. We can test the distance to this point to see if we have
@@ -281,40 +246,42 @@ bool GameScene::Update()
 
 					if (DEBUG == true)
 					{
-						DrawDecal(vCell / SPRITE_SCALE, renderer->squareDecal, spriteScale, olc::RED);
+						renderer->DrawDecal(vCell, spriteScale, renderer->squareDecal, olc::Pixel{ 255, 0, 150, 100 });
 					}
+				}
+				else
+				{
+					if (DEBUG == true)
+					{
+						renderer->DrawDecal(vCell, spriteScale, renderer->squareDecal, olc::Pixel{ 0, 255, 0, 100 });
+					}
+				}
+
+				// Basic tile detection here
+				int currentTileID = worldData->GetTileID(object.second.position.x, object.second.position.y);
+
+				// in water
+				object.second.inWater = currentTileID <= 1;
+
+				if (currentTileID != 0)
+				{
+					// FIXME: do things here
+					// There is a tile where the player is trying to go!
+				}
+				else
+				{
+					// FIXME: Check for a boat
+					// velocity = { 0, 0 };
 				}
 			}
 		}
 
 		// Set the objects new position to the allowed potential position
 		object.second.position = vPotentialPosition;
-	}
 
-	// Draw World Objects
-	for (auto& object : mapObjects)
-	{
 		// Draw object
 		renderer->DrawPlayer(object.second);
-
-		// Draw Boundary
-		//renderer->viewPort.DrawCircle(object.second.position / SPRITE_SCALE, object.second.radius);
-
-		if (DEBUG == true)
-		{
-			DrawDecal(object.second.position / SPRITE_SCALE, renderer->squareDecal, spriteScale, olc::RED);
-		}
-
-		// Draw Velocity
-		if (object.second.velocity.mag2() > 0)
-			renderer->viewPort.DrawLine(object.second.position / SPRITE_SCALE, object.second.position + object.second.velocity.norm() * object.second.radius, olc::MAGENTA);
-
-		// Draw Name
-		olc::vi2d vNameSize = engine->GetTextSizeProp("ID: " + std::to_string(object.first));
-		renderer->viewPort.DrawStringPropDecal(object.second.position - olc::vf2d{ vNameSize.x * 0.5f * 0.25f * 0.125f, -object.second.radius * 1.25f }, "ID: " + std::to_string(object.first), olc::BLUE, { 0.25f, 0.25f });
 	}
-
-	minimap->UpdateMiniMap(GetLocalPlayer().position);
 
 	if (playMode != PLAY_MODE::SINGLE_PLAYER)
 	{
@@ -329,21 +296,46 @@ bool GameScene::Update()
 	}
 
 	// Draw UI
-	DrawToolbarArea();
+	minimap->UpdateMiniMap(GetLocalPlayer().position);
+
+	if (minimap->GetDrawingMiniMap() == false)
+	{
+		DrawToolbarArea();
+
+		if (inventoryOpen)
+		{
+			DrawInventory();
+		}
+
+		HandleToolTip();
+	}
 
 	if (GetKey(olc::Key::E).bPressed || GetKey(olc::Key::I).bPressed)
 	{
-		inventoryOpen = !inventoryOpen;
+		if (minimap->GetDrawingMiniMap())
+		{
+			DisplayNotification("Cannot toggle inventory while map open.");
+		}
+		else
+		{
+			inventoryOpen = !inventoryOpen;
+		}
 	}
 
-	if (inventoryOpen)
+	if (DEBUG == true)
 	{
-		DrawInventory();
+		std::string playerPosDebug = "pos(" + std::to_string(localPlayer->desc->position.x) + ", " +
+			std::to_string(localPlayer->desc->position.y) + ")";
+		std::string worldPosDebug = "seed(" + std::to_string(worldData->seed) + ")";
+
+		olc::vi2d vPlayerDebugSize = GetTextSizeProp(playerPosDebug);
+
+		DrawStringPropDecal(olc::vf2d{ 0.0f, 0.0f }, playerPosDebug, olc::CYAN, { 0.5f, 0.5f });
+		DrawStringPropDecal(olc::vf2d{ 0.0f, vPlayerDebugSize.y + 1.0f }, worldPosDebug, olc::CYAN, { 0.5f, 0.5f });
 	}
 
 	// Show notifications on top
 	HandleNotifications();
-	HandleToolTip();
 
 	// DEBUG: just for testing here we have some upgrades for the slotbar
 	int newHotbar = 0;

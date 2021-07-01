@@ -76,8 +76,8 @@ void MiniMap::UpdateDecal(olc::vf2d localPlayer)
 	for (int y = 0; y < worldData->GetMapHeight(); y++)
 		for (int x = 0; x < worldData->GetMapWidth(); x++)
 		{
-			float distY = abs((y * SPRITE_SCALE) - (localPlayer.y));
-			float distX = abs((x * SPRITE_SCALE) - (localPlayer.x));
+			float distY = abs(y - localPlayer.y);
+			float distX = abs(x - localPlayer.x);
 
 			if (distY < PLAYER_ICON_SCALE && distX < PLAYER_ICON_SCALE)
 			{

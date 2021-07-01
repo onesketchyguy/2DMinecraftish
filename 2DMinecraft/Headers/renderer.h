@@ -40,7 +40,7 @@ class Renderer
 {
 private:
 	const float MIN_ZOOM = 10.0f;
-	const float MAX_ZOOM = 26.0f;
+	const float MAX_ZOOM = 16.0f;
 
 	olc::vf2d screenCenter{ 0.0f, 0.0f };
 	olc::vf2d camTarget{ 0.0f, 0.0f };

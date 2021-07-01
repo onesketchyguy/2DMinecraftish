@@ -75,6 +75,7 @@ public:
 	bool* collisionData = nullptr;
 	uint8_t* foliageData = nullptr;
 
+	unsigned int seed;
 	void ApplySeed(std::string seedString);
 	void GenerateCollisionMap();
 	void ClearMap();

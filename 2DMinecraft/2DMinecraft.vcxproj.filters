@@ -96,8 +96,11 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\playerData.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
     <ClInclude Include="Headers\bonusMaths.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

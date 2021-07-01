@@ -54,8 +54,18 @@ void WorldData::ReseedNoise(float* noiseSeed)
 void WorldData::ApplySeed(std::string seedString)
 {
 	unsigned int value = 0;
-	for (size_t i = 0; i < seedString.length(); i++)
-		value = (value + static_cast<int>(seedString[i])) % INT32_MAX;
+
+	if (seedString.empty())
+	{
+		value = time(0);
+	}
+	else
+	{
+		for (size_t i = 0; i < seedString.length(); i++)
+			value = (value + static_cast<int>(seedString[i])) % INT32_MAX;
+	}
+
+	seed = value;
 
 	srand(value);
 }
@@ -404,8 +414,8 @@ int WorldData::GetTileID(int x, int y)
 
 int WorldData::GetTileID(float x, float y)
 {
-	float xPos = ceil(x / SPRITE_SCALE);
-	float yPos = floor(y / SPRITE_SCALE);
+	float xPos = ceil(x);
+	float yPos = floor(y);
 	return GetTileID(int(xPos), int(yPos));
 }
 
@@ -438,15 +448,15 @@ int WorldData::GetFoliageID(int x, int y)
 
 int WorldData::GetFoliageID(float x, float y)
 {
-	float xPos = ceil(x / SPRITE_SCALE);
-	float yPos = floor(y / SPRITE_SCALE);
+	float xPos = ceil(x);
+	float yPos = floor(y);
 	return GetFoliageID(int(xPos), int(yPos));
 }
 
 int WorldData::GetFoliageIndex(float fx, float fy)
 {
-	int x = int(ceil(fx / SPRITE_SCALE));
-	int y = int(floor(fy / SPRITE_SCALE));
+	int x = int(ceil(fx));
+	int y = int(floor(fy));
 
 	if (x < 0) {
 		x *= -1;
@@ -473,8 +483,8 @@ int WorldData::GetFoliageIndex(float fx, float fy)
 
 void WorldData::SetTileID(float x, float y, uint8_t value)
 {
-	int xPos = int(ceil(x / SPRITE_SCALE));
-	int yPos = int(floor(y / SPRITE_SCALE));
+	int xPos = int(ceil(x));
+	int yPos = int(floor(y));
 
 	if (xPos < 0) {
 		xPos *= -1;
@@ -503,8 +513,8 @@ void WorldData::SetTileID(float x, float y, uint8_t value)
 
 void WorldData::SetFoliageID(float x, float y, uint8_t value)
 {
-	int xPos = int(ceil(x / SPRITE_SCALE));
-	int yPos = int(floor(y / SPRITE_SCALE));
+	int xPos = int(ceil(x));
+	int yPos = int(floor(y));
 
 	if (xPos < 0) {
 		xPos *= -1;
@@ -542,7 +552,7 @@ olc::vf2d WorldData::GetRandomGroundTile()
 			float x = static_cast<float>(index % MAP_WIDTH);
 			float y = index / static_cast<float>(MAP_WIDTH);
 
-			return { x * SPRITE_SCALE, y * SPRITE_SCALE };
+			return { x, y };
 		}
 		attempts++;
 

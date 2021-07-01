@@ -122,20 +122,41 @@ void Renderer::DrawPlayer(PlayerDescription& player)
 	engine->SetPixelMode(olc::Pixel::NORMAL);
 
 	olc::vf2d sprScale{ static_cast<float>(spriteScale.x), static_cast<float>(spriteScale.y) };
-	olc::vf2d pos = player.position;
+	olc::vf2d pos = player.position - olc::vf2d{ 0.5f, 0.5f };
 
 	if (player.flip_x)
 	{
-		pos.x += sprScale.x;
+		pos.x += 1;
 		sprScale.x *= -1;
 	}
 
-	DrawPartialDecal(pos / static_cast<float>(SPRITE_SCALE),
-		sprScale, playerSpriteData->Decal(),
+	DrawPartialDecal(pos, sprScale, playerSpriteData->Decal(),
 		{
 			static_cast<int>(player.avatarIndex_x * SPRITE_SCALE),
 			static_cast<int>(player.avatarIndex_y * SPRITE_SCALE)
 		});
+
+	if (DEBUG == true)
+	{
+		// Draw colision area
+		DrawDecal(player.position - olc::vf2d{ 0.5f, 0.5f }, olc::vf2d{ 1.0f, 1.0f } *player.radius * 2.0f * SPRITE_SCALE, squareDecal, olc::Pixel(255, 0, 0, 100));
+
+		// Draw Velocity
+		if (player.velocity.mag2() > 0)
+		{
+			DrawDecal(player.position, olc::vf2d{ 1.0f, 1.0f } + player.velocity * SPRITE_SCALE, squareDecal, olc::Pixel(255, 0, 255, 100));
+		}
+	}
+
+	if (playMode != PLAY_MODE::SINGLE_PLAYER || DEBUG == true)
+	{
+		// Draw Name
+		std::string userName = "ID: " + std::to_string(player.uniqueID);
+
+		olc::vi2d vNameSize = engine->GetTextSizeProp(userName);
+		viewPort.DrawStringPropDecal(player.position - olc::vf2d{ vNameSize.x * 0.5f * 0.25f * 0.125f, -player.radius * 2.0f * SPRITE_SCALE * 1.25f },
+			userName, olc::BLUE, { 0.25f, 0.25f });
+	}
 }
 
 void Renderer::DrawTile(int mapIndex, float x, float y)
@@ -214,11 +235,12 @@ void Renderer::DrawWorld()
 	// Draw World
 	topLeft = viewPort.GetTopLeftTile().max({ 0,0 });
 	bottomRight = viewPort.GetBottomRightTile().min({ worldData->GetMapWidth(), worldData->GetMapHeight() });
-	olc::vi2d tile;
-	for (tile.y = topLeft.y; tile.y < bottomRight.y; tile.y++)
+	for (int y = topLeft.y; y < bottomRight.y; y++)
 	{
-		for (tile.x = topLeft.x; tile.x < bottomRight.x; tile.x++)
+		for (int x = topLeft.x; x < bottomRight.x; x++)
 		{
+			olc::vi2d tile{ x, y };
+
 			int mapIndex = tile.y * worldData->GetMapWidth() + tile.x;
 
 			EnqueueDrawTile(mapIndex, static_cast<float>(tile.x), static_cast<float>(tile.y));
@@ -257,8 +279,9 @@ void Renderer::UpdateZoom()
 
 void Renderer::SetCamera(olc::vf2d pos)
 {
-	pos += olc::vf2d(SPRITE_SCALE * 0.5f, SPRITE_SCALE * 0.5f);
-	pos /= SPRITE_SCALE;
+	//pos += olc::vf2d(SPRITE_SCALE * 0.5f, SPRITE_SCALE * 0.5f);
+	//pos /= SPRITE_SCALE;
+	pos.x += 0.5f;
 
 	camTarget = pos - screenCenter;
 	viewPort.SetWorldOffset(camTarget);

@@ -161,6 +161,7 @@
     <ClInclude Include="Headers\olcPGEX_Network.h" />
     <ClInclude Include="Headers\olcPGEX_TransformedView.h" />
     <ClInclude Include="Headers\olcPixelGameEngine.h" />
+    <ClInclude Include="Headers\playerData.h" />
     <ClInclude Include="Headers\renderer.h" />
     <ClInclude Include="Headers\sceneDefinition.h" />
     <ClInclude Include="Headers\timeConstruct.h" />
