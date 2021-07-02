@@ -197,6 +197,9 @@ bool GameScene::Update()
 	MovePlayer();
 	localPlayer->Update(time->elapsedTime);
 
+	olc::vf2d cursorCell = renderer->viewPort.GetTileUnderScreenPos(GetMousePos());
+	olc::Pixel cursorColor = olc::Pixel(255, 255, 255, 50);
+
 	// Update objects locally
 	for (auto& object : mapObjects)
 	{
@@ -273,6 +276,31 @@ bool GameScene::Update()
 					// FIXME: Check for a boat
 					// velocity = { 0, 0 };
 				}
+
+				if (vCell == cursorCell)
+				{
+					cursorColor.a = 255;
+
+					if (GetMouse(0).bReleased)
+					{
+						if (worldData->foliageData[tileIndex] > 0)
+						{
+							if (localPlayer->currentTool == Tools::Axe)
+							{
+								worldData->foliageData[tileIndex] -= 1;
+								worldData->GenerateCollisionMap();
+							}
+						}
+						else if (worldData->tileData[tileIndex] > 0)
+						{
+							if (localPlayer->currentTool == Tools::Pickaxe)
+							{
+								worldData->tileData[tileIndex] -= 1;
+								worldData->GenerateCollisionMap();
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -282,6 +310,8 @@ bool GameScene::Update()
 		// Draw object
 		renderer->DrawPlayer(object.second);
 	}
+
+	renderer->DrawDecal(cursorCell, olc::vf2d{ 1.0f,1.0f }, renderer->selectionCursor->Decal(), cursorColor);
 
 	if (playMode != PLAY_MODE::SINGLE_PLAYER)
 	{
@@ -326,12 +356,15 @@ bool GameScene::Update()
 	{
 		std::string playerPosDebug = "pos(" + std::to_string(localPlayer->desc->position.x) + ", " +
 			std::to_string(localPlayer->desc->position.y) + ")";
-		std::string worldPosDebug = "seed(" + std::to_string(worldData->seed) + ")";
+		std::string mousePosDebug = "mouse(" + std::to_string(cursorCell.x) + ", " +
+			std::to_string(cursorCell.y) + ")";
+		std::string seedDebug = "seed(" + std::to_string(worldData->seed) + ")";
 
 		olc::vi2d vPlayerDebugSize = GetTextSizeProp(playerPosDebug);
 
 		DrawStringPropDecal(olc::vf2d{ 0.0f, 0.0f }, playerPosDebug, olc::CYAN, { 0.5f, 0.5f });
-		DrawStringPropDecal(olc::vf2d{ 0.0f, vPlayerDebugSize.y + 1.0f }, worldPosDebug, olc::CYAN, { 0.5f, 0.5f });
+		DrawStringPropDecal(olc::vf2d{ 0.0f, vPlayerDebugSize.y * 2.0f }, mousePosDebug, olc::CYAN, { 0.5f, 0.5f });
+		DrawStringPropDecal(olc::vf2d{ 0.0f, vPlayerDebugSize.y * 3.0f }, seedDebug, olc::CYAN, { 0.5f, 0.5f });
 	}
 
 	// Show notifications on top

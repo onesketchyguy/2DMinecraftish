@@ -10,7 +10,7 @@ Renderer::Renderer(olc::PixelGameEngine* engine)
 
 	print("Created viewport.");
 
-	const std::string DATA_LOCATION = "Data/packfile.dat";
+	const std::string DATA_LOCATION = "packfile.dat";
 	const std::string RESOURCE_KEY = "resourceKEY";
 
 	resourcePack = new olc::ResourcePack();
@@ -30,6 +30,7 @@ Renderer::Renderer(olc::PixelGameEngine* engine)
 		resourcePack->AddFile("Data/olc_logo.png");
 		resourcePack->AddFile("Data/flowe_logo.png");
 		resourcePack->AddFile("Data/colorPalette.png");
+		resourcePack->AddFile("Data/selectionCursor.png");
 
 		resourcePack->SavePack(DATA_LOCATION, RESOURCE_KEY);
 		resourcePack->LoadPack(DATA_LOCATION, RESOURCE_KEY);
@@ -44,12 +45,16 @@ Renderer::Renderer(olc::PixelGameEngine* engine)
 	// Item shit
 	itemSpriteData = new olc::Renderable();
 	LoadSprites(itemSpriteData, "Data/items.png");
-	toolsRenderable = new olc::Renderable();
-	LoadSprites(toolsRenderable, "Data/tools.png");
 	worldToolsRenderable = new olc::Renderable();
 	LoadSprites(worldToolsRenderable, "Data/worldTools.png");
+
+	// UI shit
+	toolsRenderable = new olc::Renderable();
+	LoadSprites(toolsRenderable, "Data/tools.png");
 	itemSlotRenderable = new olc::Renderable();
 	LoadSprites(itemSlotRenderable, "Data/item_slot.png");
+	selectionCursor = new olc::Renderable();
+	LoadSprites(selectionCursor, "Data/selectionCursor.png");
 
 	// World shit
 	tileSpriteData = new olc::Renderable();
@@ -218,6 +223,7 @@ void Renderer::EnqueueDrawTile(int mapIndex, float x, float y)
 	}
 }
 
+/*
 void Renderer::DrawItem(Item obj) {
 	engine->SetPixelMode(olc::Pixel::NORMAL);
 
@@ -226,6 +232,7 @@ void Renderer::DrawItem(Item obj) {
 	DrawPartialDecal(obj.position, { SPRITE_SCALE * 0.75f,SPRITE_SCALE * 0.75f },
 		itemSpriteData->Decal(), spriteCell);
 }
+*/
 
 void Renderer::DrawWorld()
 {

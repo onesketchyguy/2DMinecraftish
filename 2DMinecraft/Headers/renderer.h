@@ -74,6 +74,7 @@ public:
 	olc::ResourcePack* resourcePack = nullptr;
 	olc::Sprite* squareSprite = nullptr;
 	olc::Decal* squareDecal = nullptr;
+	olc::Renderable* selectionCursor = nullptr;
 	olc::Renderable* tileSpriteData = nullptr;
 	olc::Renderable* itemSpriteData = nullptr;
 	olc::Renderable* playerSpriteData = nullptr;
@@ -108,7 +109,7 @@ public:
 	void DrawPlayer(PlayerDescription& player);
 	void DrawTile(int mapIndex, float x, float y);
 	void EnqueueDrawTile(int mapIndex, float x, float y);
-	void DrawItem(Item obj);
+	//void DrawItem(Item obj);
 	void DrawWorld();
 	void SetZoomScaleToMax();
 	void SetZoomScaleToMin();

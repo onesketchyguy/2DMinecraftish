@@ -37,6 +37,18 @@ inline const char* ParseToolToString(Tools item)
 	}
 }
 
+inline const Tools ParseStringToTool(const char* string)
+{
+	if (string == "shovel") return Tools::Shovel;
+	if (string == "pickaxe")return Tools::Pickaxe;
+	if (string == "axe")return Tools::Axe;
+	if (string == "hoe")return Tools::Hoe;
+	if (string == "sword") return Tools::Sword;
+	if (string == "fishing pole") return Tools::FishingPole;
+
+	return Tools::None;
+}
+
 class PlayerObject
 {
 public:
