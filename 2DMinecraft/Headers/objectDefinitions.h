@@ -19,6 +19,4 @@ public:
 	}
 };
 
-#include "Item.h"
-
 #endif

@@ -153,7 +153,8 @@
     <ClInclude Include="Headers\fileManager.h" />
     <ClInclude Include="Headers\gameScene.h" />
     <ClInclude Include="Headers\introScene.h" />
-    <ClInclude Include="Headers\Item.h" />
+    <ClInclude Include="Headers\items.h" />
+    <ClInclude Include="Headers\json.hpp" />
     <ClInclude Include="Headers\MainMenu.h" />
     <ClInclude Include="Headers\miniMap.h" />
     <ClInclude Include="Headers\networkCommon.h" />
@@ -180,7 +181,6 @@
     <ClCompile Include="Sources\GameSceneInventory.cpp" />
     <ClCompile Include="Sources\GameUI.cpp" />
     <ClCompile Include="Sources\IntroScene.cpp" />
-    <ClCompile Include="Sources\Item.cpp" />
     <ClCompile Include="Sources\MainMenu.cpp" />
     <ClCompile Include="Sources\MiniMap.cpp" />
     <ClCompile Include="Sources\Renderer.cpp" />

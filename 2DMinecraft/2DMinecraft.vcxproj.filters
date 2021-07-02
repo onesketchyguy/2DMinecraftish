@@ -66,9 +66,6 @@
     <ClInclude Include="Headers\objectDefinitions.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Item.h">
-      <Filter>Header Files\World</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\timeConstruct.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
@@ -102,6 +99,12 @@
     <ClInclude Include="Headers\bonusMaths.h">
       <Filter>Header Files\System</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\items.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="2DMinecraft.rc">
@@ -125,9 +128,6 @@
     </ClCompile>
     <ClCompile Include="Sources\IntroScene.cpp">
       <Filter>Source Files\Scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Item.cpp">
-      <Filter>Source Files\Scenes\GameScene systems\World</Filter>
     </ClCompile>
     <ClCompile Include="Sources\MainMenu.cpp">
       <Filter>Source Files\Scenes</Filter>
