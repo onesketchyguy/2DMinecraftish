@@ -287,7 +287,7 @@ bool GameScene::Update()
 						{
 							if (localPlayer->currentTool == Tools::Axe)
 							{
-								worldData->foliageData[tileIndex] -= 1;
+								worldData->foliageData[tileIndex] = 0;
 								worldData->GenerateCollisionMap();
 							}
 						}
@@ -295,7 +295,7 @@ bool GameScene::Update()
 						{
 							if (localPlayer->currentTool == Tools::Pickaxe)
 							{
-								worldData->tileData[tileIndex] -= 1;
+								worldData->tileData[tileIndex] = 5;
 								worldData->GenerateCollisionMap();
 							}
 						}

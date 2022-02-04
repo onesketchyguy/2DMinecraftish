@@ -206,7 +206,8 @@ void Renderer::EnqueueDrawTile(int mapIndex, float x, float y)
 	int cellIndex_y = tile / WORLD_TILES_WIDTH;
 	olc::vi2d tileSpriteCell = {
 		spriteScale.x * cellIndex_x,
-		spriteScale.y * cellIndex_y };
+		spriteScale.y * cellIndex_y 
+	};
 
 	// Draw tile
 	EnqueueDrawPartialDecal(pos, spriteScale + olc::vf2d{ 1.5f, 1.5f },
